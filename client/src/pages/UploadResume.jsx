@@ -1,0 +1,182 @@
+import React, { useState } from 'react';
+import { 
+  CloudUpload, 
+  FileText, 
+  CheckCircle2, 
+  ArrowLeft, 
+  Sparkles, 
+  Loader2,
+  Trash2,
+  ChevronRight,
+  Target,
+  Zap,
+  ShieldCheck
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+export default function UploadResume() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzed, setIsAnalyzed] = useState(false);
+  const [file, setFile] = useState(null);
+
+  const handleUpload = () => {
+    if (!file) return;
+    setIsUploading(true);
+    // Simulate parsing
+    setTimeout(() => {
+      setIsUploading(false);
+      setIsAnalyzed(true);
+    }, 4000);
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--color-bg)] pt-24 px-6 pb-20">
+      <div className="max-w-3xl mx-auto space-y-12">
+        {/* MINI HEADER */}
+        <header className="flex items-center justify-between pb-8 border-b border-white/5">
+           <Link to="/dashboard" className="flex items-center gap-2 text-sm text-gray-500 hover:text-[var(--color-accent)] transition-colors italic">
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+           </Link>
+           <div className="flex items-center gap-2 p-1 px-3 glass border-white/10 rounded-full">
+              <Sparkles className="w-4 h-4 text-[var(--color-accent)] animate-pulse" />
+              <span className="text-[10px] font-bold text-white tracking-widest uppercase">AI_ENGINE_ON</span>
+           </div>
+        </header>
+
+        {/* MAIN TITLE */}
+        <div className="text-center space-y-4">
+           <h1 className="text-4xl lg:text-6xl font-display font-bold text-white italic">
+              <span className="text-[var(--color-accent)]">Supercharge</span> Your Profile
+           </h1>
+           <p className="text-gray-500 leading-relaxed max-w-xl mx-auto italic">
+              Our AI analyzes your experience to sync with the highest-matching roles in the industry world.
+           </p>
+        </div>
+
+        {/* UPLOAD ZONE */}
+        {!isAnalyzed && (
+          <div className="space-y-8 animate-fade-in-up">
+             <div className="card-premium p-12 bg-black/40 border-dashed border-2 border-white/10 flex flex-col items-center justify-center gap-6 group hover:border-[var(--color-accent)]/50 transition-all cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 bg-[var(--color-accent)]/5 opacity-0 group-hover:opacity-100 transition-opacity blur-[100px]"></div>
+                
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center p-5 mb-2 group-hover:bg-[var(--color-accent)]/10 transition-colors border border-white/5 group-hover:border-[var(--color-accent)]/40 relative z-10">
+                   <CloudUpload className="w-full h-full text-gray-500 group-hover:text-[var(--color-accent)] transition-colors" />
+                </div>
+                
+                <div className="text-center space-y-2 relative z-10">
+                   <p className="text-xl font-bold text-white italic tracking-tight">Drag and drop your resume</p>
+                   <p className="text-sm text-gray-600">Supported formats: PDF, DOCX (Max 10MB)</p>
+                </div>
+
+                <div className="relative z-10 pt-4 flex gap-4">
+                   <input 
+                      type="file" 
+                      className="hidden" 
+                      id="file-upload" 
+                      onChange={(e) => setFile(e.target.files[0])} 
+                   />
+                   <label htmlFor="file-upload" className="btn-secondary py-3 px-8 text-sm cursor-pointer hover:border-[var(--color-accent)]/40">Browse Files</label>
+                   {file && <button onClick={handleUpload} className="btn-primary py-3 px-10 text-sm">Analyze Resume</button>}
+                </div>
+
+                {file && (
+                  <div className="mt-8 p-4 glass rounded-xl border-white/5 flex items-center gap-4 animate-fade-in">
+                     <FileText className="w-6 h-6 text-blue-400" />
+                     <div className="flex-grow">
+                        <p className="text-xs text-white font-bold">{file.name}</p>
+                        <p className="text-[10px] text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                     </div>
+                     <button onClick={() => setFile(null)} className="p-2 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
+                        <Trash2 className="w-4 h-4" />
+                     </button>
+                  </div>
+                )}
+             </div>
+          </div>
+        )}
+
+        {/* PROCESSING ZONE */}
+        {isUploading && (
+           <div className="space-y-12 animate-fade-in py-10">
+              <div className="flex flex-col items-center gap-8 text-center max-w-sm mx-auto">
+                 <Loader2 className="w-12 h-12 text-[var(--color-accent)] animate-spin opacity-50" />
+                 <div className="space-y-2">
+                    <p className="text-xl font-display font-bold text-white tracking-widest italic">Parsing Resume Structure...</p>
+                    <p className="text-xs text-gray-600 italic">Our AI engine is extracting skills and work history markers.</p>
+                 </div>
+              </div>
+
+              <div className="space-y-6">
+                 {[
+                   { label: "Skill Extraction", icon: Zap, status: "completed" },
+                   { label: "Experience Categorization", icon: Target, status: "scanning" },
+                   { label: "Role Alignment Score", icon: ShieldCheck, status: "pending" }
+                 ].map((s, i) => (
+                    <div key={i} className="card-premium p-4 glass opacity-60">
+                       <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                             <s.icon className={`w-4 h-4 ${s.status === 'completed' ? 'text-[var(--color-accent)]' : 'text-gray-500'}`} />
+                             <span className="text-[10px] font-bold text-white italic tracking-widest uppercase">{s.label}</span>
+                          </div>
+                          <span className={`text-[9px] font-bold uppercase transition-all
+                            ${s.status === 'completed' ? 'text-[var(--color-accent)]' : 'text-gray-500 italic animate-pulse'}`}>
+                             {s.status === 'completed' ? 'COMPLETED' : 'SCANNING_SYSTEM...'}
+                          </span>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        )}
+
+        {/* RESULTS ZONE */}
+        {isAnalyzed && (
+           <div className="space-y-10 animate-fade-in-shimmer">
+              <div className="text-center space-y-4">
+                 <div className="w-16 h-16 bg-[var(--color-accent)]/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--color-accent)]/40 ring-8 ring-black/40">
+                    <CheckCircle2 className="w-8 h-8 text-[var(--color-accent)]" />
+                 </div>
+                 <h2 className="text-3xl font-display font-bold text-white italic">Analysis Complete</h2>
+                 <p className="text-sm text-gray-500 max-w-xs mx-auto italic leading-relaxed">We've extracted <span className="text-white font-bold tracking-tight">18 Core Skills</span> and mapped them to industry standards.</p>
+              </div>
+
+              <div className="card-premium p-8 space-y-8 glass">
+                 <div className="space-y-6">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2">Top Skills Extracted</p>
+                    <div className="flex flex-wrap gap-3">
+                       {["Product Design", "React.js", "Node.js", "AI/ML Logic", "Distributed Systems", "Cloud Architecture"].map((skill, i) => (
+                         <div key={i} className="px-4 py-2 bg-[var(--color-accent)]/5 border border-[var(--color-accent)]/20 rounded-lg text-[var(--color-accent)] text-xs font-bold tracking-tight shadow-sm hover:scale-105 transition-all cursor-default">
+                           {skill}
+                         </div>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div className="pt-8 border-t border-white/5 grid md:grid-cols-2 gap-6">
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                       <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Industry Alignment</p>
+                       <p className="text-2xl font-display font-bold text-white tracking-widest italic">High Match</p>
+                       <p className="text-[10px] text-gray-500 italic">Top Sectors: FinTech, Web3, AI Automation.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                       <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Profile Strength</p>
+                       <p className="text-2xl font-display font-bold text-[var(--color-accent)] tracking-widest italic">85%</p>
+                       <p className="text-[10px] text-gray-500 italic">Optimization potential found in Summary.</p>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 pt-10">
+                 <Link to="/jobs" className="btn-primary py-4 text-center md:flex-grow">
+                    Explore Job Matches <ChevronRight className="w-4 h-4 ml-2" />
+                 </Link>
+                 <Link to="/dashboard" className="btn-secondary py-4 text-center md:flex-grow">
+                    Go to Dashboard
+                 </Link>
+              </div>
+           </div>
+        )}
+      </div>
+    </div>
+  );
+}

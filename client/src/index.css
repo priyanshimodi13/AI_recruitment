@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Backgrounds — deep slate/purple */
+    --color-bg: #020617; /* slate-950 */
+    --color-surface: #0f172a; /* slate-900 */
+    --color-surface-2: #1e293b; /* slate-800 */
+    --color-border: rgba(147, 51, 234, 0.15);
+
+    /* Text — clean white/slates */
+    --color-text: #f8fafc; /* slate-50 */
+    --color-text-muted: #94a3b8; /* slate-400 */
+    --color-heading: #ffffff;
+
+    /* Accent — vibrant purple */
+    --color-accent: #9333ea; /* purple-600 */
+    --color-accent-hover: #a855f7; /* purple-500 */
+    --color-accent-glow: rgba(147, 51, 234, 0.25);
+
+    /* Utility */
+    --color-success: #22c55e;
+    --color-warning: #eab308;
+    --color-error: #ef4444;
+  }
+
+  body {
+    @apply bg-[var(--color-bg)] text-[var(--color-text)] antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--color-heading);
+    letter-spacing: -0.02em; /* Gives it that tight, clean Apple look */
+  }
+
+  a {
+    color: var(--color-accent);
+    transition: color 0.15s ease;
+  }
+  a:hover {
+    color: var(--color-accent-hover);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-md border;
+    background: rgba(24, 24, 36, 0.7);
+    border-color: var(--color-border);
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 font-semibold rounded-lg active:scale-[0.97] transition-all duration-150;
+    background-color: var(--color-accent);
+    color: #0F0F18;
+    box-shadow: 0 0 16px var(--color-accent-glow);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+    box-shadow: 0 0 24px var(--color-accent-glow);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 font-medium rounded-lg active:scale-[0.97] transition-all duration-150;
+    border: 1px solid rgba(180, 180, 220, 0.15);
+    color: var(--color-text);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(180, 180, 220, 0.25);
+  }
+
+  .card-premium {
+    @apply p-6 rounded-xl transition-all duration-300;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+  .card-premium:hover {
+    transform: translateY(-3px);
+    border-color: rgba(110, 198, 198, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(110, 198, 198, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(110, 198, 198, 0.35);
+}
+
+/* Global text color softening */
+.text-white {
+  color: var(--color-heading) !important;
+}
+.text-gray-300 {
+  color: var(--color-text) !important;
+}
+.text-gray-400, .text-gray-500 {
+  color: var(--color-text-muted) !important;
+}
+
+/* Hide Clerk phone number field */
+.cl-formField__phoneNumber,
+.cl-formFieldRow__phoneNumber,
+.cl-phoneInputBox,
+[data-localization-key="formFieldLabel__phoneNumber"],
+[class*="phoneNumber"],
+[class*="phone_number"] {
+  display: none !important;
+}
