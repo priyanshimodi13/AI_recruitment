@@ -2,26 +2,40 @@
 
 @layer base {
   :root {
-    /* Backgrounds — deep slate/purple */
-    --color-bg: #020617; /* slate-950 */
-    --color-surface: #0f172a; /* slate-900 */
-    --color-surface-2: #1e293b; /* slate-800 */
-    --color-border: rgba(147, 51, 234, 0.15);
+    /* Backgrounds — clean light mode */
+    --color-bg: #f9fafb; /* gray-50 */
+    --color-surface: #ffffff; /* white */
+    --color-surface-2: #f3f4f6; /* gray-100 */
+    --color-border: #e5e7eb; /* gray-200 */
 
-    /* Text — clean white/slates */
-    --color-text: #f8fafc; /* slate-50 */
-    --color-text-muted: #94a3b8; /* slate-400 */
-    --color-heading: #ffffff;
+    /* Text — clean slates/grays */
+    --color-text: #4b5563; /* gray-600 */
+    --color-text-muted: #6b7280; /* gray-500 */
+    --color-heading: #111827; /* gray-900 */
 
-    /* Accent — vibrant purple */
-    --color-accent: #9333ea; /* purple-600 */
-    --color-accent-hover: #a855f7; /* purple-500 */
-    --color-accent-glow: rgba(147, 51, 234, 0.25);
+    /* Accent — vibrant blue */
+    --color-accent: #3b82f6; /* blue-500 */
+    --color-accent-hover: #2563eb; /* blue-600 */
+    --color-accent-glow: rgba(59, 130, 246, 0.15);
 
     /* Utility */
     --color-success: #22c55e;
     --color-warning: #eab308;
     --color-error: #ef4444;
+  }
+
+  /* Support for Dark Mode via class toggle */
+  .dark {
+    /* Backgrounds — deep slate */
+    --color-bg: #020617; /* slate-950 */
+    --color-surface: #0f172a; /* slate-900 */
+    --color-surface-2: #1e293b; /* slate-800 */
+    --color-border: rgba(147, 51, 234, 0.15); /* subtle glow */
+
+    /* Text — pristine white/slates */
+    --color-text: #f8fafc; /* slate-50 */
+    --color-text-muted: #94a3b8; /* slate-400 */
+    --color-heading: #ffffff;
   }
 
   body {
@@ -46,41 +60,40 @@
 
 @layer components {
   .glass {
-    @apply backdrop-blur-md border;
-    background: rgba(24, 24, 36, 0.7);
+    @apply border;
+    background: var(--color-surface);
     border-color: var(--color-border);
   }
 
   .btn-primary {
     @apply px-6 py-3 font-semibold rounded-lg active:scale-[0.97] transition-all duration-150;
     background-color: var(--color-accent);
-    color: #0F0F18;
-    box-shadow: 0 0 16px var(--color-accent-glow);
+    color: #ffffff;
   }
   .btn-primary:hover {
     background-color: var(--color-accent-hover);
-    box-shadow: 0 0 24px var(--color-accent-glow);
   }
 
   .btn-secondary {
     @apply px-6 py-3 font-medium rounded-lg active:scale-[0.97] transition-all duration-150;
-    border: 1px solid rgba(180, 180, 220, 0.15);
-    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-heading);
   }
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(180, 180, 220, 0.25);
+    background: var(--color-surface-2);
   }
 
   .card-premium {
     @apply p-6 rounded-xl transition-all duration-300;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
   .card-premium:hover {
-    transform: translateY(-3px);
-    border-color: rgba(110, 198, 198, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -92,11 +105,11 @@
   background: var(--color-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(110, 198, 198, 0.2);
+  background: rgba(59, 130, 246, 0.3);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(110, 198, 198, 0.35);
+  background: rgba(59, 130, 246, 0.5);
 }
 
 /* Global text color softening */
@@ -118,4 +131,84 @@
 [class*="phoneNumber"],
 [class*="phone_number"] {
   display: none !important;
+}
+
+@theme {
+  --animate-shine: shine var(--duration) infinite linear;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  to {
+    background-position: 0% 0%;
+  }
+}
+
+.shine-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+  padding: var(--border-width);
+  background-image: var(--background-radial-gradient);
+  background-size: 300% 300%;
+  mask: var(--mask-linear-gradient);
+  -webkit-mask: var(--mask-linear-gradient);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  will-change: background-position;
+  animation: shine var(--duration) infinite linear;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.6); }
+}
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@theme {
+  --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+}
+
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.border-beam-mask {
+  mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+  -webkit-mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  -webkit-mask-clip: padding-box, border-box;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.border-beam-effect {
+  position: absolute;
+  inset: 0;
+  border: calc(var(--border-width) * 1px) solid transparent;
+  border-radius: inherit;
+}
+
+.border-beam-effect::after {
+  content: '';
+  position: absolute;
+  aspect-ratio: 1/1;
+  width: calc(var(--size) * 1px);
+  background: linear-gradient(to left, var(--color-from), var(--color-to), transparent);
+  offset-anchor: calc(var(--anchor) * 1%) 50%;
+  offset-path: rect(0 100% 100% 0 round calc(var(--size) * 1px));
+  animation: border-beam calc(var(--duration) * 1s) infinite linear;
+  animation-delay: var(--delay);
+  will-change: offset-distance;
 }

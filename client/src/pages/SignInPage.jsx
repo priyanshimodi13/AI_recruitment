@@ -2,7 +2,7 @@ import { SignIn } from '@clerk/clerk-react';
 
 export default function SignInPage() {
   return (
-    <div className="min-h-[90vh] flex items-center justify-center py-20 bg-[var(--color-bg)]">
+    <div className="min-h-[90vh] flex items-center justify-center py-20">
       <div className="w-full max-w-md animate-fade-in-up">
         <SignIn 
           path="/sign-in" 

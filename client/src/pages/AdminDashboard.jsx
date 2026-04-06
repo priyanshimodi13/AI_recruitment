@@ -80,23 +80,23 @@ export default function AdminDashboard() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Loading admin dashboard...</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold text-white">Admin Dashboard</h1>
-            <p className="text-gray-400">Manage job postings and candidate resumes.</p>
+            <h1 className="text-3xl font-display font-bold text-[var(--color-heading)]">Admin Dashboard</h1>
+            <p className="text-[var(--color-text-muted)]">Manage job postings and candidate resumes.</p>
           </div>
           <div className="flex gap-4">
              <button 
                 onClick={() => setActiveTab('jobs')}
-                className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors border ${activeTab === 'jobs' ? 'bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-accent)]' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'}`}>
+                className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors border ${activeTab === 'jobs' ? 'bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-accent)]' : 'bg-[var(--color-surface-2)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-heading)]'}`}>
                 Jobs
              </button>
              <button 
                 onClick={() => setActiveTab('applications')}
-                className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors border ${activeTab === 'applications' ? 'bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-accent)]' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'}`}>
+                className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors border ${activeTab === 'applications' ? 'bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-accent)]' : 'bg-[var(--color-surface-2)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-heading)]'}`}>
                 Applications
              </button>
           </div>

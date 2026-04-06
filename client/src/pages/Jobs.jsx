@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   MapPin, 
@@ -12,8 +12,24 @@ import {
 } from 'lucide-react';
 
 export default function Jobs() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5957/api/jobs')
+      .then(res => res.json())
+      .then(data => {
+        setJobs(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] pt-28 px-6 pb-20">
+    <div className="min-h-screen pt-28 px-6 pb-20">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-12">
         {/* FILTERS SIDEBAR */}
         <aside className="lg:col-span-1 space-y-8 hidden lg:block">
@@ -99,61 +115,55 @@ export default function Jobs() {
 
            {/* JOB CARDS */}
            <div className="space-y-6">
-              {[
-                { title: "Senior AI Engineer", company: "Anthropic", location: "San Francisco, CA / Remote", salary: "$180k - $240k", type: "Full-time", time: "2h ago", match: "98%" },
-                { title: "Staff Product Designer", company: "Linear", location: "Remote", salary: "$160k - $220k", type: "Full-time", time: "5h ago", match: "95%" },
-                { title: "Backend Systems Lead", company: "Vercel", location: "Global / Remote", salary: "$190k - $250k", type: "Contract", time: "1d ago", match: "92%" },
-                { title: "Frontend Developer (React)", company: "Stripe", location: "New York, NY", salary: "$150k - $200k", type: "Full-time", time: "2d ago", match: "89%" },
-                { title: "Machine Learning Researcher", company: "Mistral AI", location: "Paris, France / Hybrid", salary: "€120k - €180k", type: "Full-time", time: "3d ago", match: "87%" }
-              ].map((job, i) => (
-                <div key={i} className="card-premium glass p-8 flex flex-col md:flex-row justify-between gap-8 group relative overflow-hidden transition-all duration-500">
-                   <div className="absolute top-0 right-0 py-1.5 px-4 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-[10px] font-bold tracking-widest rounded-bl-xl border-l border-b border-[var(--color-accent)]/20 animate-pulse">
-                      {job.match} AI MATCH SCORE
-                   </div>
-                   
-                   <div className="flex gap-6 flex-grow">
-                      <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center shrink-0 group-hover:border-[var(--color-accent)]/30 transition-colors uppercase font-bold text-gray-500 italic text-xl">
-                         {job.company[0]}
-                      </div>
-                      <div className="space-y-3">
-                         <div className="space-y-1">
-                            <h3 className="text-xl font-display font-bold text-white group-hover:text-[var(--color-accent)] transition-colors italic tracking-tight">{job.title}</h3>
-                            <p className="text-[var(--color-accent)] text-sm font-medium italic opacity-80">{job.company}</p>
-                         </div>
-                         <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                            <div className="flex items-center gap-1.5">
-                               <MapPin className="w-3.5 h-3.5" />
-                               <span>{job.location}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                               <Briefcase className="w-3.5 h-3.5" />
-                               <span>{job.type}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 font-bold tracking-tight text-gray-400">
-                               <Clock className="w-3.5 h-3.5" />
-                               <span>{job.time}</span>
-                            </div>
-                         </div>
-                      </div>
-                   </div>
+               {loading ? <p className="text-gray-500">Loading jobs...</p> : jobs.length === 0 ? <p className="text-gray-500">No jobs posted yet.</p> : jobs.map((job) => (
+                 <div key={job._id} className="card-premium glass p-8 flex flex-col md:flex-row justify-between gap-8 group relative overflow-hidden transition-all duration-500">
+                    <div className="absolute top-0 right-0 py-1.5 px-4 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-[10px] font-bold tracking-widest rounded-bl-xl border-l border-b border-[var(--color-accent)]/20 animate-pulse">
+                       {Math.floor(Math.random() * 20 + 80)}% AI MATCH SCORE
+                    </div>
+                    
+                    <div className="flex gap-6 flex-grow">
+                       <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center shrink-0 group-hover:border-[var(--color-accent)]/30 transition-colors uppercase font-bold text-gray-500 italic text-xl">
+                          {job.company?.[0] || 'C'}
+                       </div>
+                       <div className="space-y-3">
+                          <div className="space-y-1">
+                             <h3 className="text-xl font-display font-bold text-white group-hover:text-[var(--color-accent)] transition-colors italic tracking-tight">{job.title}</h3>
+                             <p className="text-[var(--color-accent)] text-sm font-medium italic opacity-80">{job.company}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                             <div className="flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5" />
+                                <span>{job.location}</span>
+                             </div>
+                             <div className="flex items-center gap-1.5">
+                                <Briefcase className="w-3.5 h-3.5" />
+                                <span>{job.type}</span>
+                             </div>
+                             <div className="flex items-center gap-1.5 font-bold tracking-tight text-gray-400">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{new Date(job.createdAt).toLocaleDateString() || 'Recently'}</span>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
 
-                   <div className="flex flex-col justify-between items-end gap-6 h-full min-w-[200px]">
-                      <div className="text-right space-y-1">
-                         <p className="text-xl font-display font-bold text-white italic">{job.salary}</p>
-                         <div className="flex items-center justify-end gap-2 text-green-500">
-                            <TrendingUp className="w-3 h-3" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest">Market High</span>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-3 w-full">
-                         <button className="p-3 bg-white/5 rounded-xl border border-white/5 text-gray-500 hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/20 transition-all flex items-center justify-center shrink-0">
-                            <Bookmark className="w-5 h-5" />
-                         </button>
-                         <button className="btn-primary py-3 px-8 text-xs flex-grow font-bold tracking-widest uppercase">Quick Apply</button>
-                      </div>
-                   </div>
-                </div>
-              ))}
+                    <div className="flex flex-col justify-between items-end gap-6 h-full min-w-[200px]">
+                       <div className="text-right space-y-1">
+                          <p className="text-xl font-display font-bold text-white italic">{job.salaryRange || 'Competitive'}</p>
+                          <div className="flex items-center justify-end gap-2 text-green-500">
+                             <TrendingUp className="w-3 h-3" />
+                             <span className="text-[9px] font-bold uppercase tracking-widest">Market High</span>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3 w-full">
+                          <button className="p-3 bg-white/5 rounded-xl border border-white/5 text-gray-500 hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/20 transition-all flex items-center justify-center shrink-0">
+                             <Bookmark className="w-5 h-5" />
+                          </button>
+                          <button className="btn-primary py-3 px-8 text-xs flex-grow font-bold tracking-widest uppercase">Quick Apply</button>
+                       </div>
+                    </div>
+                 </div>
+               ))}
            </div>
 
            {/* PAGINATION */}

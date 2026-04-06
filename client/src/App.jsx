@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import GridBackground from './components/UI/grid-background';
 
 function ProtectedRoute({ children }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -18,7 +19,7 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-white">
+    <GridBackground className="text-[var(--color-text)]">
       <Navbar />
       <div className="pt-4">
         <Routes>
@@ -40,6 +41,6 @@ export default function App() {
           } />
         </Routes>
       </div>
-    </div>
+    </GridBackground>
   );
 }

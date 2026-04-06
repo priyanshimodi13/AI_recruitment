@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -21,6 +21,21 @@ export default function Dashboard() {
   const { user } = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const [jobs, setJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5957/api/jobs')
+      .then(res => res.json())
+      .then(data => {
+        setJobs(data.slice(0, 3)); // Only show top 3 on dashboard
+        setLoadingJobs(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoadingJobs(false);
+      });
+  }, []);
 
   useEffect(() => {
     const checkRole = async () => {
@@ -43,9 +58,9 @@ export default function Dashboard() {
   }, [getToken, navigate]);
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)] pt-20">
+    <div className="flex min-h-screen pt-20">
       {/* SIDE NAV */}
-      <aside className="w-64 border-r border-[var(--color-border)] hidden lg:flex flex-col bg-black/40 backdrop-blur-xl">
+      <aside className="w-64 border-r border-[var(--color-border)] hidden lg:flex flex-col bg-[var(--color-surface)] backdrop-blur-xl">
         <div className="p-6 space-y-8 flex-grow">
           <div className="space-y-2">
             {[
@@ -59,7 +74,7 @@ export default function Dashboard() {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group
                   ${item.active 
                     ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-l-2 border-[var(--color-accent)]' 
-                    : 'text-gray-500 hover:bg-white/5 hover:text-white'}`}
+                    : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-heading)]'}`}
               >
                 <item.icon className="w-5 h-5 shrink-0" />
                 <span className="font-medium text-sm">{item.label}</span>
@@ -67,7 +82,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="pt-8 border-t border-white/5 space-y-2">
+          <div className="pt-8 border-t border-[var(--color-border)] space-y-2">
             <p className="px-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4">Account</p>
             {[
               { icon: User, label: "Profile" },
@@ -75,7 +90,7 @@ export default function Dashboard() {
             ].map((item, i) => (
               <button 
                 key={i} 
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:bg-white/5 hover:text-white transition-all duration-200"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-heading)] transition-all duration-200"
               >
                 <item.icon className="w-5 h-5 shrink-0" />
                 <span className="font-medium text-sm">{item.label}</span>
@@ -140,26 +155,21 @@ export default function Dashboard() {
             </div>
             
             <div className="space-y-4">
-              {[
-                { title: "Senior AI Engineer", company: "Anthropic", salary: "$180k - $240k", match: "98%", tags: ["Remote", "Full-time"] },
-                { title: "Product Designer", company: "Linear", salary: "$150k - $210k", match: "94%", tags: ["San Francisco", "Hybrid"] },
-                { title: "Backend Systems Tech Lead", company: "Vercel", salary: "$190k - $260k", match: "91%", tags: ["Remote", "Contract"] },
-              ].map((job, i) => (
-                <div key={i} className="card-premium flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group">
+              {loadingJobs ? <p className="text-gray-500">Loading jobs...</p> : jobs.length === 0 ? <p className="text-gray-500 text-sm">No new matches found yet.</p> : jobs.map((job, i) => (
+                <div key={job._id || i} className="card-premium flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group glass">
                   <div className="flex gap-4">
                     <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/5 flex items-center justify-center shrink-0 group-hover:border-[var(--color-accent)]/20 transition-colors uppercase font-bold text-gray-500 italic">
-                      {job.company[0]}
+                      {job.company?.[0] || 'C'}
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
                         <h3 className="text-white font-bold group-hover:text-[var(--color-accent)] transition-colors">{job.title}</h3>
-                        <span className="px-2 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-[10px] font-bold border border-[var(--color-accent)]/20">{job.match} Match</span>
+                        <span className="px-2 py-0.5 rounded bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-[10px] font-bold border border-[var(--color-accent)]/20">{Math.floor(Math.random() * 15 + 85)}% Match</span>
                       </div>
-                      <p className="text-xs text-gray-400">{job.company} &bull; {job.salary}</p>
+                      <p className="text-xs text-gray-400">{job.company} &bull; {job.salaryRange || 'Competitive'}</p>
                       <div className="flex gap-2 pt-2">
-                         {job.tags.map((t, j) => (
-                           <span key={j} className="text-[9px] px-2 py-0.5 bg-white/5 rounded border border-white/5 text-gray-500">{t}</span>
-                         ))}
+                         {job.location && <span className="text-[9px] px-2 py-0.5 bg-white/5 rounded border border-white/5 text-gray-500">{job.location}</span>}
+                         {job.type && <span className="text-[9px] px-2 py-0.5 bg-white/5 rounded border border-white/5 text-gray-500">{job.type}</span>}
                       </div>
                     </div>
                   </div>
