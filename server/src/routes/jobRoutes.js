@@ -20,10 +20,10 @@ router.get('/', async (req, res) => {
 // @desc    Create a new job (admin only)
 router.post('/', requireAdmin, async (req, res) => {
     try {
-        const { title, company, location, type, experienceLevel, description, requirements, salaryRange } = req.body;
+        const { title, company, companyWebsite, location, type, experienceLevel, description, requirements, salaryRange } = req.body;
         
         const newJob = new Job({
-            title, company, location, type, experienceLevel, description, requirements, salaryRange,
+            title, company, companyWebsite, location, type, experienceLevel, description, requirements, salaryRange,
             postedBy: req.dbUser._id
         });
         
@@ -32,6 +32,44 @@ router.post('/', requireAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error creating job:', error);
         res.status(500).json({ error: 'Server error while creating job' });
+    }
+});
+
+// @route   PUT /api/jobs/:id
+// @desc    Update a job (admin only)
+router.put('/:id', requireAdmin, async (req, res) => {
+    try {
+        const { title, company, companyWebsite, location, type, experienceLevel, description, requirements, salaryRange, isActive } = req.body;
+        
+        const updatedJob = await Job.findByIdAndUpdate(
+            req.params.id,
+            { 
+                title, company, companyWebsite, location, type, experienceLevel, description, 
+                requirements: Array.isArray(requirements) ? requirements : requirements?.split(',').map(r => r.trim()), 
+                salaryRange,
+                isActive 
+            },
+            { new: true }
+        );
+
+        if (!updatedJob) return res.status(404).json({ error: 'Job not found' });
+        res.json(updatedJob);
+    } catch (error) {
+        console.error('Error updating job:', error);
+        res.status(500).json({ error: 'Server error while updating job' });
+    }
+});
+
+// @route   DELETE /api/jobs/:id
+// @desc    Delete a job (admin only)
+router.delete('/:id', requireAdmin, async (req, res) => {
+    try {
+        const deletedJob = await Job.findByIdAndDelete(req.params.id);
+        if (!deletedJob) return res.status(404).json({ error: 'Job not found' });
+        res.json({ message: 'Job deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting job:', error);
+        res.status(500).json({ error: 'Server error while deleting job' });
     }
 });
 

@@ -6,3 +6,4 @@ config.env
 dist/
 build/
 Coverage/
+uploads/

@@ -26,7 +26,11 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/prepare-interview" element={<PrepareInterview />} />
-          <Route path="/upload-resume" element={<UploadResume />} />
+          <Route path="/upload-resume" element={
+            <ProtectedRoute>
+              <UploadResume />
+            </ProtectedRoute>
+          } />
           <Route path="/sign-in/*" element={<SignInPage />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />
           <Route path="/admin" element={

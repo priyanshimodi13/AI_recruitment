@@ -16,56 +16,66 @@ export default function Navbar() {
   }, [isDark]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-12">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="Recruitment Logo" className="h-10 w-auto object-contain" />
-              <span className="text-2xl font-bold tracking-tight text-[var(--color-heading)] font-display hidden sm:block">
+    <nav className="fixed top-4 left-4 right-4 z-50 glass-premium rounded-2xl mx-auto max-w-7xl">
+      <div className="px-6 sm:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-10">
+            <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
+              <div className="relative w-9 h-9 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500 opacity-20 blur-lg rounded-full animate-pulse"></div>
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-blue-500 relative z-10 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <span className="text-xl font-bold tracking-tight text-[var(--color-heading)] font-display">
                 Hire<span className="text-[var(--color-accent)]">Vision</span>
               </span>
             </Link>
             
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/jobs" className="text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors font-medium">Job Matches</Link>
-              <Link to="/prepare-interview" className="text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors font-medium">Interview Prep</Link>
-              <Link to="/dashboard" className="text-[var(--color-text)] hover:text-[var(--color-accent)] transition-colors font-medium">Dashboard</Link>
+            <div className="hidden md:flex items-center gap-6">
+              {[
+                { label: 'Marketplace', path: '/jobs' },
+                { label: 'AI Coach', path: '/prepare-interview' },
+                { label: 'Dashboard', path: '/dashboard' }
+              ].map((link) => (
+                <Link 
+                  key={link.path} 
+                  to={link.path} 
+                  className="text-sm font-semibold text-[var(--color-text)] hover:text-[var(--color-accent)] transition-all duration-300 relative group"
+                >
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--color-accent)] group-hover:w-full transition-all duration-300 rounded-full"></span>
+                </Link>
+              ))}
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-6 w-[1px] bg-[var(--color-border)] mx-2 hidden sm:block"></div>
             <AnimatedThemeToggle
               isDark={isDark}
               onToggle={() => setIsDark(!isDark)}
-              className="h-10 w-10 border-none bg-transparent hover:bg-[var(--color-surface-2)]"
+              className="h-9 w-9 rounded-xl hover:bg-[var(--color-surface-2)] transition-colors"
             />
             
             <SignedOut>
-              <div className="flex items-center gap-4">
-                <Link to="/sign-in">
-                  <button className="text-[var(--color-text)] hover:text-[var(--color-heading)] transition-colors font-medium">Sign In</button>
-                </Link>
+              <div className="flex items-center gap-3">
+                <Link to="/sign-in" className="text-sm font-bold text-[var(--color-text)] hover:text-[var(--color-heading)] transition-colors px-3">Sign In</Link>
                 <Link to="/sign-up">
-                  <button className="btn-primary py-2 px-5 text-sm">Get Started</button>
+                  <button className="btn-primary py-2 px-5 text-sm rounded-xl">Get Started</button>
                 </Link>
               </div>
             </SignedOut>
             <SignedIn>
-              <div className="flex items-center gap-4">
-                <Link to="/upload-resume">
-                  <button className="btn-secondary py-2 px-5 text-sm">Upload Resume</button>
-                </Link>
-                <div className="p-1 rounded-full border border-[var(--color-border)]">
-                  <UserButton 
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox: "w-9 h-9",
-                        userButtonTrigger: "focus:shadow-none"
-                      }
-                    }} 
-                  />
-                </div>
+              <div className="flex items-center gap-3">
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-8 h-8 rounded-xl",
+                      userButtonTrigger: "focus:shadow-none hover:scale-105 transition-transform"
+                    }
+                  }} 
+                />
               </div>
             </SignedIn>
           </div>

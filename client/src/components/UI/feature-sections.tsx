@@ -17,8 +17,8 @@ export function FeatureSectionsImage() {
           <div className="rounded-xl overflow-hidden shadow-lg shadow-purple-500/10">
             <img
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800"
-              alt="Data Insights"
+              src="/hero_dashboard.png"
+              alt="AI Data Insights"
             />
           </div>
           <h3 className="text-lg font-semibold text-white mt-6">Feedback analyser</h3>
@@ -31,8 +31,8 @@ export function FeatureSectionsImage() {
           <div className="rounded-xl overflow-hidden shadow-lg shadow-purple-500/10">
             <img
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800"
-              alt="User Management"
+              src="/resume-analysis.png"
+              alt="AI Career Management"
             />
           </div>
           <h3 className="text-lg font-semibold text-white mt-6">User management</h3>
