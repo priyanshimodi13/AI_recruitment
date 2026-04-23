@@ -1,0 +1,1043 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║   PLATFORM PREVIEW SECTION — RecruitAI Landing Page                 ║
+  ║   Paste this HTML block between your existing sections.              ║
+  ║   Then paste the <style> block into your existing <style> tag        ║
+  ║   and the <script> block before your closing </body> tag.            ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+
+
+<!-- ================================================================
+     PASTE THIS HTML BLOCK WHERE YOU WANT THE SECTION TO APPEAR
+     (e.g. after the FEATURES section, before HOW IT WORKS)
+     ================================================================ -->
+
+<section id="platform-preview">
+
+  <!-- ── PART A: FLOATING 3D BROWSER MOCKUP ─────────────────────── -->
+  <div class="mockup-part" id="mockup-part">
+
+    <div class="mp-bg-label">
+      <span class="section-label" style="margin-bottom:0;">05 / PLATFORM PREVIEW</span>
+    </div>
+
+    <div class="mp-headline-wrap">
+      <h2 class="mp-headline fade-up">
+        See the platform<br><em>in action.</em>
+      </h2>
+      <p class="mp-sub fade-up" style="transition-delay:.15s">
+        A live view of candidate cards, AI rankings, and instant slot booking — all in one elegant interface.
+      </p>
+    </div>
+
+    <!-- Floating 3D mockup scene -->
+    <div class="mockup-scene" id="mockupScene">
+
+      <!-- ─ Floating Widget 1 (top-right) ─ -->
+      <div class="mp-widget mp-widget-tl fp-float-a">
+        <div class="mpw-row"><span class="mpw-icon">⏱</span><span>6 weeks avg. to hire</span></div>
+        <div class="mpw-row"><span class="mpw-icon">📅</span><span>On-demand screening</span></div>
+        <div class="mpw-row"><span class="mpw-icon">⚡</span><span>AI-powered ranking</span></div>
+      </div>
+
+      <!-- ─ Browser Window Mockup ─ -->
+      <div class="browser-mockup fp-float-b" id="browserMockup">
+        <!-- Browser chrome -->
+        <div class="browser-chrome">
+          <div class="browser-dots">
+            <span class="bd bd-red"></span>
+            <span class="bd bd-yellow"></span>
+            <span class="bd bd-green"></span>
+          </div>
+          <div class="browser-bar">
+            <span class="browser-url">app.recruitai.io/candidates</span>
+          </div>
+        </div>
+
+        <!-- Browser body — mini app UI -->
+        <div class="browser-body">
+          <div class="mini-sidebar">
+            <div class="mini-sidebar-logo">R<span class="ms-dot">•</span>AI</div>
+            <div class="ms-nav">
+              <div class="ms-nav-item ms-active">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <div class="ms-nav-item">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="ms-nav-item">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </div>
+              <div class="ms-nav-item">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-main">
+            <div class="mini-header">
+              <span class="mini-title">Top Candidates</span>
+              <span class="mini-badge">AI Ranked</span>
+            </div>
+
+            <!-- Job Card 1 (active) -->
+            <div class="job-card job-card-active">
+              <div class="jc-accent-bar"></div>
+              <div class="jc-content">
+                <div class="jc-top">
+                  <div class="jc-info">
+                    <div class="jc-avatar jc-av-1">AK</div>
+                    <div>
+                      <div class="jc-title">Senior Frontend Developer</div>
+                      <div class="jc-stars">
+                        <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span>
+                        <span class="jc-reviews">386 reviews</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="jc-tags">
+                    <span class="jc-tag"><span>⏱</span> Full-time</span>
+                    <span class="jc-tag jc-tag-green"><span>⚡</span> Top Candidate</span>
+                  </div>
+                </div>
+                <p class="jc-desc">Strong React skills, 4 years experience, available immediately</p>
+                <div class="jc-bottom">
+                  <button class="jc-save-btn">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Save to list
+                  </button>
+                  <span class="jc-tag jc-tag-date"><span>📅</span> Immediate</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Job Card 2 -->
+            <div class="job-card">
+              <div class="jc-content">
+                <div class="jc-top">
+                  <div class="jc-info">
+                    <div class="jc-avatar jc-av-2">MS</div>
+                    <div>
+                      <div class="jc-title">Backend Engineer — Node.js</div>
+                      <div class="jc-stars">
+                        <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                        <span class="jc-reviews">214 reviews</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="jc-tags">
+                    <span class="jc-tag"><span>⏱</span> Contract</span>
+                  </div>
+                </div>
+                <p class="jc-desc">Expert in REST APIs, MongoDB, and microservices architecture</p>
+                <div class="jc-bottom">
+                  <button class="jc-save-btn">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Save to list
+                  </button>
+                  <span class="jc-tag jc-tag-date"><span>📅</span> 2 weeks notice</span>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /mini-main -->
+        </div><!-- /browser-body -->
+      </div><!-- /browser-mockup -->
+
+      <!-- ─ Floating Widget 2 (bottom-right) — Book interview ─ -->
+      <div class="mp-widget mp-widget-br fp-float-c">
+        <div class="mpw-book-label">Book your</div>
+        <div class="mpw-book-label mpw-book-bold">interview slot</div>
+        <div class="mpw-book-arrow">→</div>
+      </div>
+
+    </div><!-- /mockup-scene -->
+
+  </div><!-- /mockup-part -->
+
+
+  <!-- ── PART B: DARK RADAR / ORBIT SECTION ─────────────────────── -->
+  <div class="orbit-part" id="orbitPart">
+
+    <!-- Concentric orbit rings -->
+    <div class="orbit-rings" aria-hidden="true">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="orbit-ring ring-4"></div>
+      <div class="orbit-ring ring-5"></div>
+    </div>
+
+    <!-- Floating orbiting pills -->
+    <div class="orbit-pill pill-top-c fp-drift-a">
+      <span class="op-icon">🧠</span><span>AI Screened</span>
+    </div>
+    <div class="orbit-pill pill-left op-red fp-drift-b">
+      <span class="op-icon">🎯</span><span>One-on-One</span>
+    </div>
+    <div class="orbit-pill pill-bottom-r fp-drift-c">
+      <span class="op-icon">⏱</span><span>Flexible timing</span>
+    </div>
+    <div class="orbit-pill pill-top-r fp-drift-d">
+      <span class="op-icon">📋</span><span>Personalized</span>
+    </div>
+    <div class="orbit-pill pill-right op-icon-only fp-drift-a">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="orbit-pill pill-bottom-l op-icon-only op-red fp-drift-b">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    </div>
+
+    <!-- Center content -->
+    <div class="orbit-center" id="orbitCenter">
+      <div class="orbit-avatars">
+        <div class="oa oa-1">SJ</div>
+        <div class="oa oa-2">RL</div>
+        <div class="oa oa-3">PK</div>
+        <div class="orbit-count-pill">+200 candidates</div>
+      </div>
+      <h2 class="orbit-headline">
+        Sign up for<br>an interview
+      </h2>
+      <a href="#cta" class="orbit-cta hover-trigger">Get started &rarr;</a>
+    </div>
+
+  </div><!-- /orbit-part -->
+
+</section><!-- /#platform-preview -->
+
+
+<!-- ================================================================
+     END OF HTML BLOCK
+     ================================================================ -->
+
+
+
+
+<!-- ================================================================
+     PASTE THIS ENTIRE <style> BLOCK into your existing <style> tag
+     (or add it as a separate <style> tag just before </head>)
+     ================================================================ -->
+<style>
+/* ─────────────────────────────────────────────────────────────────
+   PLATFORM PREVIEW SECTION — All styles are namespaced to avoid
+   conflicts with your existing CSS.
+   Brand red: #e63329  |  Font: Inter (already loaded)
+───────────────────────────────────────────────────────────────────*/
+
+/* ── CSS CUSTOM PROPS (scoped additions, don't override existing) ──*/
+:root {
+  --pp-red: #e63329;
+  --pp-dark: #0d0d0d;
+  --pp-card-bg: #ffffff;
+  --pp-gray-bg: #f0f0f0;
+  --pp-ring-color: rgba(255,255,255,0.06);
+  --pp-ring-pulse: rgba(230,51,41,0.08);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION WRAPPER
+══════════════════════════════════════════════════════════════════*/
+#platform-preview {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   PART A — MOCKUP SECTION
+══════════════════════════════════════════════════════════════════*/
+.mockup-part {
+  background-color: var(--pp-gray-bg);
+  padding: clamp(80px, 12vw, 160px) 0 clamp(100px, 14vw, 180px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle grid noise texture */
+.mockup-part::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.mp-bg-label {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 max(5vw, calc((100vw - var(--container)) / 2));
+  margin-bottom: 2rem;
+}
+
+.mp-headline-wrap {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 max(5vw, calc((100vw - var(--container)) / 2));
+  margin-bottom: clamp(60px, 8vw, 100px);
+}
+
+.mp-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.1;
+  color: var(--black);
+  margin-bottom: 20px;
+}
+
+.mp-headline em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.mp-sub {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 16px;
+  color: var(--gray-mid);
+  max-width: 460px;
+  line-height: 1.65;
+}
+
+/* ── Mockup Scene ── */
+.mockup-scene {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 max(5vw, calc((100vw - 1100px) / 2));
+}
+
+/* ── Browser Mockup Window ── */
+.browser-mockup {
+  width: min(720px, 90vw);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.06),
+    0 20px 60px rgba(0,0,0,0.12),
+    0 60px 120px rgba(0,0,0,0.08);
+  transform: perspective(1200px) rotateX(4deg) rotateY(-4deg);
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+  position: relative;
+  z-index: 5;
+  will-change: transform;
+  border: 1px solid rgba(0,0,0,0.07);
+}
+
+/* ── Browser Chrome ── */
+.browser-chrome {
+  background: #f7f7f7;
+  border-bottom: 1px solid #e8e8e8;
+  border-radius: 16px 16px 0 0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.browser-dots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.bd {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.bd-red    { background: #ff5f57; }
+.bd-yellow { background: #febc2e; }
+.bd-green  { background: #28c840; }
+
+.browser-bar {
+  flex: 1;
+  background: #ebebeb;
+  border-radius: 6px;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.browser-url {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+/* ── Browser Body ── */
+.browser-body {
+  display: flex;
+  height: 340px;
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+/* ── Mini Sidebar ── */
+.mini-sidebar {
+  width: 52px;
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mini-sidebar-logo {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 9px;
+  color: #fff;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.ms-dot { color: var(--pp-red); }
+
+.ms-nav { display: flex; flex-direction: column; gap: 4px; }
+
+.ms-nav-item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #666;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.ms-nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.ms-active { background: rgba(230,51,41,0.2); color: var(--pp-red) !important; }
+
+/* ── Mini Main Area ── */
+.mini-main {
+  flex: 1;
+  background: #fafafa;
+  padding: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mini-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.mini-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  color: #111;
+}
+
+.mini-badge {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #e63329, #ff6b5e);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+/* ── Job Cards ── */
+.job-card {
+  background: var(--pp-card-bg);
+  border: 1px solid #ebebeb;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  flex-shrink: 0;
+}
+
+.job-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.job-card-active {
+  border-color: rgba(230,51,41,0.2);
+  box-shadow: 0 2px 12px rgba(230,51,41,0.08);
+}
+
+.jc-accent-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--pp-red);
+  border-radius: 12px 0 0 12px;
+}
+
+.jc-content {
+  padding: 12px 12px 12px 16px;
+}
+
+.jc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.jc-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.jc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.jc-av-1 { background: linear-gradient(135deg, #e63329, #ff8c7a); }
+.jc-av-2 { background: linear-gradient(135deg, #1a1a2e, #4a4a8a); }
+
+.jc-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jc-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.star {
+  font-size: 10px;
+  color: #d0d0d0;
+  line-height: 1;
+}
+
+.star.filled {
+  color: #f5b800;
+}
+
+.jc-reviews {
+  font-family: var(--font-body);
+  font-size: 9px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.jc-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+
+.jc-tag {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 500;
+  background: #f4f4f4;
+  color: #555;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.jc-tag-green {
+  background: rgba(40,200,130,0.1);
+  color: #13a064;
+}
+
+.jc-tag-date {
+  background: rgba(230,51,41,0.08);
+  color: var(--pp-red);
+}
+
+.jc-desc {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.jc-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jc-save-btn {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: #444;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.jc-save-btn:hover {
+  background: var(--pp-red);
+  color: #fff;
+  border-color: var(--pp-red);
+}
+
+/* ── Floating Widgets ── */
+.mp-widget {
+  position: absolute;
+  z-index: 10;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Widget 1 — feature tooltip (dark) */
+.mp-widget-tl {
+  top: -20px;
+  right: calc(max(5vw, calc((100vw - 1100px) / 2)) - 10px);
+  background: #1a1a1a;
+  color: #f0f0f0;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  transform: rotate(1.5deg);
+  min-width: 200px;
+}
+
+.mpw-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+}
+
+.mpw-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Widget 2 — book interview (red) */
+.mp-widget-br {
+  bottom: -30px;
+  right: calc(max(5vw, calc((100vw - 1100px) / 2)) - 10px);
+  background: var(--pp-red);
+  color: #fff;
+  padding: 18px 24px;
+  transform: rotate(-2deg);
+  box-shadow: 0 16px 48px rgba(230,51,41,0.35);
+  min-width: 160px;
+}
+
+.mpw-book-label {
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(255,255,255,0.85);
+}
+
+.mpw-book-bold {
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+}
+
+.mpw-book-arrow {
+  margin-top: 8px;
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+}
+
+
+/* ── Floating Animations (CSS keyframes) ── */
+@keyframes ppFloatA {
+  0%, 100% { transform: translateY(0px) rotate(1.5deg); }
+  50%       { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+@keyframes ppFloatB {
+  0%, 100% { transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateY(0px); }
+  50%       { transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateY(-12px); }
+}
+
+@keyframes ppFloatC {
+  0%, 100% { transform: translateY(0px) rotate(-2deg); }
+  50%       { transform: translateY(-8px) rotate(-2deg); }
+}
+
+.fp-float-a { animation: ppFloatA 4s ease-in-out infinite; }
+.fp-float-b { animation: ppFloatB 5s ease-in-out infinite; }
+.fp-float-c { animation: ppFloatC 3.5s ease-in-out infinite; }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   PART B — DARK ORBIT SECTION
+══════════════════════════════════════════════════════════════════*/
+.orbit-part {
+  background-color: #0d0d0d;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Concentric Rings ── */
+.orbit-rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.ring-1 { width: 160px;  height: 160px;  border-color: rgba(255,255,255,0.12); animation: ppRingPulse 4s ease-in-out infinite 0s; }
+.ring-2 { width: 300px;  height: 300px;  animation: ppRingPulse 4s ease-in-out infinite 0.5s; }
+.ring-3 { width: 460px;  height: 460px;  animation: ppRingPulse 4s ease-in-out infinite 1s; }
+.ring-4 { width: 640px;  height: 640px;  animation: ppRingPulse 4s ease-in-out infinite 1.5s; border-color: var(--pp-ring-pulse); }
+.ring-5 { width: 840px;  height: 840px;  animation: ppRingPulse 4s ease-in-out infinite 2s; }
+
+@keyframes ppRingPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1);    }
+  50%       { opacity: 0.8; transform: scale(1.015); }
+}
+
+/* ── Center content ── */
+.orbit-center {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s cubic-bezier(0.19,1,0.22,1), transform 1s cubic-bezier(0.19,1,0.22,1);
+}
+
+.orbit-center.pp-in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Stacked Avatars ── */
+.orbit-avatars {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: center;
+}
+
+.oa {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid #0d0d0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.oa-1 { background: linear-gradient(135deg, #e63329, #ff6b5e); z-index: 3; }
+.oa-2 { background: linear-gradient(135deg, #6c3de6, #a575f5); margin-left: -12px; z-index: 2; }
+.oa-3 { background: linear-gradient(135deg, #25a9e0, #56d4ff); margin-left: -12px; z-index: 1; }
+
+.orbit-count-pill {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  border: 1px solid #333;
+  background: rgba(255,255,255,0.05);
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-left: 14px;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Orbit Headline ── */
+.orbit-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(36px, 6vw, 72px);
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+/* ── Orbit CTA ── */
+.orbit-cta {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: #0d0d0d;
+  background: #ffffff;
+  padding: 14px 32px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  margin-top: 8px;
+}
+
+.orbit-cta:hover {
+  background: var(--pp-red);
+  color: #fff;
+  transform: scale(1.04);
+}
+
+/* ── Floating Orbit Pills ── */
+.orbit-pill {
+  position: absolute;
+  z-index: 10;
+  background: #fff;
+  color: #111;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  white-space: nowrap;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.orbit-pill.op-red {
+  background: var(--pp-red);
+  color: #fff;
+  border-color: transparent;
+}
+
+.orbit-pill.op-icon-only {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.op-icon { font-size: 16px; line-height: 1; }
+
+/* Pill positions (desktop) */
+.pill-top-c   { top: 12%;  left: 50%; transform: translateX(-50%); }
+.pill-left     { left: 5%;  top: 45%; }
+.pill-bottom-r { bottom: 14%; right: 10%; }
+.pill-top-r   { top: 18%;  right: 8%; }
+.pill-right    { right: 4%; top: 55%; }
+.pill-bottom-l { bottom: 20%; left: 6%; }
+
+/* Pill drift animations */
+@keyframes ppDriftA {
+  0%, 100% { transform: translateY(0px) translateX(-50%); }
+  50%       { transform: translateY(-14px) translateX(-50%); }
+}
+@keyframes ppDriftB {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(12px); }
+}
+@keyframes ppDriftC {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes ppDriftD {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(8px); }
+}
+
+/* apply to pill-top-c */
+.pill-top-c.fp-drift-a { animation: ppDriftA 3.5s ease-in-out infinite; }
+.fp-drift-b { animation: ppDriftB 4.2s ease-in-out infinite; }
+.fp-drift-c { animation: ppDriftC 3s ease-in-out infinite; }
+.fp-drift-d { animation: ppDriftD 5s ease-in-out infinite; }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════*/
+
+/* Tablet */
+@media (max-width: 900px) {
+  .mp-widget-tl,
+  .mp-widget-br { display: none; }
+
+  .mockup-scene { padding: 0 5vw; }
+
+  .browser-mockup {
+    width: min(600px, 90vw);
+    transform: perspective(1200px) rotateX(3deg) rotateY(0deg);
+  }
+
+  .browser-body { height: 280px; }
+
+  .mini-sidebar { display: none; }
+
+  .orbit-pill { display: none; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .browser-mockup {
+    width: 92vw;
+    transform: perspective(1200px) rotateX(2deg) rotateY(0);
+  }
+
+  .browser-body { height: 260px; }
+
+  .orbit-rings .ring-4,
+  .orbit-rings .ring-5 { display: none; }
+
+  .orbit-headline { font-size: clamp(30px, 9vw, 54px); }
+}
+</style>
+<!-- ================================================================
+     END OF <style> BLOCK
+     ================================================================ -->
+
+
+
+
+<!-- ================================================================
+     PASTE THIS <script> BLOCK just before your closing </body> tag
+     (after your existing scripts)
+     ================================================================ -->
+<script>
+  // ==============================================================
+  // PLATFORM PREVIEW SECTION SCRIPTS
+  // ==============================================================
+
+  (function() {
+
+    // ── 1. Mousemove parallax tilt on the browser mockup ──────────
+    const mockupPart  = document.getElementById('mockup-part');
+    const browserMock = document.getElementById('browserMockup');
+
+    if (mockupPart && browserMock) {
+      mockupPart.addEventListener('mousemove', function(e) {
+        const rect = mockupPart.getBoundingClientRect();
+        // Normalised coords -1 to +1
+        const nx = (e.clientX - rect.left) / rect.width  - 0.5;
+        const ny = (e.clientY - rect.top)  / rect.height - 0.5;
+
+        // Max ±5 degrees on each axis
+        const rotY =  nx * 10;  // positive = right tilt
+        const rotX = -ny * 6;   // positive = tilt toward viewer
+
+        browserMock.style.transform =
+          `perspective(1200px) rotateX(${rotX + 4}deg) rotateY(${rotY - 4}deg)`;
+      });
+
+      mockupPart.addEventListener('mouseleave', function() {
+        // Reset to default tilt
+        browserMock.style.transform =
+          'perspective(1200px) rotateX(4deg) rotateY(-4deg)';
+      });
+    }
+
+
+    // ── 2. IntersectionObserver fade-in for orbit center ──────────
+    const orbitCenter = document.getElementById('orbitCenter');
+
+    if (orbitCenter) {
+      const orbitObs = new IntersectionObserver(function(entries, obs) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('pp-in-view');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      orbitObs.observe(orbitCenter);
+    }
+
+
+    // ── 3. Hook new .fade-up elements into the existing observer ───
+    //    (The landing page already has an IntersectionObserver
+    //     watching .fade-up/.slide-left/.slide-right)
+    //    We nudge any new ones after a tiny delay to let the DOM settle.
+    setTimeout(function() {
+      const newFadeUps = document.querySelectorAll(
+        '#platform-preview .fade-up:not([data-pp-observed])'
+      );
+      newFadeUps.forEach(function(el) {
+        el.setAttribute('data-pp-observed', '1');
+        if (typeof observer !== 'undefined') {
+          observer.observe(el);
+        } else {
+          // Fallback: just show them
+          el.classList.add('in-view');
+        }
+      });
+    }, 100);
+
+  })();
+</script>
+<!-- ================================================================
+     END OF <script> BLOCK
+     ================================================================ -->

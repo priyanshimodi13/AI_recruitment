@@ -1,307 +1,717 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { GlowCard } from '../components/UI/spotlight-card';
-import { ShineBorder } from '../components/UI/shine-border';
-import { SparkleButton } from '../components/UI/button-8';
-import { BorderBeam } from '../components/UI/border-beam';
-
-import {
-  CheckCircle2,
-  ArrowRight,
-  Target,
-  Zap,
-  Shield,
-  BarChart3,
-  Cpu,
-  Users,
-  MessageSquare,
-  Sparkles,
-  PlayCircle
-} from 'lucide-react';
-import { HeroActionButton } from '../components/UI/hero-action-button';
+import DigitalSerenity from '../components/ui/digital-serenity-animated-landing-page';
+import PlatformPreviewMockup from '../components/ui/PlatformPreviewMockup';
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth();
+  const [counts, setCounts] = useState({ resumes: 0, companies: 0, speed: 0, satisfaction: 0 });
+  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
+  const [isHovering, setIsHovering] = useState(false);
 
-  // If user is already signed in, send them to dashboard
+  useEffect(() => {
+    // Custom Cursor event listener
+    const moveCursor = (e) => {
+      requestAnimationFrame(() => {
+        setCursorPos({ x: e.clientX, y: e.clientY });
+      });
+    };
+    window.addEventListener('mousemove', moveCursor);
+
+    // Stats counter logic
+    const startCounters = () => {
+      const targets = { resumes: 10000, companies: 500, speed: 3, satisfaction: 98 };
+      let step = 0;
+      const steps = 60;
+      const timer = setInterval(() => {
+        step++;
+        setCounts({
+          resumes: Math.floor((targets.resumes / steps) * step),
+          companies: Math.floor((targets.companies / steps) * step),
+          speed: Math.floor((targets.speed / steps) * step),
+          satisfaction: Math.floor((targets.satisfaction / steps) * step)
+        });
+        if (step >= steps) {
+          clearInterval(timer);
+          setCounts(targets);
+        }
+      }, 33);
+    };
+
+    // Intersection observers
+    const obsOptions = { threshold: 0.15 };
+    const obs = new IntersectionObserver((entries, observer) => {
+      entries.forEach(e => {
+        if(e.isIntersecting) {
+          e.target.classList.add('kal-in-view');
+          if(e.target.id === 'kal-stats-container') startCounters();
+          observer.unobserve(e.target);
+        }
+      });
+    }, obsOptions);
+
+    document.querySelectorAll('.kal-fade-up, .kal-slide-left, .kal-slide-right, #kal-stats-container').forEach(el => obs.observe(el));
+
+    return () => {
+      window.removeEventListener('mousemove', moveCursor);
+      obs.disconnect();
+    };
+  }, []);
+
   if (isLoaded && isSignedIn) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  const hoverProps = {
+    onMouseEnter: () => setIsHovering(true),
+    onMouseLeave: () => setIsHovering(false)
+  };
+
   return (
-    <div className="pt-24 space-y-32 pb-20">
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden px-6">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[var(--color-accent)] opacity-[0.03] blur-[120px] rounded-full animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500 opacity-[0.03] blur-[120px] rounded-full animate-pulse"></div>
-        </div>
+    <div className="kal-theme">
+      {/* Google Fonts */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Jost:wght@200;300;400;500&display=swap');
+      `}</style>
+      
+      {/* CUSTOM CURSOR */}
+      <div 
+        className={`kal-cursor-dot ${isHovering ? 'kal-hover-state' : ''}`} 
+        style={{ left: cursorPos.x + 'px', top: cursorPos.y + 'px' }}
+      ></div>
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center relative z-10">
-          <div className="text-left space-y-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium border-white/10 text-xs font-bold tracking-widest uppercase text-[var(--color-accent)] animate-fade-in shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Next Gen AI Career Intelligence</span>
-            </div>
-
-            <h1 className="text-4xl lg:text-5xl font-display font-bold leading-[1.2] tracking-tight text-[var(--color-heading)] animate-fade-in-up">
-              Master Your Next <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-[#8b5cf6]">Career Step</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-xl font-medium leading-relaxed opacity-90">
-              HireVision connects your unique skills to the world's top job matches and prepares you for the interview with real-time AI coaching.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-6 pt-2">
-              <SparkleButton to="/sign-up" className="shadow-2xl shadow-blue-500/20">
-                Get Started Free <ArrowRight className="w-5 h-5 ml-1" />
-              </SparkleButton>
-              <HeroActionButton 
-                to="/prepare-interview" 
-                icon={<PlayCircle className="w-5 h-5" />}
-                title="See Demo"
-                size="sm"
-                className="scale-100"
-              />
-            </div>
-
-            <div className="flex items-center gap-5 pt-10 border-t border-[var(--color-border)]">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-xl border-2 border-[var(--color-bg)] bg-[var(--color-surface-2)] flex items-center justify-center ring-1 ring-black/5 overflow-hidden shadow-sm">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} alt="User" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm font-medium text-[var(--color-text-muted)]">
-                <span className="text-[var(--color-heading)] font-bold">12,000+</span> professionals growing with us
-              </p>
-            </div>
+      {/* HERO SECTION */}
+      <section className="kal-hero-wrapper">
+        <video autoPlay loop muted playsInline className="kal-hero-bg-video">
+          <source src="/69e714293555b.mp4" type="video/mp4" />
+        </video>
+        <div className="kal-hero-overlay"></div>
+        
+        <div className="kal-hero kal-container">
+          <div className="kal-hero-top-label">AI RECRUITMENT PLATFORM — EST. 2024</div>
+          
+          <div className="kal-hero-title-container">
+              <h1 className="kal-hero-title">
+                  <span className="delay-1">HIRE</span> <span className="delay-2">PEOPLE.</span>
+                  <span className="kal-line-2 delay-3">NOT PAPERWORK.</span>
+              </h1>
           </div>
 
-          <div className="relative group animate-fade-in-right hidden lg:block">
-            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-500/10 to-purple-500/10 opacity-50 blur-3xl rounded-[40px]"></div>
-            <ShineBorder 
-              className="!p-1 glass-premium shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] w-full h-full rounded-[32px]"
-              borderRadius={32}
-              color={["#3b82f6", "#8b5cf6", "#3b82f6"]}
-              borderWidth={2}
-            >
-                <img
-                  src="/hero_dashboard.png"
-                  alt="Dashboard Preview"
-                  className="w-full h-full object-cover rounded-[31px] shadow-inner"
-                />
-            </ShineBorder>
+          <p className="kal-hero-body kal-fade-up">
+              Hire Vision handles resume screening, interview scheduling, and candidate communication — so your team focuses on people.
+          </p>
+
+          <div className="kal-hero-links kal-fade-up delay-2-fade">
+              <Link to="/admin" className="kal-hero-link-primary" {...hoverProps}>Start hiring smarter ↗</Link>
+              <a href="#kal-features" className="kal-hero-link-secondary" {...hoverProps}>See how it works ↓</a>
           </div>
+
+          <svg className="kal-rotating-badge desktop-only" viewBox="0 0 100 100" width="100" height="100">
+              <defs>
+                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"/>
+              </defs>
+              <text fontSize="11" fontFamily="'Inter', sans-serif" fontWeight="500" letterSpacing="3" fill="#6b6b6b">
+                <textPath href="#circlePath">
+                  SCROLL TO EXPLORE &bull; SCROLL TO EXPLORE &bull;
+                </textPath>
+              </text>
+          </svg>
+
+          <div className="kal-hero-bottom-rule"></div>
         </div>
       </section>
 
-      {/* 3. PROBLEM SECTION */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-[var(--color-heading)] tracking-tight">
-              Traditional job hunting is <span className="text-red-500/80">exhausting</span>
-            </h2>
-            <p className="text-[var(--color-text-muted)] text-lg font-medium max-w-xl mx-auto opacity-80">
-              Stop sending generic applications into the void. The old process is broken, we fixed it.
-            </p>
+      {/* MARQUEE */}
+      <div className="kal-marquee">
+          <div className="kal-marquee-inner">
+              <div className="kal-marquee-item">
+                  <span>RESUME SCREENING</span>
+                  <span>INTERVIEW SCHEDULING</span>
+                  <span>CANDIDATE NOTIFICATIONS</span>
+                  <span>ADMIN DASHBOARD</span>
+                  <span>CALENDAR SYNC</span>
+                  <span>AI RANKING</span>
+                  <span>INSTANT ALERTS</span>
+              </div>
+              <div className="kal-marquee-item">
+                  <span>RESUME SCREENING</span>
+                  <span>INTERVIEW SCHEDULING</span>
+                  <span>CANDIDATE NOTIFICATIONS</span>
+                  <span>ADMIN DASHBOARD</span>
+                  <span>CALENDAR SYNC</span>
+                  <span>AI RANKING</span>
+                  <span>INSTANT ALERTS</span>
+              </div>
           </div>
+      </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
-            {[
-              { icon: MessageSquare, title: "Recruiter Ghosting", desc: "Never hear back? We use AI to track recruiter activity and optimize your follow-up timing.", color: "red" },
-              { icon: Shield, title: "ATS Invisibility", desc: "Your resume might be perfect, but bots can't read it. We optimize your profile for instant discovery.", color: "purple" },
-              { icon: Users, title: "Unprepared Moments", desc: "Interviewing is a skill. Practice with AI that mimics the tone and culture of your target company.", color: "blue" }
-            ].map((p, i) => (
-              <GlowCard key={i} glowColor={p.color} customSize={true} className="w-full card-premium">
-                <div className="w-14 h-14 bg-[var(--color-surface-2)] rounded-2xl flex items-center justify-center mb-8 border border-[var(--color-border)] shadow-sm">
-                  <p.icon className={`w-7 h-7 ${p.color === 'red' ? 'text-red-500' : p.color === 'purple' ? 'text-purple-500' : 'text-blue-500'}`} />
-                </div>
-                <h3 className="text-xl font-bold text-[var(--color-heading)] mb-4 tracking-tight">{p.title}</h3>
-                <p className="text-[var(--color-text-muted)] font-medium leading-relaxed">{p.desc}</p>
-              </GlowCard>
-            ))}
+      {/* STATEMENT SECTION ANIMATED */}
+      <section className="kal-statement-animated-override" style={{ backgroundColor: '#000000' }}> {/* matches background of component */}
+          <DigitalSerenity />
+          
+          <div className="kal-container" style={{ paddingBottom: '40px' }}>
+             <div className="kal-statement-bottom">
+                 <span className="kal-section-label kal-fade-up no-margin">01 / WHY HIRE VISION</span>
+                 <p className="kal-statement-p kal-fade-up">
+                     Hire Vision automates the repetitive work of recruitment — from reading resumes to booking interviews — so your team can spend time on what actually matters: the people.
+                 </p>
+             </div>
           </div>
-        </div>
       </section>
 
-      {/* 4. SOLUTION / FEATURES SECTION */}
-      <section className="py-32 px-6 glass-premium border-y border-[var(--color-border)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col lg:flex-row gap-24 items-center">
-            <div className="lg:w-1/2 space-y-10">
-              <div className="space-y-6">
-                <div className="inline-block px-4 py-1.5 rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-[10px] font-black tracking-[0.2em] uppercase">The Platform</div>
-                <h2 className="text-3xl font-display font-bold text-[var(--color-heading)] tracking-tight leading-[1.2]">
-                  Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent)] to-cyan-500">get hired</span>
-                </h2>
-                <p className="text-lg text-[var(--color-text-muted)] font-medium">
-                  We've built the ultimate toolset for the modern job seeker. Focused, fast, and driven by data.
-                </p>
-              </div>
+      {/* FEATURES SECTION */}
+      <section className="kal-features-section kal-container" id="kal-features">
+          <span className="kal-section-label kal-fade-up">02 / WHAT WE DO</span>
+          <h2 className="kal-features-headline kal-fade-up">
+              EVERYTHING AUTOMATED.<br/>NOTHING MISSED.
+          </h2>
 
-              <div className="space-y-8">
-                {[
-                  { title: "AI-Skill Intelligence", desc: "Deep analysis of your profile against 1M+ live job requirements." },
-                  { title: "Contextual Applications", desc: "Automated tailoring that maintains your unique voice and personality." },
-                  { title: "Behavioral Coaching", desc: "Real-time feedback on your speech, tone, and confidence during mock interviews." }
-                ].map((f, i) => (
-                  <div key={i} className="flex gap-6 group">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0 border border-[var(--color-accent)]/20 group-hover:bg-[var(--color-accent)] group-hover:text-white transition-all duration-300">
-                      <CheckCircle2 className="w-6 h-6 text-[var(--color-accent)] group-hover:text-white transition-colors" />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-bold text-[var(--color-heading)] mb-1 tracking-tight">{f.title}</h4>
-                      <p className="text-[var(--color-text-muted)] font-medium text-sm leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
+          <div className="kal-features-grid">
+              <div className="kal-feature-item kal-fade-up delay-1-fade">
+                  <div className="kal-feat-num">01</div>
+                  <h3 className="kal-feat-title">AI Resume Screening</h3>
+                  <p className="kal-feat-desc">Automatically ranks and filters resumes by job fit</p>
               </div>
-            </div>
-            
-            <div className="lg:w-1/2 w-full relative group">
-              <div className="absolute -inset-10 bg-gradient-to-br from-[var(--color-accent)]/20 to-purple-500/20 opacity-0 group-hover:opacity-100 blur-[100px] transition-opacity duration-1000"></div>
-              <ShineBorder 
-                className="!p-1 glass-premium shadow-2xl w-full h-full bg-[var(--color-surface-2)]/50 rounded-[40px]"
-                borderRadius={40}
-                color={["#ec4899", "#8b5cf6", "#3b82f6"]}
-                borderWidth={2}
-              >
-                <img src="/resume-analysis.png" alt="Product Demo" className="w-full h-full object-cover rounded-[39px]" />
-              </ShineBorder>
-            </div>
+              <div className="kal-feature-item kal-fade-up delay-2-fade">
+                  <div className="kal-feat-num">02</div>
+                  <h3 className="kal-feat-title">Smart Scheduling</h3>
+                  <p className="kal-feat-desc">Books interviews and syncs to Google Calendar or .ics</p>
+              </div>
+              <div className="kal-feature-item kal-fade-up delay-3-fade">
+                  <div className="kal-feat-num">03</div>
+                  <h3 className="kal-feat-title">Instant Notifications</h3>
+                  <p className="kal-feat-desc">Emails candidates the moment their status changes</p>
+              </div>
+              <div className="kal-feature-item kal-fade-up delay-4-fade">
+                  <div className="kal-feat-num">04</div>
+                  <h3 className="kal-feat-title">Admin Dashboard</h3>
+                  <p className="kal-feat-desc">One clean panel to review, accept, or reject applicants</p>
+              </div>
+              <div className="kal-feature-item kal-fade-up delay-5-fade">
+                  <div className="kal-feat-num">05</div>
+                  <h3 className="kal-feat-title">Role-Based Access</h3>
+                  <p className="kal-feat-desc">Separate secure portals for candidates and admins</p>
+              </div>
+              <div className="kal-feature-item kal-fade-up delay-6-fade">
+                  <div className="kal-feat-num">06</div>
+                  <h3 className="kal-feat-title">Real-Time Analytics</h3>
+                  <p className="kal-feat-desc">Track applications, pipeline health, and hiring velocity</p>
+              </div>
           </div>
-        </div>
       </section>
 
-      {/* 5. PRICING SECTION */}
-      <section className="py-20 px-6" id="pricing">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24 space-y-6">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-[var(--color-heading)] tracking-tight">
-              Simple, transparent <span className="text-[var(--color-accent)]">Value</span>
-            </h2>
-            <p className="text-[var(--color-text-muted)] font-medium text-lg">Choose the path that fits your career goals.</p>
-          </div>
+      {/* PLATFORM PREVIEW MOCKUP */}
+      <PlatformPreviewMockup />
 
-          <div className="grid md:grid-cols-3 gap-10">
-            {[
-              { name: "Starter", price: "0", features: ["AI Match Score", "Unlimited Resume Uploads", "Basic Skill Mapping"], cta: "Start Free" },
-              { name: "Pro", price: "29", features: ["Everything in Starter", "Interview Coaching (5 sessions)", "ATS Auto-Optimization", "Priority Industry Insights"], cta: "Get Pro Access", recommended: true },
-              { name: "Elite", price: "99", features: ["Everything in Pro", "Unlimited Interview Coaching", "Direct Skill Gap Analysis", "1-on-1 Strategy Session"], cta: "Join Elite" }
-            ].map((t, i) => (
-              <div key={i} className={`card-premium relative overflow-hidden flex flex-col p-10 ${t.recommended ? 'scale-105 border-[var(--color-accent)]/40 ring-4 ring-[var(--color-accent)]/5 shadow-2xl' : ''}`}>
-                {t.recommended && (
-                  <div className="absolute top-0 right-0 py-2 px-8 bg-gradient-to-r from-[var(--color-accent)] to-purple-600 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-bl-3xl shadow-lg">
-                    Popular
+      {/* HOW IT WORKS */}
+      <section className="kal-process-section kal-container">
+          <span className="kal-section-label kal-fade-up">03 / THE PROCESS</span>
+          <h2 className="kal-process-headline kal-fade-up">FROM APPLICATION TO HIRED.<br/>FOUR STEPS.</h2>
+
+          <div className="kal-process-steps">
+              <div className="kal-step-row kal-slide-left">
+                  <div className="kal-step-num-col">
+                      <div className="kal-step-num">01</div>
                   </div>
-                )}
-                <div className="mb-10">
-                  <h3 className="text-lg font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-4">{t.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-display font-bold text-[var(--color-heading)] leading-none">${t.price}</span>
-                    <span className="text-sm font-bold text-[var(--color-text-muted)]">/mo</span>
+                  <div className="kal-step-content-col">
+                      <h3 className="kal-step-title">Candidate Applies</h3>
+                      <p className="kal-step-desc">Fills out the form and uploads their resume from the candidate portal.</p>
                   </div>
-                </div>
-                <div className="space-y-6 mb-12 flex-grow">
-                  {t.features.map((f, j) => (
-                    <div key={j} className="flex items-center gap-4">
-                      <div className="w-5 h-5 rounded-full bg-[var(--color-success)]/10 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)]" />
+              </div>
+              <div className="kal-step-row kal-slide-right">
+                  <div className="kal-step-num-col">
+                      <div className="kal-step-num">02</div>
+                  </div>
+                  <div className="kal-step-content-col">
+                      <h3 className="kal-step-title">AI Screens Resume</h3>
+                      <p className="kal-step-desc">The system scores and ranks the resume against the job requirements.</p>
+                  </div>
+              </div>
+              <div className="kal-step-row kal-slide-left">
+                  <div className="kal-step-num-col">
+                      <div className="kal-step-num">03</div>
+                  </div>
+                  <div className="kal-step-content-col">
+                      <h3 className="kal-step-title">Admin Reviews</h3>
+                      <p className="kal-step-desc">The recruiter opens the resume, then accepts or rejects in one click.</p>
+                  </div>
+              </div>
+              <div className="kal-step-row kal-slide-right">
+                  <div className="kal-step-num-col">
+                      <div className="kal-step-num">04</div>
+                  </div>
+                  <div className="kal-step-content-col">
+                      <h3 className="kal-step-title">Interview Booked</h3>
+                      <p className="kal-step-desc">Accepted candidates get an email with their interview time and calendar link.</p>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      {/* STATS */}
+      <section className="kal-stats-section">
+          <div className="kal-container" id="kal-stats-container">
+              <div className="kal-stats-grid">
+                  <div className="kal-stat-item kal-fade-up">
+                      <div className="kal-stat-number-wrapper">
+                          <span>{counts.resumes.toLocaleString()}</span>+
                       </div>
-                      <span className="text-sm font-semibold text-[var(--color-text)]">{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <button className={`w-full py-5 rounded-2xl font-black transition-all duration-500 uppercase tracking-widest text-xs ${t.recommended ? 'btn-primary' : 'bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-heading)] hover:bg-[var(--color-border)]'}`}>
-                  {t.cta}
-                </button>
+                      <span className="kal-stat-label">Resumes Screened</span>
+                  </div>
+                  <div className="kal-stat-item kal-fade-up delay-1-fade">
+                      <div className="kal-stat-number-wrapper">
+                          <span>{counts.companies.toLocaleString()}</span>+
+                      </div>
+                      <span className="kal-stat-label">Companies Using</span>
+                  </div>
+                  <div className="kal-stat-item kal-fade-up delay-2-fade">
+                      <div className="kal-stat-number-wrapper">
+                          <span>{counts.speed}</span>x
+                      </div>
+                      <span className="kal-stat-label">Faster Hiring</span>
+                  </div>
+                  <div className="kal-stat-item kal-fade-up delay-3-fade">
+                      <div className="kal-stat-number-wrapper">
+                          <span>{counts.satisfaction}</span>%
+                      </div>
+                      <span className="kal-stat-label">Satisfaction</span>
+                  </div>
               </div>
-            ))}
+
+              <h3 className="kal-stats-quote kal-fade-up">
+                  "The future of hiring isn't faster humans — it's smarter systems."
+              </h3>
           </div>
-        </div>
       </section>
 
-      {/* 6. FINAL CTA SECTION */}
-      <section className="py-20 px-6 overflow-hidden">
-        <div className="max-w-4xl mx-auto group relative">
-          <div className="glass-premium rounded-[48px] p-16 lg:p-24 relative overflow-hidden text-center space-y-10 shadow-2xl border-[var(--color-border)]">
-            <BorderBeam size={400} duration={15} delay={9} colorFrom="var(--color-accent)" colorTo="#8b5cf6" borderWidth={3} />
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-40 group-hover:opacity-60 transition-opacity duration-700"></div>
-            
-            <div className="relative z-10 space-y-6">
-              <h2 className="text-3xl lg:text-5xl font-display font-bold leading-tight text-[var(--color-heading)] tracking-tight">
-                Ready to land your <br/><span className="text-[var(--color-accent)]">dream job?</span>
-              </h2>
-              <p className="text-lg text-[var(--color-text-muted)] max-w-xl mx-auto font-medium leading-relaxed opacity-80">
-                Join 12,000+ professionals already scaling their careers with HireVision. No credit card required.
-              </p>
-            </div>
-
-            <div className="relative z-10 pt-4">
-              <SparkleButton to="/sign-up" className="px-12 py-5 text-lg">Get Started Free Now</SparkleButton>
-            </div>
+      {/* TESTIMONIALS */}
+      <section className="kal-testimonials-section kal-container">
+          <span className="kal-section-label kal-fade-up">04 / WHAT THEY SAY</span>
+          
+          <div className="kal-testi-wrapper">
+              <div className="kal-testi-row kal-fade-up">
+                  <div className="kal-quote-mark">"</div>
+                  <div className="kal-testi-content">
+                      <p className="kal-testi-quote">Hire Vision cut our hiring time in half. The AI screening alone saved us 20 hours a week.</p>
+                      <p className="kal-testi-author">— Sarah M., HR Manager &middot; TechCorp</p>
+                  </div>
+              </div>
+              <div className="kal-testi-row kal-fade-up">
+                  <div className="kal-quote-mark">"</div>
+                  <div className="kal-testi-content">
+                      <p className="kal-testi-quote">The admin dashboard is the cleanest tool I've used. One click to schedule. Done.</p>
+                      <p className="kal-testi-author">— Raj P., Talent Lead &middot; HireNow</p>
+                  </div>
+              </div>
+              <div className="kal-testi-row kal-fade-up">
+                  <div className="kal-quote-mark">"</div>
+                  <div className="kal-testi-content">
+                      <p className="kal-testi-quote">Our candidates feel respected because they hear back instantly. It is a game-changer.</p>
+                      <p className="kal-testi-author">— Emily T., Senior Recruiter &middot; StaffPro</p>
+                  </div>
+              </div>
           </div>
-        </div>
       </section>
 
-      {/* 7. FOOTER */}
-      <footer className="py-32 px-6 border-t border-[var(--color-border)] bg-[var(--color-surface-2)]/30">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-24">
-          <div className="col-span-2 space-y-8">
-            <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent)] flex items-center justify-center shadow-lg shadow-blue-500/20">
-                 <span className="text-white font-black text-xl">H</span>
+      {/* CTA */}
+      <section className="kal-cta-section kal-container">
+          <h2 className="kal-cta-headline kal-fade-up">
+              READY TO HIRE<br/><span>SMARTER?</span>
+          </h2>
+          <p className="kal-cta-desc kal-fade-up delay-1-fade">
+              Join 500+ companies transforming their recruitment with AI.
+          </p>
+          <div className="kal-cta-buttons kal-fade-up delay-2-fade">
+              <Link to="/admin" className="kal-btn-fill" {...hoverProps}>Post a Job &rarr;</Link>
+              <Link to="/upload-resume" className="kal-btn-outline" {...hoverProps}>Upload Resume &rarr;</Link>
+          </div>
+          <p className="kal-cta-footer kal-fade-up delay-3-fade">
+              No credit card required &middot; Setup in under 10 minutes
+          </p>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="kal-footer kal-container">
+          <div className="kal-footer-top">
+              <div className="kal-footer-left">
+                  <span className="kal-footer-logo">Hire Vision</span>
+                  <span className="kal-footer-tagline">Hire people. Not paperwork.</span>
               </div>
-              <span className="text-2xl font-black text-[var(--color-heading)] font-display tracking-tight">HireVision</span>
-            </Link>
-            <p className="text-[var(--color-text-muted)] text-sm font-medium max-w-xs leading-relaxed opacity-80">
-              AI-driven career intelligence to help modern professionals scale faster and achieve their ultimate potential.
-            </p>
-            <div className="flex items-center gap-5">
-               <a href="#" className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center text-[var(--color-text)] hover:text-[var(--color-accent)] transition-all"><MessageSquare className="w-5 h-5" /></a>
-               <a href="#" className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center text-[var(--color-text)] hover:text-[var(--color-accent)] transition-all"><Shield className="w-5 h-5" /></a>
-               <a href="#" className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center text-[var(--color-text)] hover:text-[var(--color-accent)] transition-all"><BarChart3 className="w-5 h-5" /></a>
-            </div>
+              <div className="kal-footer-right">
+                  <div className="kal-footer-links">
+                      <a href="#kal-features" {...hoverProps}>Features</a>
+                      <a href="#kal-process" {...hoverProps}>How It Works</a>
+                      <Link to="/admin" {...hoverProps}>Post a Job</Link>
+                      <Link to="/upload-resume" {...hoverProps}>Upload Resume</Link>
+                      <Link to="/sign-in" {...hoverProps}>Admin Login</Link>
+                      <a href="#" {...hoverProps}>Privacy Policy</a>
+                      <a href="#" {...hoverProps}>Terms of Service</a>
+                  </div>
+              </div>
           </div>
-          <div>
-            <h5 className="text-[var(--color-heading)] font-black mb-8 text-xs uppercase tracking-[0.2em]">Product</h5>
-            <div className="space-y-5">
-              <Link to="/jobs" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Job Marketplace</Link>
-              <Link to="/prepare-interview" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">AI Interview Coach</Link>
-              <Link to="/pricing" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Pricing</Link>
-            </div>
+          <div className="kal-footer-bottom">
+              &copy; 2024 Hire Vision. All rights reserved.
           </div>
-          <div>
-            <h5 className="text-[var(--color-heading)] font-black mb-8 text-xs uppercase tracking-[0.2em]">Company</h5>
-            <div className="space-y-5">
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">About Us</a>
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text(--color-accent)] text-sm font-bold transition-colors">Research</a>
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Careers</a>
-            </div>
-          </div>
-          <div>
-            <h5 className="text-[var(--color-heading)] font-black mb-8 text-xs uppercase tracking-[0.2em]">Support</h5>
-            <div className="space-y-5">
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Help Center</a>
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Terms of Service</a>
-              <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-sm font-bold transition-colors">Privacy Policy</a>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto pt-10 border-t border-[var(--color-border)] flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">&copy; 2026 HireVision Intelligence Inc. Engineered for the future of talent.</p>
-          <div className="flex items-center gap-3 text-xs font-bold text-[var(--color-text-muted)]">
-            <span>Built with precision</span>
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></div>
-            <span>Powered by Llama</span>
-          </div>
-        </div>
       </footer>
+
+      {/* SCOPED CSS FOR KALEIDA THEME */}
+      <style>{`
+        /* Core Reset & Variables scoped to .kal-theme */
+        .kal-theme {
+            --bg: #000000;
+            --black: #ffffff;
+            --gray-mid: #a3a3a3;
+            --gray-light: #333333;
+            --rule: #333333;
+            --accent: #c8f135;
+            --font-display: 'Jost', sans-serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --section-pad: clamp(80px, 12vw, 160px);
+            --container: min(1200px, 90vw);
+            
+            background-color: var(--bg);
+            color: var(--black);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        .kal-theme * {
+            cursor: none !important;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Custom Cursor */
+        .kal-cursor-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--black);
+            border-radius: 50%;
+            position: fixed;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 99999;
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
+        .kal-cursor-dot.kal-hover-state {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Layout */
+        .kal-container {
+            width: var(--container);
+            margin: 0 auto;
+        }
+        
+        .kal-hr {
+            width: 100%; height: 1px; background-color: var(--rule);
+        }
+        .kal-section-label {
+            font-family: var(--font-body); font-weight: 300; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            color: var(--gray-mid); margin-bottom: 2rem; display: block;
+        }
+        .no-margin { margin-bottom: 0; }
+        
+        /* Animations */
+        .kal-fade-up {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1), transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+            will-change: opacity, transform;
+        }
+        .kal-slide-left {
+            opacity: 0; transform: translateX(-50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .kal-slide-right {
+            opacity: 0; transform: translateX(50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        
+        .kal-in-view {
+            opacity: 1; transform: translateY(0); transform: translateX(0);
+        }
+        
+        .delay-1 { animation-delay: 0.1s !important; }
+        .delay-2 { animation-delay: 0.2s !important; }
+        .delay-3 { animation-delay: 0.3s !important; }
+        
+        .delay-1-fade { transition-delay: 0.1s; }
+        .delay-2-fade { transition-delay: 0.2s; }
+        .delay-3-fade { transition-delay: 0.3s; }
+        .delay-4-fade { transition-delay: 0.4s; }
+        .delay-5-fade { transition-delay: 0.5s; }
+        .delay-6-fade { transition-delay: 0.6s; }
+        
+        /* Hero */
+        .kal-hero-wrapper {
+            position: relative;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            margin-right: calc(-50vw + 50%);
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg);
+        }
+        .kal-hero-bg-video {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1; opacity: 0.3;
+        }
+        .kal-hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, var(--bg));
+            z-index: 2;
+        }
+        .kal-hero {
+            height: 100%; display: flex; flex-direction: column;
+            justify-content: center; position: relative;
+            z-index: 3;
+        }
+        .kal-hero-top-label {
+            font-family: var(--font-body); font-weight: 300; font-size: 12px;
+            color: var(--gray-mid); letter-spacing: 0.2em; position: absolute;
+            top: 120px; left: max(5vw, calc((100vw - 1200px) / 2));
+        }
+        .kal-hero-title-container { margin-top: 40px; }
+        .kal-hero-title {
+            font-family: var(--font-display); 
+            font-size: clamp(48px, 9vw, 130px);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            line-height: 0.95; color: var(--black);
+        }
+        .kal-hero-title span {
+            display: inline-block; opacity: 0; transform: translateY(20px);
+            animation: kalWordFadeUp 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+        @keyframes kalWordFadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .kal-line-2 {
+            font-weight: 200; font-style: normal; color: #ffffff; display: block;
+            text-transform: uppercase;
+        }
+        .kal-hero-body {
+            font-family: var(--font-body); font-weight: 300; font-size: 18px;
+            color: var(--gray-mid); max-width: 480px; margin-top: 40px; margin-bottom: 48px;
+        }
+        .kal-hero-links {
+            display: flex; gap: 40px; align-items: center;
+        }
+        .kal-hero-link-primary {
+            font-family: var(--font-body); font-weight: 500; font-size: 16px;
+            color: var(--bg); text-decoration: none; position: relative;
+        }
+        .kal-hero-link-primary::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 100%; height: 1px; background-color: var(--bg); transition: 0.3s;
+        }
+        .kal-hero-link-primary:hover::after {
+            background-color: var(--accent); height: 2px;
+        }
+        .kal-hero-link-secondary {
+            font-family: var(--font-body); font-weight: 400; font-size: 16px;
+            color: var(--gray-mid); text-decoration: none; transition: 0.3s ease;
+        }
+        .kal-hero-link-secondary:hover { color: var(--bg); }
+        
+        .kal-rotating-badge {
+            position: absolute; right: max(5vw, calc((100vw - 1200px) / 2));
+            bottom: 60px; width: 120px; height: 120px;
+            animation: kalRotateText 20s linear infinite;
+        }
+        @keyframes kalRotateText {
+            from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+        }
+        .kal-hero-bottom-rule {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 1px; background-color: var(--rule);
+        }
+        
+        /* Marquee */
+        .kal-marquee {
+            width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%);
+            background-color: #0d0d0d; height: 48px; display: flex;
+            align-items: center; overflow: hidden; white-space: nowrap; border-bottom: 1px solid var(--rule);
+        }
+        .kal-marquee-inner {
+            display: flex; animation: kalMarqueeScroll 30s linear infinite;
+        }
+        .kal-marquee-item {
+            font-family: var(--font-body); font-weight: 500; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.15em; color: var(--gray-mid);
+            padding-right: 48px; display: flex; align-items: center; gap: 48px;
+        }
+        .kal-marquee-item::after {
+            content: '•'; color: var(--accent); font-size: 20px;
+        }
+        @keyframes kalMarqueeScroll {
+            0% { transform: translateX(0); } 100% { transform: translateX(-50%); }
+        }
+        
+        /* Statement Section */
+        .kal-statement-section {
+            padding: var(--section-pad) 0; min-height: 80vh;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .kal-statement-quote {
+            font-family: var(--font-display); font-weight: 300;
+            font-size: clamp(32px, 5vw, 64px); line-height: 1.1; color: var(--black);
+            max-width: 900px; text-align: center; margin: 0 auto 120px auto;
+        }
+        .kal-statement-bottom {
+            display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px;
+        }
+        .kal-statement-p {
+            font-family: var(--font-body); font-weight: 300; font-size: 16px;
+            color: var(--gray-mid); max-width: 480px;
+        }
+        
+        /* Features */
+        .kal-features-section { padding: var(--section-pad) 0; }
+        .kal-features-headline {
+            font-family: var(--font-display); font-weight: 300;
+            font-size: clamp(40px, 6vw, 72px); line-height: 1; color: var(--black);
+            margin-bottom: 120px; text-transform: uppercase; letter-spacing: -0.01em;
+        }
+        .kal-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 120px 60px; }
+        .kal-feature-item { display: flex; flex-direction: column; }
+        .kal-feat-num {
+            font-family: var(--font-display); font-weight: 200; font-size: 80px;
+            color: var(--gray-light); line-height: 1; margin-bottom: 24px;
+        }
+        .kal-feat-title {
+            font-family: var(--font-body); font-weight: 500; font-size: 18px; color: var(--black); margin-bottom: 8px;
+        }
+        .kal-feat-desc {
+            font-family: var(--font-body); font-weight: 300; font-size: 14px; color: var(--gray-mid); line-height: 1.6;
+        }
+        
+        /* Process */
+        .kal-process-section { padding: var(--section-pad) 0; padding-bottom: 0; }
+        .kal-process-headline {
+            font-family: var(--font-display); font-weight: 300;
+            font-size: clamp(40px, 6vw, 72px); line-height: 1.1; color: var(--black); margin-bottom: 80px;
+            text-transform: uppercase;
+        }
+        .kal-step-row {
+            display: flex; align-items: center; padding: 60px 0; border-bottom: 1px solid var(--rule);
+        }
+        .kal-step-row:first-child { border-top: 1px solid var(--rule); }
+        .kal-step-num-col { flex: 0 0 40%; }
+        .kal-step-num {
+            font-family: var(--font-display); font-weight: 200;
+            font-size: 120px; color: var(--gray-light); line-height: 1;
+        }
+        .kal-step-content-col { flex: 0 0 60%; }
+        .kal-step-title {
+            font-family: var(--font-body); font-weight: 500; font-size: 24px; color: var(--black); margin-bottom: 16px;
+        }
+        .kal-step-desc {
+            font-family: var(--font-body); font-weight: 300; font-size: 15px; color: var(--gray-mid); max-width: 480px; line-height: 1.6;
+        }
+        
+        /* Stats */
+        .kal-stats-section {
+            width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%);
+            padding: var(--section-pad) 0; border-top: 1px solid var(--rule); color: var(--black); margin-top: var(--section-pad);
+        }
+        .kal-stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--rule); padding-bottom: 80px;
+        }
+        .kal-stat-item {
+            border-right: 1px solid var(--rule); padding: 0 40px; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .kal-stat-item:first-child { padding-left: 0; }
+        .kal-stat-item:last-child { border-right: none; padding-right: 0;}
+        .kal-stat-number-wrapper {
+            font-family: var(--font-display); font-weight: 200; font-size: clamp(48px, 8vw, 96px); line-height: 1; margin-bottom: 16px; display: flex; align-items: baseline;
+        }
+        .kal-stat-label {
+            font-family: var(--font-body); font-weight: 300; font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray-mid);
+        }
+        .kal-stats-quote {
+            text-align: center; font-family: var(--font-display); font-weight: 300; font-size: clamp(24px, 4vw, 40px); margin-top: 80px; max-width: 900px; margin-inline: auto; color: var(--black);
+        }
+        
+        /* Testimonials */
+        .kal-testimonials-section { padding: var(--section-pad) 0; }
+        .kal-testi-row {
+            padding: 80px 0; border-bottom: 1px solid var(--rule); display: flex; align-items: flex-start; gap: 40px;
+        }
+        .kal-testi-row:first-child { border-top: 1px solid var(--rule); }
+        .kal-quote-mark {
+            font-family: var(--font-display); font-weight: 200; font-size: 120px; color: var(--accent); line-height: 0.6; margin-top: 20px;
+        }
+        .kal-testi-content { flex-grow: 1; }
+        .kal-testi-quote {
+            font-family: var(--font-display); font-weight: 300; font-size: clamp(20px, 3vw, 32px); color: var(--black); line-height: 1.4; max-width: 900px; margin-bottom: 32px;
+        }
+        .kal-testi-author {
+            font-family: var(--font-body); font-weight: 300; font-size: 13px; text-transform: uppercase; color: var(--gray-mid);
+        }
+        
+        /* CTA */
+        .kal-cta-section {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .kal-cta-headline {
+            font-family: var(--font-display); font-weight: 300; text-transform: uppercase; font-size: clamp(48px, 10vw, 120px); line-height: 1; color: var(--black); margin-bottom: 32px; letter-spacing: -0.01em;
+        }
+        .kal-cta-headline span { font-weight: 200; display: block; }
+        .kal-cta-desc {
+            font-family: var(--font-body); font-weight: 300; font-size: 16px; color: var(--gray-mid); margin-bottom: 48px;
+        }
+        .kal-cta-buttons { display: flex; gap: 24px; justify-content: center; margin-bottom: 32px; }
+        .kal-btn-fill {
+            font-family: var(--font-body); font-weight: 400; font-size: 15px; color: #000000; background-color: var(--black); padding: 16px 36px; border-radius: 999px; text-decoration: none; border: 1px solid var(--black); transition: all 0.3s ease; display: inline-block;
+        }
+        .kal-btn-fill:hover { background-color: var(--accent); border-color: var(--accent); color: #000000; }
+        .kal-btn-outline {
+            font-family: var(--font-body); font-weight: 400; font-size: 15px; color: var(--black); background-color: transparent; padding: 16px 36px; border-radius: 999px; text-decoration: none; border: 1px solid var(--black); transition: all 0.3s ease; display: inline-block;
+        }
+        .kal-btn-outline:hover { background-color: var(--black); color: #000000; }
+        .kal-cta-footer { font-family: var(--font-body); font-weight: 300; font-size: 13px; color: var(--gray-mid); }
+        
+        /* Footer */
+        .kal-footer { padding: 80px 0 40px 0; border-top: 1px solid var(--rule); }
+        .kal-footer-top { display: flex; justify-content: space-between; margin-bottom: 120px; }
+        .kal-footer-logo { font-family: var(--font-body); font-weight: 500; font-size: 24px; color: var(--black); margin-bottom: 16px; display: block; }
+        .kal-footer-tagline { font-family: var(--font-display); font-weight: 300; font-size: 24px; color: var(--black); }
+        .kal-footer-links { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 60px; }
+        .kal-footer-links a { font-family: var(--font-body); font-weight: 300; font-size: 14px; color: var(--gray-mid); text-decoration: none; transition: color 0.3s ease; }
+        .kal-footer-links a:hover { color: var(--black); }
+        .kal-footer-bottom { text-align: center; font-family: var(--font-body); font-weight: 300; font-size: 12px; color: var(--gray-mid); }
+        
+        @media (max-width: 768px) {
+            .kal-hero-title { padding-top: 60px; }
+            .desktop-only { display: none; }
+            .kal-hero-links { flex-direction: column; align-items: flex-start; gap: 24px; }
+            .kal-statement-bottom { flex-direction: column; align-items: flex-start; gap: 40px; }
+            .kal-statement-quote { margin-bottom: 60px; text-align: left;}
+            .kal-features-grid { grid-template-columns: 1fr; gap: 80px; }
+            .kal-step-row { flex-direction: column; align-items: flex-start; padding: 40px 0; }
+            .kal-step-num-col { margin-bottom: 24px; }
+            .kal-step-num { font-size: 80px; }
+            .kal-stats-grid { grid-template-columns: 1fr; gap: 40px 0; }
+            .kal-stat-item { border-right: none; padding: 0; }
+            .kal-testi-row { flex-direction: column; gap: 20px; padding: 60px 0;}
+            .kal-quote-mark { font-size: 80px; }
+            .kal-cta-buttons { flex-direction: column; width: 100%; padding: 0 24px; }
+            .kal-btn-fill, .kal-btn-outline { width: 100%; }
+            .kal-footer-top { flex-direction: column; gap: 60px; }
+        }
+      `}</style>
     </div>
   );
 }

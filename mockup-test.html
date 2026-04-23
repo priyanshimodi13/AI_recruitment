@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Showcase Preview</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        /* --- SECTION BACKGROUND --- */
+        .mockup-showcase-section {
+          background-color: #f0f0ef;
+          width: 100%;
+          padding: 100px 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          box-sizing: border-box;
+          perspective: 1500px;
+        }
+
+        /* --- LABEL --- */
+        .mockup-label {
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #666;
+          margin-bottom: 40px;
+          text-align: center;
+        }
+
+        /* --- ANIMATION 1: ENTRY REVEAL --- */
+        .mockup-reveal-wrapper {
+          width: 100%;
+          max-width: 1000px;
+          display: flex;
+          justify-content: center;
+          opacity: 0;
+          transform: perspective(1000px) rotateX(10deg) translateY(60px);
+          transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+        }
+        .mockup-reveal-wrapper.is-visible {
+          opacity: 1;
+          transform: perspective(1000px) rotateX(0deg) translateY(0);
+        }
+
+        /* --- ANIMATION 2: FLOATING --- */
+        @keyframes deviceFloat {
+          0%, 100% { transform: translateY(0px); }
+          50%      { transform: translateY(-14px); }
+        }
+        .mockup-float-wrapper {
+          width: 100%;
+          animation: deviceFloat 5s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        .mockup-float-wrapper.paused {
+          animation-play-state: paused;
+        }
+
+        /* --- ANIMATION 3: 3D TILT FRAME --- */
+        .mockup-tilt-wrapper {
+          transform: perspective(1000px) rotateX(4deg) rotateY(-6deg);
+          transition: transform 0.1s ease; 
+          transform-style: preserve-3d;
+          
+          width: 100%;
+          background: #fff;
+          border-radius: 18px;
+          border: 1.5px solid #d0d0d0;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          aspect-ratio: 16 / 10;
+        }
+
+        /* --- BROWSER CHROME --- */
+        .browser-chrome {
+          height: 44px;
+          background-color: #f8f8f8;
+          border-bottom: 1.5px solid #eaeaea;
+          display: flex;
+          align-items: center;
+          padding: 0 16px;
+          position: relative;
+          flex-shrink: 0;
+        }
+        .chrome-dots {
+          display: flex;
+          gap: 8px;
+        }
+        .dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+        .dot.red { background-color: #ff5f56; }
+        .dot.yellow { background-color: #ffbd2e; }
+        .dot.green { background-color: #27c93f; }
+        .url-bar {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 35%;
+          height: 24px;
+          background-color: #eaeaea;
+          border-radius: 12px;
+        }
+
+        /* --- SCREEN VIDEO CONTENT --- */
+        .screen-content {
+          flex: 1;
+          background-color: #000;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        /* --- ANIMATED UI INSIDE MOCKUP (RECRUITMENT SPECIFIC) --- */
+        .ui-scroll-container {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background-color: #fafafa;
+          position: relative;
+          font-family: inherit;
+        }
+
+        .ui-scroller {
+          width: 100%;
+          padding: 24px 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          animation: scrollMockup 20s linear infinite;
+        }
+
+        @keyframes scrollMockup {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+
+        .ui-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #eaeaea;
+        }
+
+        .ui-logo {
+          font-weight: 800;
+          font-size: 16px;
+          color: #111;
+          letter-spacing: -0.5px;
+        }
+        .ui-logo span {
+          color: #c8f135;
+          background: #111;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-left: 2px;
+        }
+
+        .ui-nav {
+          display: flex;
+          gap: 16px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #666;
+        }
+        .ui-nav span.active { color: #111; }
+
+        .ui-stats-row {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 8px;
+        }
+
+        .ui-stat-box {
+          flex: 1;
+          background: #fff;
+          border: 1px solid #eaeaea;
+          border-radius: 8px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .ui-stat-num { font-size: 20px; font-weight: 800; color: #111; line-height: 1; margin-bottom: 4px;}
+        .ui-stat-label { font-size: 10px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .ui-card {
+          background: #fff;
+          border: 1px solid #eaeaea;
+          border-radius: 10px;
+          padding: 16px;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+          border-left: 4px solid transparent;
+        }
+        
+        .ui-card.top-match {
+          border-left-color: #c8f135;
+        }
+
+        .ui-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 14px;
+          color: #333;
+          flex-shrink: 0;
+        }
+        .ui-avatar.a1 { background: #fee2e2; color: #991b1b; }
+        .ui-avatar.a2 { background: #dcfce7; color: #166534; }
+        .ui-avatar.a3 { background: #e0e7ff; color: #3730a3; }
+        .ui-avatar.a4 { background: #fef9c3; color: #854d0e; }
+
+        .ui-card-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .ui-name-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .ui-name { font-size: 14px; font-weight: 700; color: #111; }
+        .ui-badge { font-size: 10px; font-weight: 700; background: #111; color: #c8f135; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;}
+        .ui-badge.sec { background: #f4f4f4; color: #666; font-weight: 600;}
+
+        .ui-role { font-size: 12px; color: #555; }
+        
+        .ui-skills { display: flex; gap: 6px; margin-top: 6px; }
+        .ui-skill { font-size: 10px; background: #f8f8f8; border: 1px solid #eaeaea; padding: 3px 8px; border-radius: 4px; color: #666; font-weight: 500;}
+    </style>
+</head>
+<body>
+
+    <!-- Test spacing above -->
+    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #e0e0e0;">
+        Scroll Down
+    </div>
+
+    <!-- The actual section -->
+    <section class="mockup-showcase-section" id="mockup-section">
+      <div class="mockup-label">Platform Preview</div>
+
+      <div class="mockup-reveal-wrapper" id="mockup-reveal">
+        <div class="mockup-float-wrapper" id="mockup-float">
+          <div class="mockup-tilt-wrapper" id="mockup-tilt">
+            <div class="browser-chrome">
+              <div class="chrome-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <div class="url-bar"></div>
+            </div>
+            <div class="screen-content">
+              <div class="ui-scroll-container">
+                <div class="ui-scroller">
+                  <!-- First Set -->
+                  <div class="ui-header">
+                    <div class="ui-logo">Recruit<span>AI</span></div>
+                    <div class="ui-nav"><span class="active">Candidates</span><span>Jobs</span><span>Interviews</span></div>
+                  </div>
+                  <div class="ui-stats-row">
+                    <div class="ui-stat-box"><div class="ui-stat-num">4,285</div><div class="ui-stat-label">Resumes Scanned</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">34</div><div class="ui-stat-label">Interviews Booked</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">98%</div><div class="ui-stat-label">AI Accuracy</div></div>
+                  </div>
+                  
+                  <div class="ui-card top-match">
+                    <div class="ui-avatar a2">AK</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Arjun Kumar</div><div class="ui-badge">98% Match</div></div>
+                      <div class="ui-role">Senior React Developer</div>
+                      <div class="ui-skills"><span class="ui-skill">React</span><span class="ui-skill">Node.js</span><span class="ui-skill">AI Ranked #1</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card">
+                    <div class="ui-avatar a3">ER</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Elena Rodriguez</div><div class="ui-badge sec">In Review</div></div>
+                      <div class="ui-role">Full-Stack Engineer</div>
+                      <div class="ui-skills"><span class="ui-skill">TypeScript</span><span class="ui-skill">AWS</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card">
+                    <div class="ui-avatar a1">MC</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Marcus Chen</div><div class="ui-badge sec">Interviewing</div></div>
+                      <div class="ui-role">Backend Developer</div>
+                      <div class="ui-skills"><span class="ui-skill">Python</span><span class="ui-skill">MongoDB</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card top-match">
+                    <div class="ui-avatar a4">SJ</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Sarah Jenkins</div><div class="ui-badge">95% Match</div></div>
+                      <div class="ui-role">UI/UX Designer</div>
+                      <div class="ui-skills"><span class="ui-skill">Figma</span><span class="ui-skill">Prototyping</span></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Duplicated Set for infinite continuous scroll -->
+                  <div class="ui-header" style="margin-top: 16px;">
+                    <div class="ui-logo">Recruit<span>AI</span></div>
+                    <div class="ui-nav"><span class="active">Candidates</span><span>Jobs</span><span>Interviews</span></div>
+                  </div>
+                  <div class="ui-stats-row">
+                    <div class="ui-stat-box"><div class="ui-stat-num">4,285</div><div class="ui-stat-label">Resumes Scanned</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">34</div><div class="ui-stat-label">Interviews Booked</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">98%</div><div class="ui-stat-label">AI Accuracy</div></div>
+                  </div>
+                  
+                  <div class="ui-card top-match">
+                    <div class="ui-avatar a2">AK</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Arjun Kumar</div><div class="ui-badge">98% Match</div></div>
+                      <div class="ui-role">Senior React Developer</div>
+                      <div class="ui-skills"><span class="ui-skill">React</span><span class="ui-skill">Node.js</span><span class="ui-skill">AI Ranked #1</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card">
+                    <div class="ui-avatar a3">ER</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Elena Rodriguez</div><div class="ui-badge sec">In Review</div></div>
+                      <div class="ui-role">Full-Stack Engineer</div>
+                      <div class="ui-skills"><span class="ui-skill">TypeScript</span><span class="ui-skill">AWS</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card">
+                    <div class="ui-avatar a1">MC</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Marcus Chen</div><div class="ui-badge sec">Interviewing</div></div>
+                      <div class="ui-role">Backend Developer</div>
+                      <div class="ui-skills"><span class="ui-skill">Python</span><span class="ui-skill">MongoDB</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="ui-card top-match">
+                    <div class="ui-avatar a4">SJ</div>
+                    <div class="ui-card-content">
+                      <div class="ui-name-row"><div class="ui-name">Sarah Jenkins</div><div class="ui-badge">95% Match</div></div>
+                      <div class="ui-role">UI/UX Designer</div>
+                      <div class="ui-skills"><span class="ui-skill">Figma</span><span class="ui-skill">Prototyping</span></div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const section = document.getElementById('mockup-section');
+        const tiltWrapper = document.getElementById('mockup-tilt');
+        const floatWrapper = document.getElementById('mockup-float');
+        const revealWrapper = document.getElementById('mockup-reveal');
+        
+        let isHovering = false;
+
+        // --- 1. MOUSE FOLLOW 3D TILT ---
+        if (section && tiltWrapper && floatWrapper) {
+          section.addEventListener('mousemove', (e) => {
+            if (!isHovering) {
+              isHovering = true;
+              floatWrapper.classList.add('paused');
+              tiltWrapper.style.transition = 'transform 0.1s ease'; 
+            }
+            
+            const rect = section.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const xNorm = (x / rect.width) * 2 - 1;
+            const yNorm = (y / rect.height) * 2 - 1;
+            
+            const rotX = yNorm * -6;
+            const rotY = xNorm * 8;
+            
+            tiltWrapper.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+          });
+
+          section.addEventListener('mouseleave', () => {
+            isHovering = false;
+            floatWrapper.classList.remove('paused');
+            tiltWrapper.style.transition = 'transform 0.5s ease-out';
+            tiltWrapper.style.transform = `perspective(1000px) rotateX(4deg) rotateY(-6deg)`;
+          });
+        }
+
+        // --- 2. SCROLL ENTRANCE OBSERVER ---
+        if (revealWrapper) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { 
+            threshold: 0.15
+          });
+
+          observer.observe(revealWrapper);
+        }
+      });
+    </script>
+</body>
+</html>

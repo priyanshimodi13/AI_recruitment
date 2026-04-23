@@ -1,10 +1,80 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama2';
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
 
 /**
  * Service to handle AI operations using Ollama
  */
 class AIService {
+    /**
+     * Generates a JSON response using Mistral API with a fallback to Ollama.
+     * @param {string} prompt - The AI prompt
+     * @returns {Promise<any>} Parsed JSON object
+     */
+    static async _generateJsonWithLLM(prompt) {
+        if (MISTRAL_API_KEY) {
+            try {
+                const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${MISTRAL_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'mistral-small-latest',
+                        messages: [{ role: 'user', content: prompt }],
+                        response_format: { type: "json_object" }
+                    })
+                });
+
+                if (mistralResponse.ok) {
+                    const data = await mistralResponse.json();
+                    let content = data.choices[0].message.content;
+                    
+                    // Parse JSON safely
+                    if (content.includes('```')) {
+                        const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                        if (match && match[1]) {
+                            content = match[1];
+                        }
+                    }
+                    return JSON.parse(content);
+                } else {
+                    console.warn(`Mistral API error (${mistralResponse.status}): ${mistralResponse.statusText}. Falling back to Ollama.`);
+                }
+            } catch (error) {
+                console.warn('Mistral API Exception:', error.message, '. Falling back to Ollama.');
+            }
+        }
+
+        // Fallback to Ollama
+        const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: OLLAMA_MODEL,
+                prompt: prompt,
+                stream: false,
+                format: 'json'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        let content = data.response;
+        if (content.includes('```')) {
+            const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (match && match[1]) {
+                content = match[1];
+            }
+        }
+        return JSON.parse(content);
+    }
+
     /**
      * Generates a match score and feedback for a resume against a job description.
      * @param {string} resumeText - The extracted text from the resume
@@ -32,23 +102,7 @@ class AIService {
                 ${resumeText}
             `;
 
-            const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: OLLAMA_MODEL,
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json'
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Ollama API error: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            const result = JSON.parse(data.response);
+            const result = await AIService._generateJsonWithLLM(prompt);
 
             return {
                 score: result.score || 0,
@@ -95,21 +149,7 @@ class AIService {
                 }
             `;
 
-            const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: OLLAMA_MODEL,
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json'
-                })
-            });
-
-            if (!response.ok) throw new Error('Ollama connection failed');
-
-            const data = await response.json();
-            const result = JSON.parse(data.response);
+            const result = await AIService._generateJsonWithLLM(prompt);
 
             return {
                 extractedSkills: result.extracted || [],
@@ -126,87 +166,276 @@ class AIService {
         }
     }
 
+    // ─── Master Skills Database ────────────────────────────────────────────────
+    // Organized by category for comprehensive keyword-based extraction.
+    static SKILLS_DATABASE = {
+        // Programming Languages
+        languages: [
+            'Java', 'Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'C',
+            'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Dart', 'PHP', 'Scala',
+            'Perl', 'R', 'MATLAB', 'Lua', 'Haskell', 'Elixir', 'Clojure',
+            'Objective-C', 'Shell', 'Bash', 'PowerShell', 'Assembly',
+            'Groovy', 'Julia', 'F#', 'COBOL', 'Fortran', 'Solidity',
+        ],
+        // Web Frontend
+        webFrontend: [
+            'HTML', 'CSS', 'React', 'React.js', 'Angular', 'Vue.js', 'Vue',
+            'Svelte', 'Next.js', 'Nuxt.js', 'Gatsby', 'jQuery', 'Bootstrap',
+            'Tailwind CSS', 'Material UI', 'Chakra UI', 'SASS', 'SCSS', 'LESS',
+            'Webpack', 'Vite', 'Babel', 'Redux', 'MobX', 'Zustand',
+            'Styled Components', 'Emotion', 'Three.js', 'D3.js',
+        ],
+        // Web Backend & Frameworks
+        webBackend: [
+            'Node.js', 'Express.js', 'Express', 'Django', 'Flask', 'FastAPI',
+            'Spring', 'Spring Boot', 'Laravel', 'Ruby on Rails', 'Rails',
+            'ASP.NET', '.NET', 'NestJS', 'Koa', 'Hapi', 'Gin', 'Echo',
+            'Phoenix', 'Strapi', 'GraphQL', 'REST', 'REST API', 'REST APIs',
+            'gRPC', 'WebSocket', 'Socket.io',
+        ],
+        // Full-Stack Labels
+        fullStack: [
+            'MERN Stack', 'MERN', 'MEAN Stack', 'MEAN', 'LAMP', 'JAMstack',
+            'Full Stack', 'Full-Stack',
+        ],
+        // Mobile Development
+        mobile: [
+            'Flutter', 'React Native', 'SwiftUI', 'Jetpack Compose',
+            'Xamarin', 'Ionic', 'Cordova', 'Android', 'iOS',
+            'Android Studio', 'Xcode',
+        ],
+        // Databases
+        databases: [
+            'MySQL', 'PostgreSQL', 'MongoDB', 'SQLite', 'Oracle',
+            'SQL Server', 'MariaDB', 'Redis', 'Cassandra', 'DynamoDB',
+            'Firebase', 'Firestore', 'Cloud Firestore', 'Supabase',
+            'CouchDB', 'Neo4j', 'Elasticsearch', 'SQL', 'NoSQL', 'RDBMS',
+            'PL/SQL', 'T-SQL',
+        ],
+        // Cloud & DevOps
+        cloudDevOps: [
+            'AWS', 'Azure', 'Google Cloud', 'GCP', 'Heroku', 'Vercel',
+            'Netlify', 'DigitalOcean', 'Docker', 'Kubernetes', 'Jenkins',
+            'CI/CD', 'Terraform', 'Ansible', 'Nginx', 'Apache',
+            'Linux', 'Ubuntu', 'CentOS', 'GitHub Actions', 'GitLab CI',
+            'CircleCI', 'Travis CI', 'CloudFormation', 'Serverless',
+            'Lambda', 'EC2', 'S3',
+        ],
+        // AI / ML / Data Science
+        aiMl: [
+            'TensorFlow', 'PyTorch', 'Keras', 'Scikit-learn', 'OpenCV',
+            'Pandas', 'NumPy', 'SciPy', 'Matplotlib', 'Seaborn',
+            'Machine Learning', 'Deep Learning', 'NLP',
+            'Natural Language Processing', 'Computer Vision',
+            'Neural Networks', 'Hugging Face', 'LangChain', 'LLM',
+            'Generative AI', 'Data Mining', 'Data Analysis', 'Data Analytics',
+            'Big Data', 'Hadoop', 'Spark', 'Apache Spark', 'Jupyter',
+            'NLTK', 'SpaCy',
+        ],
+        // Tools & Platforms
+        tools: [
+            'Git', 'GitHub', 'GitLab', 'Bitbucket', 'VS Code',
+            'Visual Studio', 'IntelliJ', 'Eclipse', 'PyCharm', 'Postman',
+            'Jira', 'Confluence', 'Slack', 'Figma', 'Adobe XD', 'Sketch',
+            'PowerBI', 'Power BI', 'Tableau', 'Grafana', 'Kibana',
+            'Swagger', 'npm', 'Yarn', 'pip', 'Maven', 'Gradle',
+            'WordPress', 'Shopify', 'Magento', 'Salesforce',
+        ],
+        // Testing
+        testing: [
+            'Jest', 'Mocha', 'Chai', 'Cypress', 'Selenium', 'Playwright',
+            'JUnit', 'TestNG', 'Pytest', 'Enzyme', 'React Testing Library',
+            'Puppeteer', 'Appium', 'Postman',
+        ],
+        // Security & Networking
+        security: [
+            'Cybersecurity', 'Cyber Security', 'Penetration Testing',
+            'OWASP', 'SSL', 'TLS', 'OAuth', 'JWT', 'SAML', 'SSO',
+            'Firewall', 'VPN', 'Encryption', 'Blockchain',
+            'Web Security', 'Website Security', 'Infrastructure Security',
+        ],
+        // Methodologies
+        methodologies: [
+            'Agile', 'Scrum', 'Kanban', 'DevOps', 'TDD', 'BDD',
+            'Microservices', 'Monorepo', 'OOP', 'MVC', 'MVVM',
+            'Design Patterns', 'System Design', 'API Design',
+            'Data Structures', 'Algorithms',
+        ],
+    };
+
+    // Words/phrases to EXCLUDE (soft skills, spoken languages, non-tech)
+    static EXCLUDE_PATTERNS = [
+        'communication', 'teamwork', 'leadership', 'management',
+        'time management', 'team collaboration', 'negotiation',
+        'problem solving', 'critical thinking', 'hindi', 'english',
+        'gujarati', 'gujrati', 'french', 'spanish', 'german',
+        'business development', 'sales', 'accounting', 'marketing',
+        'client relationship',
+    ];
+
     /**
-     * Extracts ONLY the programming skills from a resume text.
+     * Extracts ONLY the technical/programming skills from resume text
+     * using a deterministic keyword-matching approach.
      * @param {string} resumeText - The extracted text from the resume
-     * @returns {Promise<string[]>} Array of skills
+     * @returns {Promise<string[]>} Array of unique skills found
      */
-    static async extractSkills(resumeText) {
+    static async extractSkillsDeterministic(resumeText) {
         try {
-            const prompt = `
-                You are a precise technical skill extractor AI.
-                ### TASK
-                Extract ONLY technical programming skills from the resume text. 
-                
-                ### CATEGORIES TO EXTRACT:
-                1. Programming Languages (Python, JavaScript, C++, etc.)
-                2. Frameworks & Libraries (React, Node.js, TensorFlow, etc.)
-                3. Databases (MongoDB, PostgreSQL, MySQL, etc.)
-                4. Developer Tools & Infrastructure (Git, Docker, AWS, Kubernetes, Jenkins, etc.)
-
-                ### CATEGORIES TO ABSOLUTELY IGNORE:
-                - Soft Skills (Communication, Teamwork, Leadership, Management)
-                - General Software (MS Office, Excel, PowerPoint)
-                - Non-technical skills (Marketing, Sales, Accounting)
-
-                ### EXAMPLES:
-                Input: "I am a leader with 5 years in Python and React. Expert in communication and team management. Also used Git and MongoDB."
-                Output: {"programming_skills": ["Python", "React", "Git", "MongoDB"]}
-                
-                Input: "Marketing specialist with some HTML/CSS knowledge. Expert in SEO and Excel."
-                Output: {"programming_skills": ["HTML", "CSS"]}
-
-                ### RESUME TEXT:
-                ${resumeText}
-
-                ### OUTPUT FORMAT (STRICT JSON):
-                {
-                  "programming_skills": ["Skill1", "Skill2"]
-                }
-            `;
-
-            const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: OLLAMA_MODEL,
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json'
-                })
-            });
-
-            if (!response.ok) throw new Error('Ollama connection failed');
-
-            const data = await response.json();
-            console.log("--- Ollama Raw Response (Extract Skills) ---");
-            console.log(data.response);
-            console.log("--------------------------------------------");
-            
-            let result;
-            try {
-                result = JSON.parse(data.response);
-            } catch (e) {
-                console.error("Failed to parse Ollama JSON:", e);
+            if (!resumeText || typeof resumeText !== 'string') {
+                console.warn('extractSkills: No resume text provided.');
                 return [];
             }
 
-            if (Array.isArray(result)) {
-                return result;
-            } else if (result && result.programming_skills && Array.isArray(result.programming_skills)) {
-                return result.programming_skills;
-            } else if (result && result.skills && Array.isArray(result.skills)) {
-                return result.skills;
-            } else if (typeof result === 'object') {
-                const lists = Object.values(result).find(val => Array.isArray(val));
-                return lists || [];
+            const textLower = resumeText.toLowerCase();
+            const foundSkills = new Set();
+
+            // Flatten all skill categories into one list
+            const allSkills = Object.values(AIService.SKILLS_DATABASE).flat();
+
+            for (const skill of allSkills) {
+                const skillLower = skill.toLowerCase();
+
+                // Skip if it matches an exclusion pattern
+                if (AIService.EXCLUDE_PATTERNS.some(ex => skillLower.includes(ex))) {
+                    continue;
+                }
+
+                // Use word-boundary-aware matching to avoid partial matches
+                // e.g. "C" shouldn't match inside "Communication"
+                const escaped = skillLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                // For very short skills (1-2 chars like "C", "R", "Go"), require stricter context
+                let regex;
+                if (skill.length <= 2) {
+                    // Match "C " or "C," or "C++" context, or as a standalone listed item
+                    regex = new RegExp(
+                        `(?:^|[,;|/\\s])${escaped}(?=[,;|/\\s.+]|$)`, 'i'
+                    );
+                } else {
+                    regex = new RegExp(`(?:^|[^a-zA-Z])${escaped}(?=[^a-zA-Z]|$)`, 'i');
+                }
+
+                if (regex.test(textLower)) {
+                    foundSkills.add(skill);
+                }
             }
-            
-            return [];
+
+            // De-duplicate variations (e.g. if both "React" and "React.js" matched, keep "React.js")
+            const deduped = AIService._deduplicateSkills([...foundSkills]);
+
+            console.log(`--- Deterministic Skill Extraction ---`);
+            console.log(`Found ${deduped.length} skills:`, deduped);
+            console.log(`--------------------------------------`);
+
+            return deduped;
         } catch (error) {
-            console.error('Skill Extraction Error:', error);
+            console.error('Deterministic Skill Extraction Error:', error);
             return [];
         }
+    }
+
+    /**
+     * Extracts skills using AI (Mistral/Ollama), falling back to deterministic extraction on failure.
+     * @param {string} resumeText 
+     * @returns {Promise<string[]>}
+     */
+    static async extractSkills(resumeText) {
+        try {
+            if (!resumeText || typeof resumeText !== 'string') {
+                console.warn('extractSkills: No resume text provided.');
+                return [];
+            }
+
+            const prompt = `
+                You are an expert technical recruiter. Your task is to exhaustively extract EVERY SINGLE technical skill from the following resume text.
+                Do NOT leave any technical skills out. Read the entire document carefully.
+
+                CRITICAL RULE: DO NOT INVENT, GUESS, OR HALLUCINATE SKILLS.
+                CRITICAL RULE: ONLY EXTRACT SKILLS THAT ARE EXPLICITLY WRITTEN IN THE RESUME TEXT.
+
+                Categorize all the extracted skills into three specific categories:
+                1. Programming Languages
+                2. Web Development (Frontend & Backend Frameworks/Libraries)
+                3. Tools, Platforms, Cloud, and Databases
+
+                Ignore soft skills, spoken languages, and general office software.
+                
+                IMPORTANT: Ensure the skills strictly fit into these three buckets. You MUST extract all of them, but ONLY if they are explicitly mentioned in the text.
+
+                ### OUTPUT FORMAT (STRICT JSON ONLY)
+                {
+                   "programming": ["extracted_skill_1", "extracted_skill_2"],
+                   "web_development": ["extracted_skill_3", "extracted_skill_4"],
+                   "tools_and_platforms": ["extracted_skill_5", "extracted_skill_6"]
+                }
+
+                ### RESUME CONTENT
+                ${resumeText}
+            `;
+
+            try {
+                const result = await AIService._generateJsonWithLLM(prompt);
+                console.log("--- AI Raw Response (Extract Skills Categorized) ---");
+                console.log(JSON.stringify(result));
+                console.log("----------------------------------------");
+                
+                if (result) {
+                    // Concatenate the categorized arrays in the requested sequence
+                    const combinedSkills = [
+                        ...(Array.isArray(result.programming) ? result.programming : []),
+                        ...(Array.isArray(result.web_development) ? result.web_development : []),
+                        ...(Array.isArray(result.tools_and_platforms) ? result.tools_and_platforms : [])
+                    ];
+
+                    if (combinedSkills.length > 0) {
+                        return AIService._deduplicateSkills(combinedSkills);
+                    }
+                }
+            } catch (e) {
+                console.error("AI Skill Extraction failed:", e.message);
+            }
+
+            // Fallback to deterministic method if AI fails or returns empty
+            console.log("Falling back to deterministic skill extraction.");
+            return await AIService.extractSkillsDeterministic(resumeText);
+            
+        } catch (error) {
+            console.error('Skill Extraction Overall Error:', error);
+            return await AIService.extractSkillsDeterministic(resumeText);
+        }
+    }
+
+    /**
+     * Remove duplicate variations of the same skill.
+     * e.g., keep "React.js" over "React", "Node.js" over "Node"
+     */
+    static _deduplicateSkills(skills) {
+        const variations = {
+            'react': 'React.js',
+            'react.js': 'React.js',
+            'angular': 'Angular',
+            'vue': 'Vue.js',
+            'vue.js': 'Vue.js',
+            'node.js': 'Node.js',
+            'express': 'Express.js',
+            'express.js': 'Express.js',
+            'mern': 'MERN Stack',
+            'mern stack': 'MERN Stack',
+            'mean': 'MEAN Stack',
+            'mean stack': 'MEAN Stack',
+            'power bi': 'PowerBI',
+            'powerbi': 'PowerBI',
+        };
+
+        const normalized = new Map();
+        for (const skill of skills) {
+            const key = variations[skill.toLowerCase()] || skill;
+            // Keep the longer / more specific version
+            if (!normalized.has(key) || skill.length > normalized.get(key).length) {
+                normalized.set(key, skill);
+            }
+        }
+        return [...normalized.values()];
     }
     /**
      * Extracts skills from a resume and matches them against a job requirement matrix, returning matching jobs.
@@ -258,37 +487,14 @@ class AIService {
                 ${jobMatrixString}
             `;
 
-            const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: OLLAMA_MODEL,
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json'
-                })
-            });
-
-            if (!response.ok) throw new Error('Ollama connection failed');
-
-            const data = await response.json();
-            console.log("--- Ollama Raw Response (Match Jobs) ---");
-            console.log(data.response);
-            console.log("----------------------------------------");
-            
             let result;
             try {
-                // Remove markdown code blocks if the AI added them
-                let cleanResponse = data.response;
-                if (cleanResponse.includes('```')) {
-                    const match = cleanResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-                    if (match && match[1]) {
-                        cleanResponse = match[1];
-                    }
-                }
-                result = JSON.parse(cleanResponse);
+                result = await AIService._generateJsonWithLLM(prompt);
+                console.log("--- AI Raw Response (Match Jobs) ---");
+                console.log(JSON.stringify(result));
+                console.log("----------------------------------------");
             } catch (e) {
-                console.error("Failed to parse Ollama JSON:", e);
+                console.error("Failed to parse AI JSON:", e);
                 // Last ditch effort: if it's not JSON, return whatever words look like skills
                 return { extracted_skills: [], matched_jobs: [] };
             }

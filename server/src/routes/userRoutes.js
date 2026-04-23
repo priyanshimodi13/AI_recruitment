@@ -42,4 +42,19 @@ router.get('/profile', requireAuth, async (req, res) => {
     }
 });
 
+router.get('/sessions', requireAuth, async (req, res) => {
+    try {
+        // Mock dynamic sessions for the user
+        const sessions = [
+            { id: 1, title: "System Design Frameworks", time: "Today, 4:00 PM", type: "AI Coaching", active: true },
+            { id: 2, title: "Behavioral Analysis", time: "Tomorrow, 10:00 AM", type: "Virtual Mock", active: false },
+            { id: 3, title: "Resume Review Deep Dive", time: "Friday, 2:00 PM", type: "1-on-1 Mentor", active: false }
+        ];
+        res.json(sessions);
+    } catch (error) {
+        console.error('Error fetching sessions:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 module.exports = router;

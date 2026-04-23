@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [activeView, setActiveView] = useState('Overview'); // Overview, Job Matches, Preparation, Applications
   const [selectedJob, setSelectedJob] = useState(null);
+  const [activeSessions, setActiveSessions] = useState([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
     fetch('http://localhost:5957/api/jobs')
@@ -61,6 +63,27 @@ export default function Dashboard() {
     checkRole();
   }, [getToken, navigate]);
 
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetch('http://localhost:5957/api/users/profile/sessions', {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+           const data = await res.json();
+           setActiveSessions(data);
+        }
+      } catch (err) {
+        console.error('Error fetching sessions:', err);
+      } finally {
+        setLoadingSessions(false);
+      }
+    };
+    fetchSessions();
+  }, [getToken]);
+
   return (
     <div className="flex min-h-screen pt-24 bg-[var(--color-bg)]">
       {/* SIDE NAV */}
@@ -71,7 +94,7 @@ export default function Dashboard() {
               <p className="px-4 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.3em] mb-6">Navigation</p>
               {[
                 { icon: LayoutDashboard, label: "Overview" },
-                { icon: Briefcase, label: "Job Matches" },
+                { icon: Briefcase, label: "Jobs" },
                 { icon: Calendar, label: "Preparation" },
                 { icon: CheckCircle2, label: "Applications" },
               ].map((item, i) => (
@@ -197,7 +220,7 @@ export default function Dashboard() {
               <Filter className="w-4 h-4" /> Global Filters
             </button>
             <Link to="/upload-resume" className="btn-primary py-3 px-8 flex items-center gap-3 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 pr-10">
-              <Plus className="w-4 h-4" /> Synchronize Resume
+              <Plus className="w-4 h-4" /> Upload Resume
             </Link>
           </div>
         </header>
@@ -233,7 +256,7 @@ export default function Dashboard() {
                       <div className="w-2 h-8 bg-[var(--color-accent)] rounded-full"></div>
                       <h2 className="text-2xl font-display font-black text-[var(--color-heading)] tracking-tight italic">Curated AI Pipeline</h2>
                    </div>
-                  <button onClick={() => setActiveView('Job Matches')} className="text-[var(--color-accent)] text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-transform">Explore All</button>
+                  <button onClick={() => setActiveView('Jobs')} className="text-[var(--color-accent)] text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-transform">Explore All</button>
                 </div>
                 
                 <div className="space-y-6">
@@ -265,7 +288,10 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <button onClick={() => setSelectedJob(job)} className="btn-secondary py-3 px-8 text-[10px] font-black tracking-widest uppercase w-full md:w-auto shadow-md">Details</button>
+                      <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button onClick={() => setSelectedJob(job)} className="btn-secondary py-3 px-6 text-[10px] font-black tracking-widest uppercase flex-1 shadow-md">Details</button>
+                        <button onClick={() => navigate('/upload-resume')} className="btn-primary py-3 px-6 text-[10px] font-black tracking-widest uppercase flex-1 shadow-md shadow-blue-500/20 hover:-translate-y-1 transition-transform">Apply</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -275,11 +301,14 @@ export default function Dashboard() {
               <div className="space-y-12">
                 <div className="space-y-8">
                   <h2 className="text-xl font-display font-bold text-[var(--color-heading)] px-2 tracking-tight">Active Sessions</h2>
-                  <div className="card-premium space-y-4 bg-gradient-to-br from-[var(--color-surface-2)] to-transparent p-6">
-                    {[
-                      { title: "System Design Frameworks", time: "Today, 4:00 PM", type: "AI Coaching", active: true },
-                      { title: "Behavioral Analysis", time: "Tomorrow, 10:00 AM", type: "Virtual Mock" },
-                    ].map((s, i) => (
+                  <div className="card-premium space-y-4 bg-gradient-to-br from-[var(--color-surface-2)] to-transparent p-6 min-h-[120px]">
+                    {loadingSessions ? (
+                       <div className="flex justify-center items-center h-full pt-4">
+                          <div className="w-6 h-6 rounded-full border-2 border-[var(--color-accent)]/20 border-t-[var(--color-accent)] animate-spin"></div>
+                       </div>
+                    ) : activeSessions.length === 0 ? (
+                       <p className="text-sm font-bold text-[var(--color-text-muted)] italic opacity-80 text-center py-4">No active sessions scheduled.</p>
+                    ) : activeSessions.map((s, i) => (
                       <div key={i} className="p-4 rounded-[1.5rem] bg-[var(--color-surface-2)]/50 border border-[var(--color-border)] flex items-center justify-between group hover:border-[var(--color-accent)]/30 cursor-pointer transition-all duration-300">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
@@ -321,7 +350,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {activeView === 'Job Matches' && (
+        {activeView === 'Jobs' && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="card-premium glass-premium p-6 flex flex-col md:flex-row gap-6 items-center shadow-2xl relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent)]/5 to-transparent pointer-events-none"></div>
@@ -363,7 +392,8 @@ export default function Dashboard() {
                          </div>
                       </div>
                       <div className="pt-8 mt-8 border-t border-[var(--color-border)] flex gap-4">
-                         <button onClick={() => setSelectedJob(job)} className="btn-secondary py-3 flex-grow text-[10px] font-black uppercase tracking-[0.2em] bg-[var(--color-surface-2)] border-[var(--color-border)] hover:bg-[var(--color-border)] transition-all">Details</button>
+                         <button onClick={() => setSelectedJob(job)} className="btn-secondary py-3 flex-1 text-[10px] font-black uppercase tracking-[0.2em] bg-[var(--color-surface-2)] border-[var(--color-border)] hover:bg-[var(--color-border)] transition-all">Details</button>
+                         <button onClick={() => navigate('/upload-resume')} className="btn-primary py-3 flex-1 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 hover:-translate-y-1 transition-all">Apply</button>
                       </div>
                    </div>
                 ))}

@@ -31,6 +31,10 @@ const resumeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    skills: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: ['pending', 'accepted', 'rejected'],

@@ -1,68 +1,85 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { UserButton, SignedIn, SignedOut } from '@clerk/clerk-react';
-import { Moon, Sun } from 'lucide-react';
-import { AnimatedThemeToggle } from './UI/animated-theme-toggle';
 
 export default function Navbar() {
-  const [isDark, setIsDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
+  // Force dark styling on html for the whole site whenever the app loads now that we have a dark theme
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.backgroundColor = '#000000';
+    document.documentElement.style.color = '#ffffff';
+
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-4 left-4 right-4 z-50 glass-premium rounded-2xl mx-auto max-w-7xl">
-      <div className="px-6 sm:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+        scrolled || !isHomePage 
+          ? 'bg-black/90 backdrop-blur-md border-b border-[#333333] py-4' 
+          : 'bg-transparent py-6'
+      }`}
+    >
+      <div className="w-full px-6 sm:px-12 mx-auto" style={{ maxWidth: 'min(1200px, 90vw)' }}>
+        <div className="flex items-center justify-between h-10">
+          
+          {/* Logo */}
           <div className="flex items-center gap-10">
-            <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
-              <div className="relative w-9 h-9 flex items-center justify-center">
-                <div className="absolute inset-0 bg-blue-500 opacity-20 blur-lg rounded-full animate-pulse"></div>
-                <svg viewBox="0 0 24 24" className="w-7 h-7 text-blue-500 relative z-10 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold tracking-tight text-[var(--color-heading)] font-display">
-                Hire<span className="text-[var(--color-accent)]">Vision</span>
+            <Link to="/" className="flex items-center gap-3">
+              <span 
+                className="text-2xl font-light tracking-wide text-white font-display uppercase hover:opacity-70 transition-opacity"
+                style={{ fontFamily: "'Jost', sans-serif" }}
+              >
+                Hire <span style={{ fontWeight: 400, color: '#c8f135' }}>Vision</span>
               </span>
             </Link>
             
-            <div className="hidden md:flex items-center gap-6">
+            {/* Nav Links */}
+            <div className="hidden md:flex items-center gap-8 ml-8">
               {[
-                { label: 'Marketplace', path: '/jobs' },
+                { label: 'Jobs', path: '/jobs' },
                 { label: 'AI Coach', path: '/prepare-interview' },
                 { label: 'Dashboard', path: '/dashboard' }
               ].map((link) => (
                 <Link 
                   key={link.path} 
                   to={link.path} 
-                  className="text-sm font-semibold text-[var(--color-text)] hover:text-[var(--color-accent)] transition-all duration-300 relative group"
+                  className="text-xs uppercase tracking-widest font-light text-[#a3a3a3] hover:text-white transition-all duration-300 relative group"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--color-accent)] group-hover:w-full transition-all duration-300 rounded-full"></span>
+                  <span className="absolute -bottom-2 left-0 w-0 h-px bg-white group-hover:w-full transition-all duration-300"></span>
                 </Link>
               ))}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-6 w-[1px] bg-[var(--color-border)] mx-2 hidden sm:block"></div>
-            <AnimatedThemeToggle
-              isDark={isDark}
-              onToggle={() => setIsDark(!isDark)}
-              className="h-9 w-9 rounded-xl hover:bg-[var(--color-surface-2)] transition-colors"
-            />
-            
+          {/* Right Side */}
+          <div className="flex items-center gap-6">
             <SignedOut>
-              <div className="flex items-center gap-3">
-                <Link to="/sign-in" className="text-sm font-bold text-[var(--color-text)] hover:text-[var(--color-heading)] transition-colors px-3">Sign In</Link>
+              <div className="flex items-center gap-6">
+                <Link 
+                  to="/sign-in" 
+                  className="text-xs uppercase tracking-widest font-light text-[#a3a3a3] hover:text-white transition-colors"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  Sign In
+                </Link>
                 <Link to="/sign-up">
-                  <button className="btn-primary py-2 px-5 text-sm rounded-xl">Get Started</button>
+                  <button 
+                    className="px-6 py-2 text-xs uppercase tracking-widest font-normal text-black bg-[#c8f135] rounded-full hover:bg-white hover:scale-105 transition-all duration-300"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    Get Started
+                  </button>
                 </Link>
               </div>
             </SignedOut>
@@ -71,8 +88,8 @@ export default function Navbar() {
                 <UserButton 
                   appearance={{
                     elements: {
-                      userButtonAvatarBox: "w-8 h-8 rounded-xl",
-                      userButtonTrigger: "focus:shadow-none hover:scale-105 transition-transform"
+                      userButtonAvatarBox: "w-8 h-8 rounded-full border border-[#333333]",
+                      userButtonTrigger: "focus:shadow-none hover:opacity-80 transition-opacity"
                     }
                   }} 
                 />

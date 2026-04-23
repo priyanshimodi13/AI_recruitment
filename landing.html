@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hire Vision | Hire people. Not paperwork.</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #fafaf8;
+            --black: #0d0d0d;
+            --gray-mid: #6b6b6b;
+            --gray-light: #e8e8e8;
+            --rule: #e0e0e0;
+            --accent: #c8f135; /* Sharp lime/yellow-green */
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --section-pad: clamp(80px, 12vw, 160px);
+            --container: min(1200px, 90vw);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Hide default cursor to use custom dot */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--black);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        a, button {
+            cursor: none; /* Custom cursor handles this */
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* CUSTOM CURSOR */
+        .cursor-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--black);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
+
+        .cursor-dot.hover-state {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(13, 13, 13, 0.1);
+        }
+
+        /* UTILITIES */
+        .container {
+            width: var(--container);
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .hr {
+            width: 100%;
+            height: 1px;
+            background-color: var(--rule);
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1), transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+            will-change: opacity, transform;
+        }
+
+        .fade-up.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 1: NAVBAR
+        ------------------------------------------------------------- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px 0;
+            z-index: 100;
+            transition: background-color 0.4s ease, padding 0.4s ease, border-bottom 0.4s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(250, 250, 248, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 16px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 18px;
+            letter-spacing: 0.05em;
+            color: var(--black);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .nav-link {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--black);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--black);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.hover-trigger:hover::after {
+            width: 100%;
+        }
+
+        .nav-btn {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--black);
+            text-decoration: none;
+            padding: 10px 24px;
+            border: 1px solid var(--black);
+            border-radius: 999px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--black);
+            color: var(--bg);
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 2: HERO
+        ------------------------------------------------------------- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-top-label {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 12px;
+            color: var(--gray-mid);
+            letter-spacing: 0.2em;
+            position: absolute;
+            top: 120px;
+            left: max(5vw, calc((100vw - 1200px) / 2));
+        }
+
+        .hero-title-container {
+            margin-top: 40px;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(64px, 12vw, 160px);
+            line-height: 0.95;
+            color: var(--black);
+        }
+
+        .hero-title span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: wordFadeUp 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        @keyframes wordFadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title .line-2 {
+            font-weight: 900;
+            font-style: italic;
+            color: #121212;
+            display: block;
+        }
+
+        .hero-body {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 18px;
+            color: var(--gray-mid);
+            max-width: 480px;
+            margin-top: 40px;
+            margin-bottom: 48px;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-link-primary {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 16px;
+            color: var(--black);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .hero-link-primary::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--black);
+            transition: background-color 0.3s ease;
+        }
+
+        .hero-link-primary:hover::after {
+            background-color: var(--accent);
+            height: 2px;
+        }
+
+        .hero-link-secondary {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 16px;
+            color: var(--gray-mid);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .hero-link-secondary:hover {
+            color: var(--black);
+        }
+
+        .rotating-badge {
+            position: absolute;
+            right: max(5vw, calc((100vw - 1200px) / 2));
+            bottom: 60px;
+            width: 120px;
+            height: 120px;
+            animation: rotateText 20s linear infinite;
+        }
+
+        @keyframes rotateText {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-bottom-rule {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--rule);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { padding-top: 60px; }
+            .rotating-badge { display: none; }
+            .hero-links { flex-direction: column; align-items: flex-start; gap: 24px; }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 3: MARQUEE
+        ------------------------------------------------------------- */
+        .marquee {
+            width: 100%;
+            background-color: var(--black);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-inner {
+            display: flex;
+            animation: marqueeScroll 30s linear infinite;
+        }
+
+        .marquee-item {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--bg);
+            padding-right: 48px;
+            display: flex;
+            align-items: center;
+            gap: 48px;
+        }
+
+        .marquee-item::after {
+            content: '•';
+            color: var(--accent);
+            font-size: 20px;
+        }
+
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 4: STATEMENT
+        ------------------------------------------------------------- */
+        .statement-section {
+            padding: var(--section-pad) 0;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .statement-quote {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(36px, 6vw, 80px);
+            line-height: 1.1;
+            color: var(--black);
+            max-width: 900px;
+            text-align: center;
+            margin: 0 auto 120px auto;
+        }
+
+        .statement-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+        }
+
+        .statement-p {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 16px;
+            color: var(--gray-mid);
+            max-width: 480px;
+        }
+
+        @media (max-width: 768px) {
+            .statement-bottom { flex-direction: column; align-items: flex-start; gap: 40px; }
+            .statement-quote { margin-bottom: 60px; text-align: left;}
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 5: FEATURES
+        ------------------------------------------------------------- */
+        .features-section {
+            padding: var(--section-pad) 0;
+            background-color: var(--bg);
+        }
+
+        .features-headline {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(40px, 6vw, 72px);
+            line-height: 1.1;
+            color: var(--black);
+            margin-bottom: 120px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 120px 60px;
+        }
+
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feat-num {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 80px;
+            color: var(--gray-light);
+            line-height: 1;
+            margin-bottom: 24px;
+        }
+
+        .feat-title {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 18px;
+            color: var(--black);
+            margin-bottom: 8px;
+        }
+
+        .feat-desc {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 14px;
+            color: var(--gray-mid);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .features-grid { grid-template-columns: 1fr; gap: 80px;}
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 6: HOW IT WORKS
+        ------------------------------------------------------------- */
+        .process-section {
+            padding: var(--section-pad) 0;
+            padding-bottom: 0;
+        }
+
+        .process-headline {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(40px, 6vw, 72px);
+            line-height: 1.1;
+            color: var(--black);
+            margin-bottom: 80px;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            padding: 60px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .step-row:first-child {
+            border-top: 1px solid var(--rule);
+        }
+
+        .step-num-col {
+            flex: 0 0 40%;
+        }
+
+        .step-num {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-weight: 900;
+            font-size: 120px;
+            color: var(--gray-light);
+            line-height: 1;
+        }
+
+        .step-content-col {
+            flex: 0 0 60%;
+        }
+
+        .step-title {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 24px;
+            color: var(--black);
+            margin-bottom: 16px;
+        }
+
+        .step-desc {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 15px;
+            color: var(--gray-mid);
+            max-width: 480px;
+            line-height: 1.6;
+        }
+
+        /* Alternating slide-in animations */
+        .slide-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .slide-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .slide-left.in-view, .slide-right.in-view {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .step-row { flex-direction: column; align-items: flex-start; padding: 40px 0; }
+            .step-num-col { margin-bottom: 24px; }
+            .step-num { font-size: 80px; }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 7: STATS
+        ------------------------------------------------------------- */
+        .stats-section {
+            padding: var(--section-pad) 0;
+            background-color: var(--black);
+            color: var(--bg);
+            margin-top: var(--section-pad);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 80px;
+        }
+
+        .stat-item {
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 0 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .stat-item:first-child { padding-left: 0; }
+        .stat-item:last-child { border-right: none; padding-right: 0;}
+
+        .stat-number-wrapper {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: clamp(48px, 8vw, 96px);
+            line-height: 1;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .stat-label {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--gray-mid);
+        }
+
+        .stats-quote {
+            text-align: center;
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: clamp(24px, 4vw, 40px);
+            margin-top: 80px;
+            max-width: 900px;
+            margin-inline: auto;
+            color: var(--bg);
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 60px 0; padding-bottom: 60px;}
+            .stat-item:nth-child(2) { border-right: none; }
+            .stat-item { padding: 0 20px; }
+        }
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; gap: 40px 0; }
+            .stat-item { border-right: none; padding: 0; }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 8: TESTIMONIALS
+        ------------------------------------------------------------- */
+        .testimonials-section {
+            padding: var(--section-pad) 0;
+        }
+
+        .testi-row {
+            padding: 80px 0;
+            border-bottom: 1px solid var(--rule);
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .testi-row:first-child {
+            border-top: 1px solid var(--rule);
+        }
+
+        .quote-mark {
+            font-family: var(--font-display);
+            font-size: 120px;
+            color: var(--accent);
+            line-height: 0.6;
+            margin-top: 20px;
+        }
+
+        .testi-content {
+            flex-grow: 1;
+        }
+
+        .testi-quote {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: clamp(20px, 3vw, 32px);
+            color: var(--black);
+            line-height: 1.4;
+            max-width: 900px;
+            margin-bottom: 32px;
+        }
+
+        .testi-author {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+        }
+
+        @media (max-width: 768px) {
+            .testi-row { flex-direction: column; gap: 20px; padding: 60px 0;}
+            .quote-mark { font-size: 80px; }
+        }
+
+
+        /* ------------------------------------------------------------- 
+           SECTION 9: CTA
+        ------------------------------------------------------------- */
+        .cta-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .cta-headline {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: clamp(48px, 10vw, 120px);
+            line-height: 1;
+            color: var(--black);
+            margin-bottom: 32px;
+        }
+
+        .cta-headline span {
+            font-style: italic;
+            display: block;
+        }
+
+        .cta-desc {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 16px;
+            color: var(--gray-mid);
+            margin-bottom: 48px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .btn-fill {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 15px;
+            color: var(--bg);
+            background-color: var(--black);
+            padding: 16px 36px;
+            border-radius: 999px;
+            text-decoration: none;
+            border: 1px solid var(--black);
+            transition: all 0.3s ease;
+        }
+
+        .btn-fill:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: var(--black);
+        }
+
+        .btn-outline {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 15px;
+            color: var(--black);
+            background-color: transparent;
+            padding: 16px 36px;
+            border-radius: 999px;
+            text-decoration: none;
+            border: 1px solid var(--black);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--black);
+            color: var(--bg);
+        }
+
+        .cta-footer {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 13px;
+            color: var(--gray-mid);
+        }
+
+        @media (max-width: 640px) {
+            .cta-buttons { flex-direction: column; width: 100%; padding: 0 24px; }
+            .btn-fill, .btn-outline { width: 100%; }
+        }
+
+        /* ------------------------------------------------------------- 
+           SECTION 10: FOOTER
+        ------------------------------------------------------------- */
+        footer {
+            padding: 80px 0 40px 0;
+            border-top: 1px solid var(--rule);
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 120px;
+        }
+
+        .footer-logo {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 24px;
+            color: var(--black);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .footer-tagline {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 24px;
+            color: var(--black);
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 60px;
+        }
+
+        .footer-links a {
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 14px;
+            color: var(--gray-mid);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--black);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            font-family: var(--font-body);
+            font-weight: 300;
+            font-size: 12px;
+            color: var(--gray-mid);
+        }
+
+        @media (max-width: 768px) {
+            .footer-top { flex-direction: column; gap: 60px; }
+        }
+
+        /* ─────────────────────────────────────────────────────────────────
+           PLATFORM PREVIEW SECTION
+           Brand red: #e63329  |  All classes namespaced to avoid conflicts
+        ─────────────────────────────────────────────────────────────────── */
+
+        :root {
+          --pp-red: #e63329;
+          --pp-dark: #0d0d0d;
+          --pp-card-bg: #ffffff;
+          --pp-gray-bg: #f0f0f0;
+        }
+
+        /* ── Section Wrapper ── */
+        #platform-preview { margin: 0; padding: 0; overflow: hidden; }
+
+        /* ══ PART A — MOCKUP ══ */
+        .mockup-part {
+          background-color: var(--pp-gray-bg);
+          padding: clamp(80px,12vw,160px) 0 clamp(100px,14vw,180px);
+          position: relative;
+          overflow: hidden;
+        }
+        .mockup-part::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+          background-size: 40px 40px;
+          pointer-events: none;
+        }
+        .mp-bg-label {
+          max-width: var(--container);
+          margin: 0 auto;
+          padding: 0 max(5vw, calc((100vw - var(--container)) / 2));
+          margin-bottom: 2rem;
+        }
+        .mp-headline-wrap {
+          max-width: var(--container);
+          margin: 0 auto;
+          padding: 0 max(5vw, calc((100vw - var(--container)) / 2));
+          margin-bottom: clamp(60px,8vw,100px);
+        }
+        .mp-headline {
+          font-family: var(--font-display);
+          font-weight: 700;
+          font-size: clamp(40px,6vw,72px);
+          line-height: 1.1;
+          color: var(--black);
+          margin-bottom: 20px;
+        }
+        .mp-headline em { font-style: italic; font-weight: 400; }
+        .mp-sub {
+          font-family: var(--font-body);
+          font-weight: 300;
+          font-size: 16px;
+          color: var(--gray-mid);
+          max-width: 460px;
+          line-height: 1.65;
+        }
+
+        /* ── Mockup Scene ── */
+        .mockup-scene {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0 max(5vw, calc((100vw - 1100px) / 2));
+        }
+
+        /* ── Browser Mockup Window ── */
+        .browser-mockup {
+          width: min(720px, 90vw);
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.06), 0 20px 60px rgba(0,0,0,0.12), 0 60px 120px rgba(0,0,0,0.08);
+          transform: perspective(1200px) rotateX(4deg) rotateY(-4deg);
+          transform-style: preserve-3d;
+          transition: transform 0.1s ease-out;
+          position: relative;
+          z-index: 5;
+          will-change: transform;
+          border: 1px solid rgba(0,0,0,0.07);
+        }
+        .browser-chrome {
+          background: #f7f7f7;
+          border-bottom: 1px solid #e8e8e8;
+          border-radius: 16px 16px 0 0;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .browser-dots { display: flex; gap: 6px; flex-shrink: 0; }
+        .bd { width: 10px; height: 10px; border-radius: 50%; }
+        .bd-red    { background: #ff5f57; }
+        .bd-yellow { background: #febc2e; }
+        .bd-green  { background: #28c840; }
+        .browser-bar {
+          flex: 1;
+          background: #ebebeb;
+          border-radius: 6px;
+          padding: 5px 12px;
+          display: flex;
+          align-items: center;
+        }
+        .browser-url { font-family: var(--font-body); font-size: 11px; color: #888; letter-spacing: 0.02em; }
+        .browser-body { display: flex; height: 340px; border-radius: 0 0 16px 16px; overflow: hidden; }
+
+        /* ── Mini Sidebar ── */
+        .mini-sidebar {
+          width: 52px;
+          background: #0d0d0d;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 16px 0;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        .mini-sidebar-logo {
+          font-family: var(--font-body);
+          font-weight: 700;
+          font-size: 9px;
+          color: #fff;
+          letter-spacing: 0.05em;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+        .ms-dot { color: var(--pp-red); }
+        .ms-nav { display: flex; flex-direction: column; gap: 4px; }
+        .ms-nav-item {
+          width: 36px; height: 36px;
+          display: flex; align-items: center; justify-content: center;
+          border-radius: 8px; color: #666;
+          transition: background 0.2s, color 0.2s; cursor: pointer;
+        }
+        .ms-nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .ms-active { background: rgba(230,51,41,0.2) !important; color: var(--pp-red) !important; }
+
+        /* ── Mini Main ── */
+        .mini-main {
+          flex: 1; background: #fafafa;
+          padding: 16px; overflow: hidden;
+          display: flex; flex-direction: column; gap: 12px;
+        }
+        .mini-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .mini-title { font-family: var(--font-body); font-weight: 600; font-size: 13px; color: #111; }
+        .mini-badge {
+          font-family: var(--font-body); font-size: 10px; font-weight: 500;
+          background: linear-gradient(135deg,#e63329,#ff6b5e); color: #fff;
+          padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em;
+        }
+
+        /* ── Job Cards ── */
+        .job-card {
+          background: #fff; border: 1px solid #ebebeb; border-radius: 12px;
+          position: relative; overflow: hidden;
+          transition: box-shadow 0.3s ease; flex-shrink: 0;
+        }
+        .job-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .job-card-active { border-color: rgba(230,51,41,0.2); box-shadow: 0 2px 12px rgba(230,51,41,0.08); }
+        .jc-accent-bar {
+          position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+          background: var(--pp-red); border-radius: 12px 0 0 12px;
+        }
+        .jc-content { padding: 12px 12px 12px 16px; }
+        .jc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+        .jc-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .jc-avatar {
+          width: 32px; height: 32px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--font-body); font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0;
+        }
+        .jc-av-1 { background: linear-gradient(135deg,#e63329,#ff8c7a); }
+        .jc-av-2 { background: linear-gradient(135deg,#1a1a2e,#4a4a8a); }
+        .jc-title { font-family: var(--font-body); font-weight: 600; font-size: 12px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .jc-stars { display: flex; align-items: center; gap: 2px; margin-top: 2px; }
+        .star { font-size: 10px; color: #d0d0d0; line-height: 1; }
+        .star.filled { color: #f5b800; }
+        .jc-reviews { font-family: var(--font-body); font-size: 9px; color: #999; margin-left: 4px; }
+        .jc-tags { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; align-items: flex-end; }
+        .jc-tag {
+          font-family: var(--font-body); font-size: 9px; font-weight: 500;
+          background: #f4f4f4; color: #555; padding: 3px 8px; border-radius: 999px;
+          white-space: nowrap; display: flex; align-items: center; gap: 3px;
+        }
+        .jc-tag-green { background: rgba(40,200,130,0.1); color: #13a064; }
+        .jc-tag-date  { background: rgba(230,51,41,0.08); color: var(--pp-red); }
+        .jc-desc { font-family: var(--font-body); font-size: 11px; color: #777; line-height: 1.5; margin-bottom: 10px; }
+        .jc-bottom { display: flex; align-items: center; justify-content: space-between; }
+        .jc-save-btn {
+          font-family: var(--font-body); font-size: 10px; font-weight: 500; color: #444;
+          background: transparent; border: 1px solid #e0e0e0; border-radius: 999px;
+          padding: 4px 10px; cursor: pointer;
+          display: flex; align-items: center; gap: 4px;
+          transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .jc-save-btn:hover { background: var(--pp-red); color: #fff; border-color: var(--pp-red); }
+
+        /* ── Floating Widgets ── */
+        .mp-widget {
+          position: absolute; z-index: 10;
+          border-radius: 16px; font-family: var(--font-body);
+          font-size: 12px; font-weight: 500;
+        }
+        .mp-widget-tl {
+          top: -20px;
+          right: calc(max(5vw, calc((100vw - 1100px) / 2)) - 10px);
+          background: #1a1a1a; color: #f0f0f0;
+          padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.25); transform: rotate(1.5deg); min-width: 200px;
+        }
+        .mpw-row { display: flex; align-items: center; gap: 10px; line-height: 1; }
+        .mpw-icon { font-size: 14px; width: 20px; text-align: center; }
+        .mp-widget-br {
+          bottom: -30px;
+          right: calc(max(5vw, calc((100vw - 1100px) / 2)) - 10px);
+          background: var(--pp-red); color: #fff;
+          padding: 18px 24px; transform: rotate(-2deg);
+          box-shadow: 0 16px 48px rgba(230,51,41,0.35); min-width: 160px;
+        }
+        .mpw-book-label { font-size: 15px; line-height: 1.4; color: rgba(255,255,255,0.85); }
+        .mpw-book-bold  { font-weight: 700; font-size: 18px; color: #fff; }
+        .mpw-book-arrow { margin-top: 8px; font-size: 22px; font-weight: 300; color: rgba(255,255,255,0.7); }
+
+        /* ── Float Keyframes ── */
+        @keyframes ppFloatA {
+          0%,100% { transform: translateY(0px) rotate(1.5deg); }
+          50%      { transform: translateY(-10px) rotate(1.5deg); }
+        }
+        @keyframes ppFloatB {
+          0%,100% { transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateY(0px); }
+          50%      { transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateY(-12px); }
+        }
+        @keyframes ppFloatC {
+          0%,100% { transform: translateY(0px) rotate(-2deg); }
+          50%      { transform: translateY(-8px) rotate(-2deg); }
+        }
+        .fp-float-a { animation: ppFloatA 4s ease-in-out infinite; }
+        .fp-float-b { animation: ppFloatB 5s ease-in-out infinite; }
+        .fp-float-c { animation: ppFloatC 3.5s ease-in-out infinite; }
+
+        /* ══ PART B — ORBIT ══ */
+        .orbit-part {
+          background-color: #0d0d0d;
+          position: relative; overflow: hidden;
+          min-height: 100vh;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .orbit-rings {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          pointer-events: none;
+        }
+        .orbit-ring {
+          position: absolute; border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.06);
+        }
+        .ring-1 { width:160px;  height:160px;  border-color:rgba(255,255,255,0.12); animation: ppRingPulse 4s ease-in-out infinite 0s; }
+        .ring-2 { width:300px;  height:300px;  animation: ppRingPulse 4s ease-in-out infinite 0.5s; }
+        .ring-3 { width:460px;  height:460px;  animation: ppRingPulse 4s ease-in-out infinite 1s; }
+        .ring-4 { width:640px;  height:640px;  animation: ppRingPulse 4s ease-in-out infinite 1.5s; border-color:rgba(230,51,41,0.08); }
+        .ring-5 { width:840px;  height:840px;  animation: ppRingPulse 4s ease-in-out infinite 2s; }
+        @keyframes ppRingPulse {
+          0%,100% { opacity:0.4; transform:scale(1); }
+          50%      { opacity:0.8; transform:scale(1.015); }
+        }
+
+        /* ── Orbit Center ── */
+        .orbit-center {
+          position: relative; z-index: 10;
+          text-align: center;
+          display: flex; flex-direction: column; align-items: center; gap: 24px;
+          opacity: 0; transform: translateY(30px);
+          transition: opacity 1s cubic-bezier(0.19,1,0.22,1), transform 1s cubic-bezier(0.19,1,0.22,1);
+        }
+        .orbit-center.pp-in-view { opacity:1; transform:translateY(0); }
+
+        /* ── Avatars ── */
+        .orbit-avatars { display:flex; align-items:center; gap:0; justify-content:center; }
+        .oa {
+          width:44px; height:44px; border-radius:50%; border:3px solid #0d0d0d;
+          display:flex; align-items:center; justify-content:center;
+          font-family:var(--font-body); font-size:13px; font-weight:700; color:#fff;
+          position:relative; flex-shrink:0;
+        }
+        .oa-1 { background:linear-gradient(135deg,#e63329,#ff6b5e); z-index:3; }
+        .oa-2 { background:linear-gradient(135deg,#6c3de6,#a575f5); margin-left:-12px; z-index:2; }
+        .oa-3 { background:linear-gradient(135deg,#25a9e0,#56d4ff); margin-left:-12px; z-index:1; }
+        .orbit-count-pill {
+          font-family:var(--font-body); font-size:12px; font-weight:500; color:#fff;
+          border:1px solid #333; background:rgba(255,255,255,0.05);
+          padding:5px 14px; border-radius:999px; margin-left:14px;
+          backdrop-filter:blur(8px);
+        }
+        .orbit-headline {
+          font-family:var(--font-display); font-weight:700;
+          font-size:clamp(36px,6vw,72px); line-height:1.1; color:#fff;
+        }
+        .orbit-cta {
+          display:inline-block; font-family:var(--font-body);
+          font-size:15px; font-weight:500; color:#0d0d0d; background:#fff;
+          padding:14px 32px; border-radius:999px; text-decoration:none;
+          transition:background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+          margin-top:8px;
+        }
+        .orbit-cta:hover { background:var(--pp-red); color:#fff; transform:scale(1.04); }
+
+        /* ── Orbit Pills ── */
+        .orbit-pill {
+          position:absolute; z-index:10; background:#fff; color:#111;
+          font-family:var(--font-body); font-size:13px; font-weight:600;
+          padding:10px 18px; border-radius:999px;
+          display:flex; align-items:center; gap:8px;
+          box-shadow:0 4px 20px rgba(0,0,0,0.35);
+          white-space:nowrap; border:1px solid rgba(255,255,255,0.15);
+        }
+        .orbit-pill.op-red    { background:var(--pp-red); color:#fff; border-color:transparent; }
+        .orbit-pill.op-icon-only { width:48px; height:48px; padding:0; justify-content:center; border-radius:50%; }
+        .op-icon { font-size:16px; line-height:1; }
+
+        /* Pill positions */
+        .pill-top-c   { top:12%;   left:50%; transform:translateX(-50%); }
+        .pill-left     { left:5%;   top:45%; }
+        .pill-bottom-r { bottom:14%; right:10%; }
+        .pill-top-r   { top:18%;   right:8%; }
+        .pill-right    { right:4%;  top:55%; }
+        .pill-bottom-l { bottom:20%; left:6%; }
+
+        /* Drift keyframes */
+        @keyframes ppDriftA {
+          0%,100% { transform:translateY(0px) translateX(-50%); }
+          50%      { transform:translateY(-14px) translateX(-50%); }
+        }
+        @keyframes ppDriftB {
+          0%,100% { transform:translateY(0px); }
+          50%      { transform:translateY(12px); }
+        }
+        @keyframes ppDriftC {
+          0%,100% { transform:translateY(0px); }
+          50%      { transform:translateY(-10px); }
+        }
+        @keyframes ppDriftD {
+          0%,100% { transform:translateY(0px); }
+          50%      { transform:translateY(8px); }
+        }
+        .pill-top-c.fp-drift-a { animation:ppDriftA 3.5s ease-in-out infinite; }
+        .fp-drift-b { animation:ppDriftB 4.2s ease-in-out infinite; }
+        .fp-drift-c { animation:ppDriftC 3s ease-in-out infinite; }
+        .fp-drift-d { animation:ppDriftD 5s ease-in-out infinite; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+          .mp-widget-tl, .mp-widget-br { display:none; }
+          .mockup-scene { padding:0 5vw; }
+          .browser-mockup { width:min(600px,90vw); transform:perspective(1200px) rotateX(3deg) rotateY(0deg); }
+          .browser-body { height:280px; }
+          .mini-sidebar { display:none; }
+          .orbit-pill { display:none; }
+        }
+        @media (max-width: 640px) {
+          .browser-mockup { width:92vw; transform:perspective(1200px) rotateX(2deg) rotateY(0); }
+          .browser-body { height:260px; }
+          .ring-4, .ring-5 { display:none; }
+          .orbit-headline { font-size:clamp(30px,9vw,54px); }
+        }
+        /* END PLATFORM PREVIEW CSS */
+
+        /* --- NEW SCROLLING MOCKUP SECTION --- */
+        .mockup-showcase-section {
+          background-color: #f0f0ef;
+          width: 100%;
+          padding: 100px 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          box-sizing: border-box;
+          perspective: 1500px;
+        }
+        .mockup-label {
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #666;
+          margin-bottom: 40px;
+          text-align: center;
+        }
+        .mockup-reveal-wrapper {
+          width: 100%;
+          max-width: 1000px;
+          display: flex;
+          justify-content: center;
+          opacity: 0;
+          transform: perspective(1000px) rotateX(10deg) translateY(60px);
+          transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+        }
+        .mockup-reveal-wrapper.is-visible {
+          opacity: 1;
+          transform: perspective(1000px) rotateX(0deg) translateY(0);
+        }
+        @keyframes deviceFloat {
+          0%, 100% { transform: translateY(0px); }
+          50%      { transform: translateY(-14px); }
+        }
+        .mockup-float-wrapper {
+          width: 100%;
+          animation: deviceFloat 5s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        .mockup-float-wrapper.paused {
+          animation-play-state: paused;
+        }
+        .mockup-tilt-wrapper {
+          transform: perspective(1000px) rotateX(4deg) rotateY(-6deg);
+          transition: transform 0.1s ease;
+          transform-style: preserve-3d;
+          width: 100%;
+          background: #fff;
+          border-radius: 18px;
+          border: 1.5px solid #d0d0d0;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          aspect-ratio: 16 / 10;
+        }
+        .scrolling-mockup-chrome {
+          height: 44px;
+          background-color: #f8f8f8;
+          border-bottom: 1.5px solid #eaeaea;
+          display: flex;
+          align-items: center;
+          padding: 0 16px;
+          position: relative;
+          flex-shrink: 0;
+        }
+        .scrolling-mockup-dots {
+          display: flex;
+          gap: 8px;
+        }
+        .scrolling-mockup-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+        .scrolling-mockup-dot.red { background-color: #ff5f56; }
+        .scrolling-mockup-dot.yellow { background-color: #ffbd2e; }
+        .scrolling-mockup-dot.green { background-color: #27c93f; }
+        .scrolling-mockup-url-bar {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 35%;
+          height: 24px;
+          background-color: #eaeaea;
+          border-radius: 12px;
+        }
+        .scrolling-mockup-screen-content {
+          flex: 1;
+          background-color: #000;
+          position: relative;
+          overflow: hidden;
+        }
+        .ui-scroll-container {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background-color: #fafafa;
+          position: relative;
+        }
+        .ui-scroller {
+          width: 100%;
+          padding: 24px 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          animation: scrollMockup 20s linear infinite;
+        }
+        @keyframes scrollMockup {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); } 
+        }
+        .ui-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 16px; border-bottom: 1px solid #eaeaea; }
+        .ui-logo { font-weight: 800; font-size: 16px; color: #111; letter-spacing: -0.5px; }
+        .ui-logo span { color: #c8f135; background: #111; padding: 2px 6px; border-radius: 4px; margin-left: 2px; }
+        .ui-nav { display: flex; gap: 16px; font-size: 12px; font-weight: 600; color: #888; }
+        .ui-nav span.active { color: #111; }
+        .ui-stats-row { display: flex; gap: 16px; margin-bottom: 8px; }
+        .ui-stat-box { flex: 1; background: #fff; border: 1px solid #eaeaea; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .ui-stat-num { font-size: 20px; font-weight: 800; color: #111; line-height: 1; margin-bottom: 4px;}
+        .ui-stat-label { font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inner-ui-card { background: #fff; border: 1px solid #eaeaea; border-radius: 10px; padding: 16px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-left: 4px solid transparent; }
+        .inner-ui-card.top-match { border-left-color: #c8f135; }
+        .ui-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #333; flex-shrink: 0; }
+        .ui-avatar.a1 { background: #fee2e2; color: #991b1b; }
+        .ui-avatar.a2 { background: #dcfce7; color: #166534; }
+        .ui-avatar.a3 { background: #e0e7ff; color: #3730a3; }
+        .ui-avatar.a4 { background: #fef9c3; color: #854d0e; }
+        .ui-card-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .ui-name-row { display: flex; justify-content: space-between; align-items: center; }
+        .ui-name { font-size: 14px; font-weight: 700; color: #111; }
+        .ui-badge { font-size: 10px; font-weight: 700; background: #111; color: #c8f135; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;}
+        .ui-badge.sec { background: #f4f4f4; color: #666; font-weight: 600;}
+        .ui-role { font-size: 12px; color: #555; }
+        .ui-skills { display: flex; gap: 6px; margin-top: 6px; }
+        .ui-skill { font-size: 10px; background: #f8f8f8; border: 1px solid #eaeaea; padding: 3px 8px; border-radius: 4px; color: #666; font-weight: 500;}
+    </style>
+</head>
+<body>
+
+    <!-- CUSTOM CURSOR -->
+    <div class="cursor-dot" id="cursor"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-inner">
+            <a href="#" class="nav-logo hover-trigger">RecruitAI</a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link hover-trigger">Features</a>
+                <a href="#process" class="nav-link hover-trigger">How It Works</a>
+                <a href="#testimonials" class="nav-link hover-trigger">For Candidates</a>
+                <a href="#cta" class="nav-link hover-trigger">Contact</a>
+                <a href="#cta" class="nav-btn hover-trigger">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero container">
+        <div class="hero-top-label">AI RECRUITMENT PLATFORM — EST. 2024</div>
+        
+        <div class="hero-title-container">
+            <h1 class="hero-title">
+                <span style="animation-delay: 0.1s">Hire</span> <span style="animation-delay: 0.2s">People.</span>
+                <span class="line-2" style="animation-delay: 0.3s">Not Paperwork.</span>
+            </h1>
+        </div>
+
+        <p class="hero-body fade-up">
+            Hire Vision handles resume screening, interview scheduling, and candidate communication — so your team focuses on people.
+        </p>
+
+        <div class="hero-links fade-up" style="transition-delay: 0.2s;">
+            <a href="#cta" class="hero-link-primary hover-trigger">Start hiring smarter ↗</a>
+            <a href="#features" class="hero-link-secondary hover-trigger">See how it works ↓</a>
+        </div>
+
+        <svg class="rotating-badge" viewBox="0 0 100 100" width="100" height="100">
+            <defs>
+              <path id="circle"
+                d="M 50, 50
+                   m -37, 0
+                   a 37,37 0 1,1 74,0
+                   a 37,37 0 1,1 -74,0"/>
+            </defs>
+            <text font-size="11" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="3" fill="#6b6b6b">
+              <textPath href="#circle">
+                SCROLL TO EXPLORE &bull; SCROLL TO EXPLORE &bull;
+              </textPath>
+            </text>
+        </svg>
+
+        <div class="hero-bottom-rule"></div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee">
+        <div class="marquee-inner">
+            <!-- Duplicated for infinite scroll illusion -->
+            <div class="marquee-item">
+                <span>RESUME SCREENING</span>
+                <span>INTERVIEW SCHEDULING</span>
+                <span>CANDIDATE NOTIFICATIONS</span>
+                <span>ADMIN DASHBOARD</span>
+                <span>CALENDAR SYNC</span>
+                <span>AI RANKING</span>
+                <span>INSTANT ALERTS</span>
+            </div>
+            <div class="marquee-item">
+                <span>RESUME SCREENING</span>
+                <span>INTERVIEW SCHEDULING</span>
+                <span>CANDIDATE NOTIFICATIONS</span>
+                <span>ADMIN DASHBOARD</span>
+                <span>CALENDAR SYNC</span>
+                <span>AI RANKING</span>
+                <span>INSTANT ALERTS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATEMENT SECTION -->
+    <section class="statement-section container">
+        <h2 class="statement-quote fade-up">
+            "Most hiring teams waste 60% of their time on tasks a machine can do in seconds."
+        </h2>
+        <div class="hr fade-up"></div>
+        <div class="statement-bottom">
+            <span class="section-label fade-up" style="margin-bottom: 0;">01 / WHY HIRE VISION</span>
+            <p class="statement-p fade-up">
+                Hire Vision automates the repetitive work of recruitment — from reading resumes to booking interviews — so your team can spend time on what actually matters: the people.
+            </p>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features-section container" id="features">
+        <span class="section-label fade-up">02 / WHAT WE DO</span>
+        <h2 class="features-headline fade-up">
+            Everything automated.<br>Nothing missed.
+        </h2>
+
+        <div class="features-grid">
+            <div class="feature-item fade-up" style="transition-delay: 0.1s;">
+                <div class="feat-num">01</div>
+                <h3 class="feat-title">AI Resume Screening</h3>
+                <p class="feat-desc">Automatically ranks and filters resumes by job fit</p>
+            </div>
+            <div class="feature-item fade-up" style="transition-delay: 0.2s;">
+                <div class="feat-num">02</div>
+                <h3 class="feat-title">Smart Scheduling</h3>
+                <p class="feat-desc">Books interviews and syncs to Google Calendar or .ics</p>
+            </div>
+            <div class="feature-item fade-up" style="transition-delay: 0.3s;">
+                <div class="feat-num">03</div>
+                <h3 class="feat-title">Instant Notifications</h3>
+                <p class="feat-desc">Emails candidates the moment their status changes</p>
+            </div>
+            <div class="feature-item fade-up" style="transition-delay: 0.4s;">
+                <div class="feat-num">04</div>
+                <h3 class="feat-title">Admin Dashboard</h3>
+                <p class="feat-desc">One clean panel to review, accept, or reject applicants</p>
+            </div>
+            <div class="feature-item fade-up" style="transition-delay: 0.5s;">
+                <div class="feat-num">05</div>
+                <h3 class="feat-title">Role-Based Access</h3>
+                <p class="feat-desc">Separate secure portals for candidates and admins</p>
+            </div>
+            <div class="feature-item fade-up" style="transition-delay: 0.6s;">
+                <div class="feat-num">06</div>
+                <h3 class="feat-title">Real-Time Analytics</h3>
+                <p class="feat-desc">Track applications, pipeline health, and hiring velocity</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════════
+         PLATFORM PREVIEW — Section added (do not edit above/below)
+         ════════════════════════════════════════════════════════════ -->
+    <section id="platform-preview">
+
+      <!-- ── PART A: FLOATING 3D BROWSER MOCKUP ────────────────── -->
+      <div class="mockup-part" id="mockup-part">
+        <div class="mp-bg-label">
+          <span class="section-label" style="margin-bottom:0;">05 / PLATFORM PREVIEW</span>
+        </div>
+        <div class="mp-headline-wrap">
+          <h2 class="mp-headline fade-up">
+            See the platform<br><em>in action.</em>
+          </h2>
+          <p class="mp-sub fade-up" style="transition-delay:.15s">
+            A live view of candidate cards, AI rankings, and instant slot booking — all in one elegant interface.
+          </p>
+        </div>
+
+        <!-- Floating 3D mockup scene -->
+        <div class="mockup-scene" id="mockupScene">
+
+          <!-- Floating Widget 1 (top-right dark card) -->
+          <div class="mp-widget mp-widget-tl fp-float-a">
+            <div class="mpw-row"><span class="mpw-icon">⏱</span><span>6 weeks avg. to hire</span></div>
+            <div class="mpw-row"><span class="mpw-icon">📅</span><span>On-demand screening</span></div>
+            <div class="mpw-row"><span class="mpw-icon">⚡</span><span>AI-powered ranking</span></div>
+          </div>
+
+          <!-- Browser Window Mockup -->
+          <div class="browser-mockup fp-float-b" id="browserMockup">
+            <div class="browser-chrome">
+              <div class="browser-dots">
+                <span class="bd bd-red"></span>
+                <span class="bd bd-yellow"></span>
+                <span class="bd bd-green"></span>
+              </div>
+              <div class="browser-bar">
+                <span class="browser-url">app.hirevision.io/candidates</span>
+              </div>
+            </div>
+
+            <div class="browser-body">
+              <!-- Mini Sidebar -->
+              <div class="mini-sidebar">
+                <div class="mini-sidebar-logo">HV<span class="ms-dot">•</span></div>
+                <div class="ms-nav">
+                  <div class="ms-nav-item ms-active">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                  </div>
+                  <div class="ms-nav-item">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                  <div class="ms-nav-item">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </div>
+                  <div class="ms-nav-item">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mini Main -->
+              <div class="mini-main">
+                <div class="mini-header">
+                  <span class="mini-title">Top Candidates</span>
+                  <span class="mini-badge">AI Ranked</span>
+                </div>
+
+                <!-- Card 1 (active/highlighted) -->
+                <div class="job-card job-card-active">
+                  <div class="jc-accent-bar"></div>
+                  <div class="jc-content">
+                    <div class="jc-top">
+                      <div class="jc-info">
+                        <div class="jc-avatar jc-av-1">AK</div>
+                        <div>
+                          <div class="jc-title">Senior Frontend Developer</div>
+                          <div class="jc-stars">
+                            <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span>
+                            <span class="jc-reviews">386 reviews</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="jc-tags">
+                        <span class="jc-tag"><span>⏱</span> Full-time</span>
+                        <span class="jc-tag jc-tag-green"><span>⚡</span> Top Candidate</span>
+                      </div>
+                    </div>
+                    <p class="jc-desc">Strong React skills, 4 years experience, available immediately</p>
+                    <div class="jc-bottom">
+                      <button class="jc-save-btn">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        Save to list
+                      </button>
+                      <span class="jc-tag jc-tag-date"><span>📅</span> Immediate</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="job-card">
+                  <div class="jc-content">
+                    <div class="jc-top">
+                      <div class="jc-info">
+                        <div class="jc-avatar jc-av-2">MS</div>
+                        <div>
+                          <div class="jc-title">Backend Engineer — Node.js</div>
+                          <div class="jc-stars">
+                            <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                            <span class="jc-reviews">214 reviews</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="jc-tags">
+                        <span class="jc-tag"><span>⏱</span> Contract</span>
+                      </div>
+                    </div>
+                    <p class="jc-desc">Expert in REST APIs, MongoDB, and microservices architecture</p>
+                    <div class="jc-bottom">
+                      <button class="jc-save-btn">
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        Save to list
+                      </button>
+                      <span class="jc-tag jc-tag-date"><span>📅</span> 2 weeks notice</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- /mini-main -->
+            </div><!-- /browser-body -->
+          </div><!-- /browser-mockup -->
+
+          <!-- Floating Widget 2 (bottom-right red card) -->
+          <div class="mp-widget mp-widget-br fp-float-c">
+            <div class="mpw-book-label">Book your</div>
+            <div class="mpw-book-label mpw-book-bold">interview slot</div>
+            <div class="mpw-book-arrow">→</div>
+          </div>
+
+        </div><!-- /mockup-scene -->
+      </div><!-- /mockup-part -->
+
+
+      <!-- ── PART B: DARK RADAR / ORBIT SECTION ────────────────── -->
+      <div class="orbit-part" id="orbitPart">
+
+        <!-- Concentric rings -->
+        <div class="orbit-rings" aria-hidden="true">
+          <div class="orbit-ring ring-1"></div>
+          <div class="orbit-ring ring-2"></div>
+          <div class="orbit-ring ring-3"></div>
+          <div class="orbit-ring ring-4"></div>
+          <div class="orbit-ring ring-5"></div>
+        </div>
+
+        <!-- Floating pills -->
+        <div class="orbit-pill pill-top-c fp-drift-a">
+          <span class="op-icon">🧠</span><span>AI Screened</span>
+        </div>
+        <div class="orbit-pill pill-left op-red fp-drift-b">
+          <span class="op-icon">🎯</span><span>One-on-One</span>
+        </div>
+        <div class="orbit-pill pill-bottom-r fp-drift-c">
+          <span class="op-icon">⏱</span><span>Flexible timing</span>
+        </div>
+        <div class="orbit-pill pill-top-r fp-drift-d">
+          <span class="op-icon">📋</span><span>Personalized</span>
+        </div>
+        <div class="orbit-pill pill-right op-icon-only fp-drift-a">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="orbit-pill pill-bottom-l op-icon-only op-red fp-drift-b">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+
+        <!-- Center content -->
+        <div class="orbit-center" id="orbitCenter">
+          <div class="orbit-avatars">
+            <div class="oa oa-1">SJ</div>
+            <div class="oa oa-2">RL</div>
+            <div class="oa oa-3">PK</div>
+            <div class="orbit-count-pill">+200 candidates</div>
+          </div>
+          <h2 class="orbit-headline">
+            Sign up for<br>an interview
+          </h2>
+          <a href="#cta" class="orbit-cta hover-trigger">Get started &rarr;</a>
+        </div>
+
+      </div><!-- /orbit-part -->
+
+    </section><!-- /#platform-preview -->
+    <!-- ════════════════════════════════════════════════════════════
+         END PLATFORM PREVIEW
+         ════════════════════════════════════════════════════════════ -->
+
+
+    <!-- ════════════════════════════════════════════════════════════
+         NEW SCROLLING MOCKUP
+         ════════════════════════════════════════════════════════════ -->
+    <section class="mockup-showcase-section" id="mockup-section">
+      <div class="mockup-reveal-wrapper" id="mockup-reveal">
+        <div class="mockup-float-wrapper" id="mockup-float">
+          <div class="mockup-tilt-wrapper" id="mockup-tilt">
+            <div class="scrolling-mockup-chrome">
+              <div class="scrolling-mockup-dots">
+                <span class="scrolling-mockup-dot red"></span>
+                <span class="scrolling-mockup-dot yellow"></span>
+                <span class="scrolling-mockup-dot green"></span>
+              </div>
+              <div class="scrolling-mockup-url-bar"></div>
+            </div>
+            <div class="scrolling-mockup-screen-content">
+              <div class="ui-scroll-container">
+                <div class="ui-scroller">
+                  <!-- First Set -->
+                  <div class="ui-header">
+                    <div class="ui-logo">Hire<span>Vision</span></div>
+                    <div class="ui-nav"><span class="active">Candidates</span><span>Jobs</span><span>Interviews</span></div>
+                  </div>
+                  <div class="ui-stats-row">
+                    <div class="ui-stat-box"><div class="ui-stat-num">4,285</div><div class="ui-stat-label">Resumes Scanned</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">34</div><div class="ui-stat-label">Interviews Booked</div></div>
+                    <div class="ui-stat-box"><div class="ui-stat-num">98%</div><div class="ui-stat-label">AI Accuracy</div></div>
+                  </div>
+                  <div class="inner-ui-card top-match"><div class="ui-avatar a2">AK</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Arjun Kumar</div><div class="ui-badge">98% Match</div></div><div class="ui-role">Senior React Developer</div><div class="ui-skills"><span class="ui-skill">React</span><span class="ui-skill">Node.js</span><span class="ui-skill">AI Ranked #1</span></div></div></div>
+                  <div class="inner-ui-card"><div class="ui-avatar a3">ER</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Elena Rodriguez</div><div class="ui-badge sec">In Review</div></div><div class="ui-role">Full-Stack Engineer</div><div class="ui-skills"><span class="ui-skill">TypeScript</span><span class="ui-skill">AWS</span></div></div></div>
+                  <div class="inner-ui-card"><div class="ui-avatar a1">MC</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Marcus Chen</div><div class="ui-badge sec">Interviewing</div></div><div class="ui-role">Backend Developer</div><div class="ui-skills"><span class="ui-skill">Python</span><span class="ui-skill">MongoDB</span></div></div></div>
+                  <div class="inner-ui-card top-match"><div class="ui-avatar a4">SJ</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Sarah Jenkins</div><div class="ui-badge">95% Match</div></div><div class="ui-role">UI/UX Designer</div><div class="ui-skills"><span class="ui-skill">Figma</span><span class="ui-skill">Prototyping</span></div></div></div>
+                  
+                  <!-- Duplicated Set -->
+                  <div class="ui-header" style="margin-top: 16px;">
+                    <div class="ui-logo">Hire<span>Vision</span></div>
+                    <div class="ui-nav"><span class="active">Candidates</span><span>Jobs</span><span>Interviews</span></div>
+                  </div>
+                  <div class="ui-stats-row"><div class="ui-stat-box"><div class="ui-stat-num">4,285</div><div class="ui-stat-label">Resumes Scanned</div></div><div class="ui-stat-box"><div class="ui-stat-num">34</div><div class="ui-stat-label">Interviews Booked</div></div><div class="ui-stat-box"><div class="ui-stat-num">98%</div><div class="ui-stat-label">AI Accuracy</div></div></div>
+                  <div class="inner-ui-card top-match"><div class="ui-avatar a2">AK</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Arjun Kumar</div><div class="ui-badge">98% Match</div></div><div class="ui-role">Senior React Developer</div><div class="ui-skills"><span class="ui-skill">React</span><span class="ui-skill">Node.js</span><span class="ui-skill">AI Ranked #1</span></div></div></div>
+                  <div class="inner-ui-card"><div class="ui-avatar a3">ER</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Elena Rodriguez</div><div class="ui-badge sec">In Review</div></div><div class="ui-role">Full-Stack Engineer</div><div class="ui-skills"><span class="ui-skill">TypeScript</span><span class="ui-skill">AWS</span></div></div></div>
+                  <div class="inner-ui-card"><div class="ui-avatar a1">MC</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Marcus Chen</div><div class="ui-badge sec">Interviewing</div></div><div class="ui-role">Backend Developer</div><div class="ui-skills"><span class="ui-skill">Python</span><span class="ui-skill">MongoDB</span></div></div></div>
+                  <div class="inner-ui-card top-match"><div class="ui-avatar a4">SJ</div><div class="ui-card-content"><div class="ui-name-row"><div class="ui-name">Sarah Jenkins</div><div class="ui-badge">95% Match</div></div><div class="ui-role">UI/UX Designer</div><div class="ui-skills"><span class="ui-skill">Figma</span><span class="ui-skill">Prototyping</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="process-section container" id="process">
+        <span class="section-label fade-up">03 / THE PROCESS</span>
+        <h2 class="process-headline fade-up">From application to hired.<br>Four steps.</h2>
+
+        <div class="process-steps">
+            <div class="step-row slide-left">
+                <div class="step-num-col">
+                    <div class="step-num">01</div>
+                </div>
+                <div class="step-content-col">
+                    <h3 class="step-title">Candidate Applies</h3>
+                    <p class="step-desc">Fills out the form and uploads their resume from the candidate portal.</p>
+                </div>
+            </div>
+            <div class="step-row slide-right">
+                <div class="step-num-col">
+                    <div class="step-num">02</div>
+                </div>
+                <div class="step-content-col">
+                    <h3 class="step-title">AI Screens Resume</h3>
+                    <p class="step-desc">The system scores and ranks the resume against the job requirements.</p>
+                </div>
+            </div>
+            <div class="step-row slide-left">
+                <div class="step-num-col">
+                    <div class="step-num">03</div>
+                </div>
+                <div class="step-content-col">
+                    <h3 class="step-title">Admin Reviews</h3>
+                    <p class="step-desc">The recruiter opens the resume, then accepts or rejects in one click.</p>
+                </div>
+            </div>
+            <div class="step-row slide-right">
+                <div class="step-num-col">
+                    <div class="step-num">04</div>
+                </div>
+                <div class="step-content-col">
+                    <h3 class="step-title">Interview Booked</h3>
+                    <p class="step-desc">Accepted candidates get an email with their interview time and calendar link.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid" id="stats-container">
+                <div class="stat-item fade-up">
+                    <div class="stat-number-wrapper">
+                        <span class="stat-num" data-target="10000">0</span>+
+                    </div>
+                    <span class="stat-label">Resumes Screened</span>
+                </div>
+                <div class="stat-item fade-up" style="transition-delay: 0.1s;">
+                    <div class="stat-number-wrapper">
+                        <span class="stat-num" data-target="500">0</span>+
+                    </div>
+                    <span class="stat-label">Companies Using Hire Vision</span>
+                </div>
+                <div class="stat-item fade-up" style="transition-delay: 0.2s;">
+                    <div class="stat-number-wrapper">
+                        <span class="stat-num" data-target="3">0</span>x
+                    </div>
+                    <span class="stat-label">Faster Hiring</span>
+                </div>
+                <div class="stat-item fade-up" style="transition-delay: 0.3s;">
+                    <div class="stat-number-wrapper">
+                        <span class="stat-num" data-target="98">0</span>%
+                    </div>
+                    <span class="stat-label">Candidate Satisfaction</span>
+                </div>
+            </div>
+
+            <h3 class="stats-quote fade-up">
+                "The future of hiring isn't faster humans — it's smarter systems."
+            </h3>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="testimonials-section container" id="testimonials">
+        <span class="section-label fade-up">04 / WHAT THEY SAY</span>
+        
+        <div class="testi-wrapper">
+            <div class="testi-row fade-up">
+                <div class="quote-mark">"</div>
+                <div class="testi-content">
+                    <p class="testi-quote">Hire Vision cut our hiring time in half. The AI screening alone saved us 20 hours a week.</p>
+                    <p class="testi-author">— Sarah M., HR Manager &middot; TechCorp</p>
+                </div>
+            </div>
+            <div class="testi-row fade-up">
+                <div class="quote-mark">"</div>
+                <div class="testi-content">
+                    <p class="testi-quote">The admin dashboard is the cleanest tool I've used in 10 years of recruiting. One click to schedule. Done.</p>
+                    <p class="testi-author">— Raj P., Talent Lead &middot; HireNow</p>
+                </div>
+            </div>
+            <div class="testi-row fade-up">
+                <div class="quote-mark">"</div>
+                <div class="testi-content">
+                    <p class="testi-quote">Our candidates feel respected because they hear back instantly. The email notifications are a game-changer.</p>
+                    <p class="testi-author">— Emily T., Senior Recruiter &middot; StaffPro</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section container" id="cta">
+        <h2 class="cta-headline fade-up">
+            Ready to hire<br><span>smarter?</span>
+        </h2>
+        <p class="cta-desc fade-up" style="transition-delay: 0.1s;">
+            Join 500+ companies transforming their recruitment with AI.
+        </p>
+        <div class="cta-buttons fade-up" style="transition-delay: 0.2s;">
+            <a href="#" class="btn-fill hover-trigger">Post a Job &rarr;</a>
+            <a href="#" class="btn-outline hover-trigger">Upload Resume &rarr;</a>
+        </div>
+        <p class="cta-footer fade-up" style="transition-delay: 0.3s;">
+            No credit card required &middot; Setup in under 10 minutes
+        </p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="container">
+        <div class="footer-top">
+            <div class="footer-left">
+                <a href="#" class="nav-logo" style="display:block; margin-bottom: 8px;">
+                    HIRE <span style="color:var(--accent);">VISION</span>
+                </a>
+                <span class="footer-tagline">Hire people. Not paperwork.</span>
+            </div>
+            <div class="footer-right">
+                <div class="footer-links">
+                    <a href="#features" class="hover-trigger">Features</a>
+                    <a href="#process" class="hover-trigger">How It Works</a>
+                    <a href="#" class="hover-trigger">Post a Job</a>
+                    <a href="#" class="hover-trigger">Upload Resume</a>
+                    <a href="#" class="hover-trigger">Admin Login</a>
+                    <a href="#" class="hover-trigger">Privacy Policy</a>
+                    <a href="#" class="hover-trigger">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 RecruitAI. All rights reserved.
+        </div>
+    </footer>
+
+
+    <script>
+        // --------------------------------------------------------
+        // CUSTOM CURSOR LOGIC
+        // --------------------------------------------------------
+        const cursor = document.getElementById('cursor');
+        const hoverTriggers = document.querySelectorAll('a, button, .hover-trigger');
+
+        document.addEventListener('mousemove', (e) => {
+            // Slight lag effect using requestAnimationFrame
+            requestAnimationFrame(() => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        });
+
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => cursor.classList.add('hover-state'));
+            trigger.addEventListener('mouseleave', () => cursor.classList.remove('hover-state'));
+        });
+
+        // Hide custom cursor when leaving window
+        document.addEventListener('mouseleave', () => cursor.style.display = 'none');
+        document.addEventListener('mouseenter', () => cursor.style.display = 'block');
+
+
+        // --------------------------------------------------------
+        // STICKY NAVBAR LOGIC
+        // --------------------------------------------------------
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // --------------------------------------------------------
+        // INTERSECTION OBSERVER FOR FADE & SLIDE ANIMATIONS
+        // --------------------------------------------------------
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up, .slide-left, .slide-right').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --------------------------------------------------------
+        // STATS COUNT-UP LOGIC
+        // --------------------------------------------------------
+        const statsSection = document.getElementById('stats-container');
+        let hasCounted = false;
+
+        const statsObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !hasCounted) {
+                hasCounted = true;
+                const counters = document.querySelectorAll('.stat-num');
+                const speed = 200;
+
+                counters.forEach(counter => {
+                    const updateCount = () => {
+                        const target = +counter.getAttribute('data-target');
+                        const count = +counter.innerText.replace(/,/g, '');
+                        const inc = target / speed;
+
+                        if (count < target) {
+                            counter.innerText = Math.ceil(count + inc).toLocaleString();
+                            setTimeout(updateCount, 15);
+                        } else {
+                            counter.innerText = target.toLocaleString();
+                        }
+                    };
+                    updateCount();
+                });
+            }
+        }, { threshold: 0.5 });
+
+        if (statsSection) {
+            statsObserver.observe(statsSection);
+        }
+
+        // --------------------------------------------------------
+        // PLATFORM PREVIEW — Mousemove tilt + orbit fade-in
+        // --------------------------------------------------------
+        (function() {
+          // 1. Mousemove parallax tilt on the browser mockup
+          var mockupPart  = document.getElementById('mockup-part');
+          var browserMock = document.getElementById('browserMockup');
+
+          if (mockupPart && browserMock) {
+            mockupPart.addEventListener('mousemove', function(e) {
+              var rect = mockupPart.getBoundingClientRect();
+              var nx = (e.clientX - rect.left) / rect.width  - 0.5;
+              var ny = (e.clientY - rect.top)  / rect.height - 0.5;
+              var rotY =  nx * 10;
+              var rotX = -ny * 6;
+              browserMock.style.transform =
+                'perspective(1200px) rotateX(' + (rotX + 4) + 'deg) rotateY(' + (rotY - 4) + 'deg)';
+            });
+            mockupPart.addEventListener('mouseleave', function() {
+              browserMock.style.transform =
+                'perspective(1200px) rotateX(4deg) rotateY(-4deg)';
+            });
+          }
+
+          // 2. IntersectionObserver fade-in for orbit center
+          var orbitCenter = document.getElementById('orbitCenter');
+          if (orbitCenter) {
+            var orbitObs = new IntersectionObserver(function(entries, obs) {
+              entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('pp-in-view');
+                  obs.unobserve(entry.target);
+                }
+              });
+            }, { threshold: 0.2 });
+            orbitObs.observe(orbitCenter);
+          }
+
+          // 3. Hook new .fade-up inside the preview into the existing observer
+          setTimeout(function() {
+            var newFadeUps = document.querySelectorAll('#platform-preview .fade-up:not([data-pp-obs])');
+            newFadeUps.forEach(function(el) {
+              el.setAttribute('data-pp-obs', '1');
+              if (typeof observer !== 'undefined') {
+                observer.observe(el);
+              } else {
+                el.classList.add('in-view');
+              }
+            });
+          }, 100);
+        })();
+        // END PLATFORM PREVIEW JS
+
+        // --------------------------------------------------------
+        // NEW SCROLLING MOCKUP TILT & REVEAL
+        // --------------------------------------------------------
+        (function() {
+          const section = document.getElementById('mockup-section');
+          const tiltWrapper = document.getElementById('mockup-tilt');
+          const floatWrapper = document.getElementById('mockup-float');
+          const revealWrapper = document.getElementById('mockup-reveal');
+          let isHovering = false;
+
+          if (section && tiltWrapper && floatWrapper) {
+            section.addEventListener('mousemove', (e) => {
+              if (!isHovering) {
+                isHovering = true;
+                floatWrapper.classList.add('paused');
+                tiltWrapper.style.transition = 'transform 0.1s ease'; 
+              }
+              const rect = section.getBoundingClientRect();
+              const xNorm = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+              const yNorm = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+              tiltWrapper.style.transform = `perspective(1000px) rotateX(${yNorm * -6}deg) rotateY(${xNorm * 8}deg)`;
+            });
+            section.addEventListener('mouseleave', () => {
+              isHovering = false;
+              floatWrapper.classList.remove('paused');
+              tiltWrapper.style.transition = 'transform 0.5s ease-out';
+              tiltWrapper.style.transform = `perspective(1000px) rotateX(4deg) rotateY(-6deg)`;
+            });
+          }
+
+          if (revealWrapper && typeof IntersectionObserver !== 'undefined') {
+            const obs = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  obs.unobserve(entry.target); 
+                }
+              });
+            }, { threshold: 0.15 });
+            obs.observe(revealWrapper);
+          }
+        })();
+    </script>
+</body>
+</html>

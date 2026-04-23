@@ -110,6 +110,7 @@ function AddJobSection() {
   const [submitting, setSubmitting] = useState(false);
   const [jobSuccess, setJobSuccess] = useState('');
   const [jobError, setJobError] = useState('');
+  const [editingJobId, setEditingJobId] = useState(null);
 
   useEffect(() => { fetchJobs(); }, []);
 
@@ -136,24 +137,59 @@ function AddJobSection() {
     try {
       const payload = {
         ...form,
-        requirements: form.requirements
-          .split(',')
-          .map((r) => r.trim())
-          .filter(Boolean),
+        requirements: typeof form.requirements === 'string'
+          ? form.requirements.split(',').map((r) => r.trim()).filter(Boolean)
+          : form.requirements,
       };
 
       const freshToken = await getToken();
-      await axios.post(`${API_URL}/api/jobs`, payload, {
-        headers: { Authorization: `Bearer ${freshToken}` },
-      });
-      setJobSuccess('✅ Job posted successfully!');
+      
+      if (editingJobId) {
+        await axios.put(`${API_URL}/api/jobs/${editingJobId}`, payload, {
+          headers: { Authorization: `Bearer ${freshToken}` },
+        });
+        setJobSuccess('✅ Job updated successfully!');
+      } else {
+        await axios.post(`${API_URL}/api/jobs`, payload, {
+          headers: { Authorization: `Bearer ${freshToken}` },
+        });
+        setJobSuccess('✅ Job posted successfully!');
+      }
+      
       setForm(emptyJob);
+      setEditingJobId(null);
       fetchJobs();
     } catch (err) {
-      setJobError(err.response?.data?.error || err.response?.data?.message || 'Failed to post job.');
+      setJobError(err.response?.data?.error || err.response?.data?.message || 'Failed to process job.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEditClick = (job) => {
+    setEditingJobId(job._id);
+    setForm({
+      title: job.title,
+      company: job.company,
+      companyWebsite: job.companyWebsite || '',
+      location: job.location,
+      type: job.type,
+      experienceLevel: job.experienceLevel,
+      description: job.description,
+      requirements: Array.isArray(job.requirements) ? job.requirements.join(', ') : '',
+      salaryRange: job.salaryRange || '',
+    });
+    setJobSuccess('');
+    setJobError('');
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingJobId(null);
+    setForm(emptyJob);
+    setJobSuccess('');
+    setJobError('');
   };
 
   const handleDelete = async (id) => {
@@ -171,10 +207,10 @@ function AddJobSection() {
 
   return (
     <div className="space-y-8">
-      {/* ── Add Job Form ── */}
+      {/* ── Add/Edit Job Form ── */}
       <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
-        <h2 className="text-lg font-bold text-white mb-1">Post a New Job</h2>
-        <p className="text-xs text-gray-500 mb-5">Fill in the details to publish a new job listing.</p>
+        <h2 className="text-lg font-bold text-white mb-1">{editingJobId ? 'Edit Job Listing' : 'Post a New Job'}</h2>
+        <p className="text-xs text-gray-500 mb-5">Fill in the details to {editingJobId ? 'update the' : 'publish a new'} job listing.</p>
 
         {jobSuccess && (
           <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">{jobSuccess}</div>
@@ -252,11 +288,17 @@ function AddJobSection() {
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           {/* Submit */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 flex gap-3 mt-2">
             <button type="submit" disabled={submitting}
-              className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">
-              {submitting ? 'Posting...' : 'Post Job'}
+              className="flex-1 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">
+              {submitting ? (editingJobId ? 'Updating...' : 'Posting...') : (editingJobId ? 'Update Job' : 'Post Job')}
             </button>
+            {editingJobId && (
+              <button type="button" onClick={handleCancelEdit} disabled={submitting}
+                className="flex-1 py-2.5 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 text-sm font-medium transition-colors">
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -290,10 +332,16 @@ function AddJobSection() {
                     )}
                   </div>
                 </div>
-                <button onClick={() => handleDelete(job._id)}
-                  className="shrink-0 px-3 py-1.5 rounded-lg bg-red-600/15 border border-red-500/20 text-red-400 hover:bg-red-600/30 text-xs font-medium transition-colors">
-                  Delete
-                </button>
+                <div className="shrink-0 flex items-center gap-2">
+                  <button onClick={() => handleEditClick(job)}
+                    className="px-3 py-1.5 rounded-lg bg-blue-600/15 border border-blue-500/20 text-blue-400 hover:bg-blue-600/30 text-xs font-medium transition-colors">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(job._id)}
+                    className="px-3 py-1.5 rounded-lg bg-red-600/15 border border-red-500/20 text-red-400 hover:bg-red-600/30 text-xs font-medium transition-colors">
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -374,6 +422,7 @@ function ResumesSection() {
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
                 <th className="px-5 py-3">Position</th>
+                <th className="px-5 py-3">Skills</th>
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Actions</th>
@@ -381,11 +430,31 @@ function ResumesSection() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {resumes.map((resume) => (
-                <tr key={resume._id} className="bg-white/[0.02] hover:bg-white/5 transition-colors">
+                <tr key={resume._id} className="bg-white/[0.02] hover:bg-white/5 transition-colors align-top">
                   <td className="px-5 py-4 text-white font-medium">{resume.name}</td>
                   <td className="px-5 py-4 text-gray-300">{resume.email}</td>
                   <td className="px-5 py-4 text-gray-300">{resume.phone}</td>
                   <td className="px-5 py-4 text-gray-300">{resume.position}</td>
+                  <td className="px-5 py-4 max-w-xs">
+                    {resume.skills && resume.skills.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {resume.skills.slice(0, 6).map((skill, i) => (
+                          <span key={i}
+                            className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] rounded-full whitespace-nowrap">
+                            {skill}
+                          </span>
+                        ))}
+                        {resume.skills.length > 6 && (
+                          <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-gray-400 text-[11px] rounded-full"
+                            title={resume.skills.slice(6).join(', ')}>
+                            +{resume.skills.length - 6} more
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-600 text-xs italic">No skills detected</span>
+                    )}
+                  </td>
                   <td className="px-5 py-4 text-gray-400">
                     {new Date(resume.uploadedAt).toLocaleDateString('en-IN', {
                       day: '2-digit', month: 'short', year: 'numeric',
