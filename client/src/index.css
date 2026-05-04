@@ -147,9 +147,7 @@
 }
 
 /* Global text color softening */
-.text-white {
-  color: var(--color-heading) !important;
-}
+/* Removed problematic text-white override to restore standard Tailwind behavior */
 
 .text-gray-300 {
   color: var(--color-text) !important;

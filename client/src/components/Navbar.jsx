@@ -33,10 +33,13 @@ export default function Navbar() {
   const padding = 24 - scrollProgress * 8; // Shrinks from 24px to 16px
   const headerHeight = 40 + padding * 0.5; // Dynamic height
 
+  const isRoleSelectionPage = location.pathname === '/role-selection';
+  const shouldHaveBlackBg = scrolled && !isRoleSelectionPage && !isHomePage;
+
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-        scrolled || !isHomePage 
+        shouldHaveBlackBg
           ? 'bg-black/95 backdrop-blur-lg border-b border-[#333333]' 
           : 'bg-transparent'
       }`}
@@ -64,7 +67,7 @@ export default function Navbar() {
                   transition: 'all 300ms ease-out'
                 }}
               >
-                Hire <span style={{ fontWeight: 400, color: '#c8f135' }}>Vision</span>
+                HIRE <span style={{ fontWeight: 700, color: '#c8f135' }}>VISION</span>
               </span>
             </Link>
             
