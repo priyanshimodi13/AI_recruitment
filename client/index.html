@@ -10,19 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Prevent flash of unstyled content -->
+    <!-- Prevent layout shift -->
     <style>
-      /* Hide content until fonts are loaded */
-      body {
-        opacity: 0;
-        transition: opacity 0.3s ease-in;
-      }
-
-      body.fonts-loaded {
-        opacity: 1;
-      }
-
-      /* Prevent layout shift */
       * {
         box-sizing: border-box;
       }

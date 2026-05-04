@@ -2,8 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import { ClerkProvider } from '@clerk/clerk-react'
+import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/clerk-react'
 import { BrowserRouter } from 'react-router-dom'
+import { InfinityLoader } from './components/UI/loader-13'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -29,7 +30,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         signUpUrl="/sign-up"
       >
       <BrowserRouter>
-        <App />
+        <ClerkLoading>
+          <div className="flex justify-center items-center h-screen bg-black">
+            <InfinityLoader size={80} className="[&>svg>path:last-child]:stroke-blue-500" />
+          </div>
+        </ClerkLoading>
+        <ClerkLoaded>
+          <App />
+        </ClerkLoaded>
       </BrowserRouter>
     </ClerkProvider>
   </React.StrictMode>

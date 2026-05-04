@@ -12,19 +12,24 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import RoleSelectionPage from './pages/RoleSelectionPage';
 import GridBackground from './components/UI/grid-background';
-import TubesSplashScreen from './components/UI/TubesSplashScreen';
-
+import HeroSplashScreen from './components/UI/HeroSplashScreen';
+import { InfinityLoader } from './components/UI/loader-13';
 function ProtectedRoute({ children }) {
   const { isSignedIn, isLoaded } = useAuth();
-  if (!isLoaded) return <div className="flex justify-center items-center h-screen font-medium text-blue-600">Loading...</div>;
+  if (!isLoaded) return (
+    <div className="flex justify-center items-center h-screen bg-[var(--color-bg)]">
+      <InfinityLoader size={80} />
+    </div>
+  );
   return isSignedIn ? children : <Navigate to="/sign-in" />;
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('splashShown'));
   const [isAppReady, setIsAppReady] = useState(false);
 
   const handleSplashFinish = useCallback(() => {
+    sessionStorage.setItem('splashShown', 'true');
     setShowSplash(false);
   }, []);
 
@@ -46,7 +51,7 @@ export default function App() {
 
   return (
     <GridBackground className="text-[var(--color-text)]">
-      {showSplash && <TubesSplashScreen onFinish={handleSplashFinish} />}
+      {showSplash && <HeroSplashScreen onFinish={handleSplashFinish} />}
       <div className={`transition-opacity duration-500 ${isAppReady && !showSplash ? 'opacity-100' : 'opacity-0'}`}>
         <Navbar />
         <div>

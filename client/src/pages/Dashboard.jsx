@@ -148,7 +148,7 @@ export default function Dashboard() {
 
         // 2. Check if we have an intended role from RoleSelectionPage
         const intendedRole = localStorage.getItem('intendedRole');
-        if (intendedRole) {
+        if (intendedRole && intendedRole !== dbRole) {
           // Send to backend to update the newly created/existing user
           const roleRes = await fetch(`${API_URL}/api/users/role`, {
             method: 'PUT',
@@ -162,7 +162,13 @@ export default function Dashboard() {
           if (roleRes.ok) {
             currentRole = intendedRole;
           }
-          localStorage.removeItem('intendedRole'); // clear it
+        } else if (intendedRole === dbRole) {
+          currentRole = intendedRole;
+        }
+
+        // Only clear intendedRole after everything is processed
+        if (intendedRole) {
+          localStorage.removeItem('intendedRole');
         }
 
         // 3. Set the final role state

@@ -7,13 +7,8 @@ interface TubesSplashScreenProps {
 
 export default function TubesSplashScreen({ onFinish }: TubesSplashScreenProps) {
   const splashRef = useRef<HTMLDivElement>(null);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Mark as ready after a short delay to ensure the canvas is initialized
-    const readyTimer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
 
     const timer = setTimeout(() => {
       if (splashRef.current) {
@@ -27,7 +22,6 @@ export default function TubesSplashScreen({ onFinish }: TubesSplashScreenProps) 
     }, 3500);
 
     return () => {
-      clearTimeout(readyTimer);
       clearTimeout(timer);
     };
   }, [onFinish]);
@@ -35,7 +29,7 @@ export default function TubesSplashScreen({ onFinish }: TubesSplashScreenProps) 
   return (
     <div
       ref={splashRef}
-      className={`fixed inset-0 z-[9999] bg-black transition-opacity duration-300 ${!isReady ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 z-[9999] bg-black transition-opacity duration-300 opacity-100`}
     >
       <TubesCursor
         title="Hire Vision"
