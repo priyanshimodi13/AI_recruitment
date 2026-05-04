@@ -22,8 +22,8 @@ import {
   UserCheck,
 } from 'lucide-react';
 import * as THREE from 'three';
-import RadialOrbitalTimeline from '../components/ui/radial-orbital-timeline';
-import { CinematicFooter } from '../components/ui/motion-footer';
+import RadialOrbitalTimeline from '../components/UI/radial-orbital-timeline';
+import { CinematicFooter } from '../components/UI/motion-footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
