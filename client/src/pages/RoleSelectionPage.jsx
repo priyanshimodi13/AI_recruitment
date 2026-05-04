@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Briefcase, UserCircle } from 'lucide-react';
 import gsap from 'gsap';
-import ThreeBackground from '../components/ThreeBackground';
+import LoginPage from '../components/UI/gaming-login';
 
 export default function RoleSelectionPage() {
   const navigate = useNavigate();
@@ -75,8 +75,8 @@ export default function RoleSelectionPage() {
       className="h-screen w-full flex items-center justify-center bg-black relative overflow-hidden"
       style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
-      <ThreeBackground />
-      <div className="absolute inset-0 bg-gradient-to-br from-lime-400/10 to-transparent pointer-events-none"></div>
+      <LoginPage.VideoBackground videoUrl="/18514338-hd_1920_1080_60fps.mp4" />
+      <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
       
       <div className="w-full max-w-4xl relative z-20 px-6">
         <div className="text-center mb-12" ref={titleRef}>

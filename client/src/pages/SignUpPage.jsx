@@ -1,68 +1,75 @@
+import React from 'react';
 import { SignUp } from '@clerk/clerk-react';
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import ThreeBackground from '../components/ThreeBackground';
+import LoginPage from '../components/UI/gaming-login';
 
 export default function SignUpPage() {
-  const formRef = useRef(null);
-
-  useEffect(() => {
-    // Scroll to top
-    window.scrollTo(0, 0);
-
-    // GSAP animations
-    gsap.fromTo(
-      formRef.current,
-      { opacity: 0, y: 40, scale: 0.9 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: 'back.out(1.2)'
-      }
-    );
-  }, []);
-
   return (
-    <div className="min-h-screen flex flex-col items-center pt-48 pb-32 bg-black relative overflow-hidden">
-      <ThreeBackground />
-      <div className="absolute inset-0 bg-gradient-to-br from-lime-400/10 to-transparent pointer-events-none"></div>
-      <div className="w-full max-w-md relative z-20 px-6 mt-10" ref={formRef}>
-        <SignUp 
-          path="/sign-up" 
-          routing="path" 
-          signInUrl="/sign-in"
-          fallbackRedirectUrl="/dashboard"
-          appearance={{
-            elements: {
-              card: "backdrop-blur-2xl border border-lime-400/40 rounded-[2.5rem] shadow-2xl p-6 bg-slate-900/40",
-              headerTitle: "text-white font-display font-black italic tracking-tighter text-2xl mb-2",
-              headerSubtitle: "text-slate-300 font-medium italic opacity-80",
-              socialButtonsBlockButton: "bg-slate-800/60 border border-lime-400/40 text-white hover:bg-slate-800/80 hover:border-lime-400/60 transition-all rounded-2xl py-3 shadow-sm",
-              socialButtonsBlockButtonText: "text-slate-200 font-black uppercase text-[9px] tracking-widest",
-              dividerLine: "bg-lime-400/20 opacity-40",
-              dividerText: "text-slate-400 uppercase text-[9px] font-black tracking-[0.3em] opacity-60",
-              formFieldLabel: "text-slate-300 uppercase text-[9px] font-black tracking-widest opacity-70 mb-2",
-              formFieldInput: "bg-[#111] border border-lime-400/30 text-white rounded-2xl focus:border-lime-400/60 focus:ring-4 focus:ring-lime-400/10 transition-all py-3 px-4 font-semibold placeholder-slate-500",
-              formButtonPrimary: "w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg bg-lime-400 text-black hover:bg-lime-300 active:scale-95 transition-all shadow-lime-400/30",
-              footerActionText: "text-slate-400 font-medium italic",
-              footerActionLink: "text-lime-400 font-black italic hover:underline ml-1",
-              identityPreviewText: "text-white",
-              identityPreviewEditButtonIcon: "text-lime-400",
-              formField__phoneNumber: "hidden",
-              formFieldRow__phoneNumber: "hidden"
-            },
-            variables: {
-              colorPrimary: "#c8f135",
-              colorBackground: "#050505",
-              colorText: "#ffffff",
-              colorInputBackground: "#111111",
-              colorInputText: "#ffffff"
-            }
-          }}
-        />
+    <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-12 overflow-hidden">
+      {/* Video Background */}
+      <LoginPage.VideoBackground videoUrl="/18514338-hd_1920_1080_60fps.mp4" />
+
+      {/* Clerk SignUp overlaid in the gaming-styled card layout */}
+      <div className="relative z-20 w-full max-w-md">
+        <div
+          className="p-10 rounded-[2.5rem] backdrop-blur-xl bg-black/60 border border-white/10 shadow-2xl"
+          style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" }}
+        >
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <h2 className="text-4xl font-black mb-3 tracking-tighter italic uppercase">
+              <span className="text-white">HIRE </span>
+              <span className="text-lime-400">VISION</span>
+            </h2>
+            <p className="text-white/60 text-sm font-medium mb-1">Begin your professional journey</p>
+            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">[Create your account]</p>
+          </div>
+
+          {/* Clerk Sign Up Form */}
+          <SignUp
+            path="/sign-up"
+            routing="path"
+            signInUrl="/sign-in"
+            fallbackRedirectUrl="/dashboard"
+            appearance={{
+              elements: {
+                card: "shadow-none bg-transparent border-0 p-0",
+                headerTitle: "hidden",
+                headerSubtitle: "hidden",
+                logoBox: "hidden",
+                socialButtonsBlockButton: "flex items-center justify-center p-3 bg-white/5 border border-white/10 rounded-xl text-white/80 hover:bg-white/10 hover:text-white hover:border-lime-400/30 transition-all duration-300 w-full",
+                socialButtonsBlockButtonText: "text-[10px] font-black uppercase tracking-widest text-white/80",
+                socialButtonsBlockButtonArrow: "hidden",
+                dividerLine: "bg-white/10",
+                dividerText: "text-[10px] font-black uppercase tracking-[0.3em] text-white/30",
+                formFieldLabel: "text-[10px] font-black uppercase tracking-widest text-white/50 mb-2",
+                formFieldInput: "w-full pl-4 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-lime-400/50 transition-all duration-300 text-sm",
+                formButtonPrimary: "w-full py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 transform hover:-translate-y-1 active:scale-95 bg-lime-400 text-black hover:bg-white shadow-xl shadow-lime-400/10",
+                footerActionText: "text-xs text-white/40 font-medium",
+                footerActionLink: "text-xs font-black text-white hover:text-lime-400 transition-colors uppercase tracking-widest ml-1",
+                identityPreviewText: "text-white",
+                identityPreviewEditButtonIcon: "text-lime-400",
+                formField__phoneNumber: "hidden",
+                formFieldRow__phoneNumber: "hidden",
+                footer: "mt-6",
+                formFieldInputShowPasswordButton: "text-white/40 hover:text-white",
+                alert: "bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl text-xs",
+              },
+              variables: {
+                colorPrimary: "#c8f135",
+                colorBackground: "transparent",
+                colorText: "#ffffff",
+                colorInputBackground: "transparent",
+                colorInputText: "#ffffff",
+                borderRadius: "0.75rem",
+              }
+            }}
+          />
+        </div>
       </div>
+
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-white/30 text-xs z-20 uppercase tracking-widest font-black">
+        © 2025 Hire Vision. All rights reserved.
+      </footer>
     </div>
   );
 }
