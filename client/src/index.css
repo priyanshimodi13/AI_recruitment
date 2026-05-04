@@ -27,17 +27,17 @@
 
   /* Support for Dark Mode */
   .dark {
-    --color-bg: #000000;
-    --color-surface: rgba(15, 23, 42, 0.7);
-    --color-surface-2: #1e293b;
-    --color-border: rgba(148, 163, 184, 0.1);
+    --color-bg: #09090b;
+    --color-surface: rgba(17, 24, 39, 0.7);
+    --color-surface-2: #111827;
+    --color-border: rgba(255, 255, 255, 0.05);
 
-    --color-text: #cbd5e1;
-    --color-text-muted: #94a3b8;
-    --color-heading: #f8fafc;
+    --color-text: #9ca3af;
+    --color-text-muted: #6b7280;
+    --color-heading: #f3f4f6;
 
-    --color-accent: #60a5fa;
-    --color-accent-hsl: 213, 94%, 68%;
+    --color-accent: #c8f135;
+    --color-accent-hsl: 73, 82%, 58%;
   }
 
   html {
@@ -45,23 +45,20 @@
     /* Scale base: 16px → 14px, brings all rem sizes to medium */
   }
 
-  body {
-    @apply bg-[var(--color-bg)] text-[var(--color-text)] antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
-      'Helvetica Neue', Arial, sans-serif;
+  body, .font-sf-text {
+    @apply text-[var(--color-text)] antialiased;
+    font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 0.9375rem;
-    /* ~15px body text */
   }
 
   h1,
   h2,
   h3,
   h4,
-  .font-display {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
-      'Helvetica Neue', Arial, sans-serif;
+  .font-display, .font-sf-display {
+    font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--color-heading);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
     font-weight: 700;
   }
 
@@ -84,47 +81,36 @@
   }
 
   .btn-primary {
-    @apply px-6 py-3 font-semibold rounded-xl active:scale-[0.98] transition-all duration-300 relative overflow-hidden;
-    background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
-    color: #ffffff;
-    box-shadow: 0 4px 15px hsla(var(--color-accent-hsl), 0.3);
-  }
-
-  .btn-primary::after {
-    content: '';
-    @apply absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300;
+    @apply px-6 py-3 font-bold rounded-2xl active:scale-[0.98] transition-all duration-500 relative overflow-hidden;
+    background: linear-gradient(135deg, var(--color-accent), #a3e635);
+    color: #000000;
+    box-shadow: 0 4px 20px hsla(var(--color-accent-hsl), 0.2);
   }
 
   .btn-primary:hover {
-    @apply -translate-y-0.5 shadow-xl;
-    box-shadow: 0 8px 25px hsla(var(--color-accent-hsl), 0.4);
-  }
-
-  .btn-primary:hover::after {
-    @apply opacity-100;
+    @apply -translate-y-1 shadow-2xl;
+    box-shadow: 0 12px 30px hsla(var(--color-accent-hsl), 0.3);
   }
 
   .btn-secondary {
-    @apply px-6 py-3 font-medium rounded-lg active:scale-[0.97] transition-all duration-150;
+    @apply px-6 py-3 font-bold rounded-2xl active:scale-[0.97] transition-all duration-300;
     border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-heading);
-  }
-
-  .btn-secondary:hover {
     background: var(--color-surface-2);
+    color: var(--color-heading);
+    @apply backdrop-blur-md;
   }
 
   .card-premium {
-    @apply p-8 rounded-3xl transition-all duration-500 backdrop-blur-xl border;
-    background: var(--color-surface);
-    border-color: var(--color-border);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    @apply p-8 rounded-[2.5rem] transition-all duration-700 backdrop-blur-2xl border;
+    background: linear-gradient(145deg, rgba(196, 238, 198, 0.05), rgba(9, 9, 11, 0.9));
+    border-color: rgba(196, 238, 198, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   }
 
   .card-premium:hover {
-    @apply -translate-y-2 border-[var(--color-accent)]/30;
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+    @apply -translate-y-2;
+    border-color: rgba(196, 238, 198, 0.3);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -166,6 +152,92 @@
 [class*="phoneNumber"],
 [class*="phone_number"] {
   display: none !important;
+}
+
+/* ===== CLERK FORM — FORCE WHITE TEXT ON DARK VIDEO PAGES ===== */
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsBlockButton:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  font-size: 11px !important;
+}
+
+.cl-dividerText {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.cl-dividerLine {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.cl-formFieldLabel {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+}
+
+.cl-formFieldInput {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.cl-formFieldInput::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.cl-formFieldHintText,
+.cl-formFieldSuccessText,
+.cl-formResendCodeLink {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.cl-footerActionText {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.cl-footerActionLink {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.cl-footerActionLink:hover {
+  color: #c8f135 !important;
+}
+
+.cl-footer {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.cl-otpCodeFieldInput {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.cl-identityPreviewText {
+  color: #ffffff !important;
+}
+
+.cl-alternativeMethodsBlockButton {
+  color: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Hint / secondary text beside labels */
+[data-localization-key] {
+  color: inherit;
 }
 
 @theme {

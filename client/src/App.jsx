@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import Navbar from './components/Navbar';
 import ModernLandingPage from './pages/ModernLandingPage';
@@ -14,72 +14,78 @@ import RoleSelectionPage from './pages/RoleSelectionPage';
 import GridBackground from './components/UI/grid-background';
 import HeroSplashScreen from './components/UI/HeroSplashScreen';
 import { InfinityLoader } from './components/UI/loader-13';
+
 function ProtectedRoute({ children }) {
-  const { isSignedIn, isLoaded } = useAuth();
-  if (!isLoaded) return (
-    <div className="flex justify-center items-center h-screen bg-[var(--color-bg)]">
-      <InfinityLoader size={80} />
-    </div>
-  );
-  return isSignedIn ? children : <Navigate to="/sign-in" />;
+ const { isSignedIn, isLoaded } = useAuth();
+ if (!isLoaded) return (
+  <div className="flex justify-center items-center h-screen bg-[var(--color-bg)]">
+   <InfinityLoader size={80} />
+  </div>
+ );
+ return isSignedIn ? children : <Navigate to="/sign-in" />;
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('splashShown'));
-  const [isAppReady, setIsAppReady] = useState(false);
+ const location = useLocation();
+ const [showSplash, setShowSplash] = useState(!sessionStorage.getItem('splashShown'));
+ const [isAppReady, setIsAppReady] = useState(false);
 
-  const handleSplashFinish = useCallback(() => {
-    sessionStorage.setItem('splashShown', 'true');
-    setShowSplash(false);
-  }, []);
+ const handleSplashFinish = useCallback(() => {
+  sessionStorage.setItem('splashShown', 'true');
+  setShowSplash(false);
+ }, []);
 
-  useEffect(() => {
-    // Mark app as ready after fonts are loaded
-    const checkFonts = () => {
-      if (document.body.classList.contains('fonts-loaded')) {
-        setIsAppReady(true);
-      } else {
-        setTimeout(checkFonts, 100);
-      }
-    };
+ useEffect(() => {
+  // Mark app as ready after fonts are loaded
+  const checkFonts = () => {
+   if (document.body.classList.contains('fonts-loaded')) {
+    setIsAppReady(true);
+   } else {
+    setTimeout(checkFonts, 100);
+   }
+  };
 
-    // Start checking after a small delay
-    const timer = setTimeout(checkFonts, 200);
+  // Start checking after a small delay
+  const timer = setTimeout(checkFonts, 200);
 
-    return () => clearTimeout(timer);
-  }, []);
+  return () => clearTimeout(timer);
+ }, []);
 
-  return (
-    <GridBackground className="text-[var(--color-text)]">
-      {showSplash && <HeroSplashScreen onFinish={handleSplashFinish} />}
-      <div className={`transition-opacity duration-500 ${isAppReady && !showSplash ? 'opacity-100' : 'opacity-0'}`}>
-        <Navbar />
-        <div>
-          <Routes>
-            <Route path="/" element={<ModernLandingPage />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/prepare-interview" element={<PrepareInterview />} />
-            <Route path="/upload-resume" element={
-              <ProtectedRoute>
-                <UploadResume />
-              </ProtectedRoute>
-            } />
-            <Route path="/role-selection" element={<RoleSelectionPage />} />
-            <Route path="/sign-in/*" element={<SignInPage />} />
-            <Route path="/sign-up/*" element={<SignUpPage />} />
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </div>
-      </div>
-    </GridBackground>
-  );
+ // Routes that should NOT show the global top navbar
+ const hideNavbarRoutes = ['/dashboard', '/admin', '/sign-in', '/sign-up', '/role-selection'];
+ const shouldHideNavbar = hideNavbarRoutes.some(route => location.pathname.startsWith(route));
+
+ return (
+  <GridBackground className="text-[var(--color-text)]">
+   {showSplash && <HeroSplashScreen onFinish={handleSplashFinish} />}
+   <div className={`transition-opacity duration-500 ${isAppReady && !showSplash ? 'opacity-100' : 'opacity-0'}`}>
+    {!shouldHideNavbar && <Navbar />}
+    <div>
+     <Routes>
+      <Route path="/" element={<ModernLandingPage />} />
+      <Route path="/jobs" element={<Jobs />} />
+      <Route path="/prepare-interview" element={<PrepareInterview />} />
+      <Route path="/upload-resume" element={
+       <ProtectedRoute>
+        <UploadResume />
+       </ProtectedRoute>
+      } />
+      <Route path="/role-selection" element={<RoleSelectionPage />} />
+      <Route path="/sign-in/*" element={<SignInPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
+      <Route path="/admin" element={
+       <ProtectedRoute>
+        <AdminDashboard />
+       </ProtectedRoute>
+      } />
+      <Route path="/dashboard" element={
+       <ProtectedRoute>
+        <Dashboard />
+       </ProtectedRoute>
+      } />
+     </Routes>
+    </div>
+   </div>
+  </GridBackground>
+ );
 }
