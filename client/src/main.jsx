@@ -21,7 +21,6 @@ if (typeof document !== 'undefined') {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
- <React.StrictMode>
   <ClerkProvider
     publishableKey={PUBLISHABLE_KEY}
     signInFallbackRedirectUrl="/dashboard"
@@ -40,5 +39,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </ClerkLoaded>
    </BrowserRouter>
   </ClerkProvider>
- </React.StrictMode>
 )
