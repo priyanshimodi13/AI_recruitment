@@ -219,11 +219,15 @@ export default function Dashboard() {
  useEffect(() => {
   const checkAndInitRole = async () => {
    try {
-   // Optimistic Speed Boost: If we have an intended role, use it immediately
-   const localIntendedRole = localStorage.getItem('intendedRole');
-   if (localIntendedRole) {
-    setUserRole(localIntendedRole);
-   }
+    // 1. Instant Cache Check: Look for intended role OR previously saved role
+    const localIntendedRole = localStorage.getItem('intendedRole');
+    const cachedRole = localStorage.getItem('userRoleCache');
+    
+    if (localIntendedRole) {
+     setUserRole(localIntendedRole);
+    } else if (cachedRole) {
+     setUserRole(cachedRole);
+    }
 
    try {
     const token = await getToken();
@@ -231,8 +235,7 @@ export default function Dashboard() {
      headers: { Authorization: `Bearer ${token}` }
     });
     
-    let currentRole = null;
-    let dbRole = null;
+    let finalRole = null;
 
     if (res.ok) {
      const data = await res.json();
@@ -240,23 +243,26 @@ export default function Dashboard() {
       navigate('/admin');
       return;
      }
-     dbRole = data.role;
+     const dbRole = data.role;
      
-     // 2. Check if we have an intended role from RoleSelectionPage
-     const intendedRole = localStorage.getItem('intendedRole');
-     if (intendedRole && intendedRole !== dbRole) {
-      // Background Sync: Don't wait for this to finish before showing UI
+     // 2. Handle Intended Role Sync
+     if (localIntendedRole && localIntendedRole !== dbRole) {
       fetch(`${API_URL}/api/users/role`, {
        method: 'PUT',
        headers: { 
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}` 
        },
-       body: JSON.stringify({ role: intendedRole })
+       body: JSON.stringify({ role: localIntendedRole })
       });
-      currentRole = intendedRole;
+      finalRole = localIntendedRole;
      } else {
-      currentRole = dbRole;
+      finalRole = dbRole;
+     }
+
+     // 3. Update Cache for next time
+     if (finalRole) {
+      localStorage.setItem('userRoleCache', finalRole);
      }
     }
     
@@ -265,9 +271,9 @@ export default function Dashboard() {
      localStorage.removeItem('intendedRole');
     }
 
-    if (currentRole) {
-     setUserRole(currentRole);
-    } else {
+    if (finalRole) {
+     setUserRole(finalRole);
+    } else if (!userRole) {
      setUserRole('candidate'); // Ultimate fallback
     }
    } catch (err) {
