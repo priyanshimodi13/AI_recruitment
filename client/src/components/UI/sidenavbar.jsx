@@ -19,11 +19,12 @@ import {
  User,
  Search,
  Plus,
- Bell
+ Bell,
+ LogOut
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, SignOutButton } from "@clerk/clerk-react";
 
 export default function Sidenavbar({ children, userRole = 'candidate', activeView, setActiveView, onPostJob }) {
  const [isOpen, setIsOpen] = useState(true);
@@ -114,6 +115,18 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
          {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">{item.label}</span>}
         </Button>
        ))}
+
+       <div className="pt-4 mt-4 border-t border-white/5">
+        <SignOutButton>
+         <Button
+          variant="ghost"
+          className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-red-400/60 hover:bg-red-400/5 hover:text-red-400 transition-all duration-500 group`}
+         >
+          <LogOut className="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100" />
+          {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">Sign Out</span>}
+         </Button>
+        </SignOutButton>
+       </div>
       </div>
      </nav>
     </ScrollArea>
