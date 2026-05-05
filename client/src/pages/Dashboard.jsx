@@ -218,16 +218,15 @@ export default function Dashboard() {
 
  useEffect(() => {
   const checkAndInitRole = async () => {
-   try {
-    // 1. Instant Cache Check: Look for intended role OR previously saved role
-    const localIntendedRole = localStorage.getItem('intendedRole');
-    const cachedRole = localStorage.getItem('userRoleCache');
-    
-    if (localIntendedRole) {
-     setUserRole(localIntendedRole);
-    } else if (cachedRole) {
-     setUserRole(cachedRole);
-    }
+   // 1. Instant Cache Check: Look for intended role OR previously saved role
+   const localIntendedRole = localStorage.getItem('intendedRole');
+   const cachedRole = localStorage.getItem('userRoleCache');
+   
+   if (localIntendedRole) {
+    setUserRole(localIntendedRole);
+   } else if (cachedRole) {
+    setUserRole(cachedRole);
+   }
 
    try {
     const token = await getToken();
