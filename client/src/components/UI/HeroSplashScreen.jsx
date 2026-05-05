@@ -15,8 +15,8 @@ export default function HeroSplashScreen({ onFinish }) {
   <div className="fixed inset-0 z-50">
    <Hero
     trustBadge={{
-     text: "Powered by AI Recruitment",
-     icons: ["✨", "🚀"]
+     text: "Next-Gen AI Recruitment",
+     icons: []
     }}
     headline={{
      line1: "Hire Vision",
