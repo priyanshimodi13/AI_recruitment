@@ -10,8 +10,9 @@ connectDB();
 const app = express();
 
 // Middlewares
+app.use(cors()); // Global CORS
 app.use(express.json());
-app.use(cors());
+
 app.use('/uploads', express.static('uploads'));
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -53,7 +54,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.DEVELOPMENT_PORT || 5957;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || process.env.DEVELOPMENT_PORT || 5957;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}...`);
 });
+
