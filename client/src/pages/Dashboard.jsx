@@ -219,15 +219,21 @@ export default function Dashboard() {
  useEffect(() => {
   const checkAndInitRole = async () => {
    try {
-    const token = await getToken();
-    let currentRole = null;
-    let dbRole = null;
+   // Optimistic Speed Boost: If we have an intended role, use it immediately
+   const localIntendedRole = localStorage.getItem('intendedRole');
+   if (localIntendedRole) {
+    setUserRole(localIntendedRole);
+   }
 
-    // 1. Fetch profile FIRST to ensure user exists in DB and get their current status
+   try {
+    const token = await getToken();
     const res = await fetch(`${API_URL}/api/users/profile`, {
      headers: { Authorization: `Bearer ${token}` }
     });
     
+    let currentRole = null;
+    let dbRole = null;
+
     if (res.ok) {
      const data = await res.json();
      if (data.isAdmin) {
@@ -235,44 +241,39 @@ export default function Dashboard() {
       return;
      }
      dbRole = data.role;
-    }
-
-    // 2. Check if we have an intended role from RoleSelectionPage
-    const intendedRole = localStorage.getItem('intendedRole');
-    if (intendedRole && intendedRole !== dbRole) {
-     // Send to backend to update the newly created/existing user
-     const roleRes = await fetch(`${API_URL}/api/users/role`, {
-      method: 'PUT',
-      headers: { 
-       'Content-Type': 'application/json',
-       Authorization: `Bearer ${token}` 
-      },
-      body: JSON.stringify({ role: intendedRole })
-     });
      
-     if (roleRes.ok) {
+     // 2. Check if we have an intended role from RoleSelectionPage
+     const intendedRole = localStorage.getItem('intendedRole');
+     if (intendedRole && intendedRole !== dbRole) {
+      // Background Sync: Don't wait for this to finish before showing UI
+      fetch(`${API_URL}/api/users/role`, {
+       method: 'PUT',
+       headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` 
+       },
+       body: JSON.stringify({ role: intendedRole })
+      });
       currentRole = intendedRole;
+     } else {
+      currentRole = dbRole;
      }
-    } else if (intendedRole === dbRole) {
-     currentRole = intendedRole;
     }
-
-    // Only clear intendedRole after everything is processed
-    if (intendedRole) {
+    
+    // Cleanup storage
+    if (localStorage.getItem('intendedRole')) {
      localStorage.removeItem('intendedRole');
     }
 
-    // 3. Set the final role state
     if (currentRole) {
      setUserRole(currentRole);
-    } else if (dbRole) {
-     setUserRole(dbRole);
     } else {
-     setUserRole('candidate'); // Default
+     setUserRole('candidate'); // Ultimate fallback
     }
-
    } catch (err) {
-    console.error('Error checking user role:', err);
+    console.error('Error initializing role:', err);
+    // If backend fails but we have a local role, keep using it
+    if (!userRole) setUserRole('candidate');
    }
   };
   checkAndInitRole();
