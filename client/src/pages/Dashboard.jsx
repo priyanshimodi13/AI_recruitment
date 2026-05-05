@@ -21,6 +21,7 @@ import Sidenavbar from '@/components/UI/sidenavbar';
 import Toast from '@/components/UI/Toast';
 import SelectionResultScreen from '@/components/SelectionResultScreen';
 import InterviewScheduler from '@/components/InterviewScheduler';
+import { InfinityLoader } from '@/components/UI/loader-13';
 
 // Toast State Hook Helper
 const useToasts = () => {
@@ -298,16 +299,21 @@ export default function Dashboard() {
   fetchSessions();
  }, [getToken]);
 
- return (
-  <Sidenavbar 
-   userRole={userRole} 
-   activeView={activeView} 
-   setActiveView={setActiveView}
-   onPostJob={handlePostJobClick}
-  >
-   {userRole === 'employer' ? (
-    <EmployerDashboard activeView={activeView} setActiveView={setActiveView} triggerPostJob={triggerPostJob} />
-   ) : (
+  return (
+   <Sidenavbar 
+    userRole={userRole} 
+    activeView={activeView} 
+    setActiveView={setActiveView}
+    onPostJob={handlePostJobClick}
+   >
+    {!userRole ? (
+     <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 animate-pulse">
+      <InfinityLoader size={80} className="text-[#c4eec6]" />
+      <p className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.4em]">Synchronizing Neural Profile...</p>
+     </div>
+    ) : userRole === 'employer' ? (
+     <EmployerDashboard activeView={activeView} setActiveView={setActiveView} triggerPostJob={triggerPostJob} />
+    ) : (
     <div className="space-y-12 animate-fade-in">
      {activeView === 'Overview' && (
       <div className="space-y-6 animate-fade-in pb-12">
