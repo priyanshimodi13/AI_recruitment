@@ -1,32 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Briefcase, Plus, TrendingUp, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import PostJobSection from '@/components/UI/PostJobSection';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 
-export default function EmployerDashboard({ activeView = 'Overview', setActiveView }) {
+export default function EmployerDashboard({ activeView = 'Overview', setActiveView, triggerPostJob }) {
  const { user } = useUser();
  const { getToken } = useAuth();
  const [jobs, setJobs] = useState([]);
  const [candidates, setCandidates] = useState([]);
  const [loading, setLoading] = useState(true);
- const [showPostJobModal, setShowPostJobModal] = useState(false);
- const [isEditing, setIsEditing] = useState(false);
- const [editingJobId, setEditingJobId] = useState(null);
+
+ useEffect(() => {
+  if (triggerPostJob > 0) {
+    setActiveView('Jobs');
+  }
+ }, [triggerPostJob]);
  
- // Job Form State
- const [formData, setFormData] = useState({
-  title: '',
-  company: user?.firstName ? `${user.firstName}'s Company` : '',
-  companyWebsite: '',
-  location: '',
-  type: 'Full-time',
-  experienceLevel: 'Mid Level',
-  description: '',
-  requirements: '',
-  salaryRange: '',
-  isActive: true
- });
+
 
  const fetchJobs = async () => {
   try {
@@ -65,23 +57,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
   fetchCandidates();
  }, [getToken, activeView]);
 
- const handleEditClick = (job) => {
-  setFormData({
-   title: job.title,
-   company: job.company,
-   companyWebsite: job.companyWebsite || '',
-   location: job.location,
-   type: job.type,
-   experienceLevel: job.experienceLevel,
-   description: job.description,
-   requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements || '',
-   salaryRange: job.salaryRange || '',
-   isActive: job.isActive ?? true
-  });
-  setEditingJobId(job._id);
-  setIsEditing(true);
-  setShowPostJobModal(true);
- };
+
 
  const openResume = (url) => {
   if (!url || url === 'Uploaded via Modal') {
@@ -98,53 +74,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
   window.open(fullUrl, '_blank');
  };
 
- const handlePostJob = async (e) => {
-  e.preventDefault();
-  try {
-   const token = await getToken();
-   const payload = {
-    ...formData,
-    requirements: formData.requirements.split('\n').filter(r => r.trim() !== '')
-   };
-   
-   const url = isEditing ? `${API_URL}/api/jobs/${editingJobId}` : `${API_URL}/api/jobs`;
-   const method = isEditing ? 'PUT' : 'POST';
 
-   const res = await fetch(url, {
-    method: method,
-    headers: {
-     'Content-Type': 'application/json',
-     Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-   });
-
-   if (res.ok) {
-    setShowPostJobModal(false);
-    setIsEditing(false);
-    setEditingJobId(null);
-    setFormData({
-     title: '',
-     company: user?.firstName ? `${user.firstName}'s Company` : '',
-     companyWebsite: '',
-     location: '',
-     type: 'Full-time',
-     experienceLevel: 'Mid Level',
-     description: '',
-     requirements: '',
-     salaryRange: '',
-     isActive: true
-    });
-    fetchJobs();
-   }
-  } catch (err) {
-   console.error('Error saving job:', err);
-  }
- };
-
- const handleChange = (e) => {
-  setFormData({ ...formData, [e.target.name]: e.target.value });
- };
 
  return (
   <div className="flex flex-col flex-grow space-y-12 animate-fade-in">
@@ -159,7 +89,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
       </p>
      </div>
      <div className="flex flex-wrap gap-3 w-full xl:w-auto">
-      <button onClick={() => setShowPostJobModal(true)} className="btn-primary py-3 px-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
+      <button onClick={() => setActiveView('Jobs')} className="btn-primary py-3 px-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
        <Plus className="w-3.5 h-3.5" /> Post Job
       </button>
      </div>
@@ -230,7 +160,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
               <p className="text-base font-bold text-[#c4eec6] font-sf-display">Active</p>
             </div>
            </div>
-           <button onClick={() => setShowPostJobModal(true)} className="btn-primary !py-3 !px-8 text-[9px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
+           <button onClick={() => setActiveView('Jobs')} className="btn-primary !py-3 !px-8 text-[9px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
             Create Posting <Plus className="ml-1.5 w-3 h-3" />
            </button>
          </div>
@@ -330,7 +260,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
             </div>
 
             <div className="pt-8 border-t border-white/5 flex gap-4">
-              <button onClick={() => handleEditClick(job)} className="flex-1 btn-secondary !py-4 text-[10px] font-bold uppercase tracking-widest ">Modify Node</button>
+              <button onClick={() => setActiveView('Jobs')} className="flex-1 btn-secondary !py-4 text-[10px] font-bold uppercase tracking-widest ">Modify Node</button>
               <button onClick={() => setActiveView('Candidates')} className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all">Review Talent</button>
             </div>
             
@@ -347,41 +277,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
    {/* JOBS LIST VIEW */}
    {activeView === 'Jobs' && (
     <div className="space-y-10 animate-fade-in">
-     <div className="flex justify-between items-end px-2">
-       <div className="space-y-2">
-        <h2 className="text-3xl font-display font-bold text-white tracking-tighter">Listing Matrix</h2>
-        <p className="text-xs text-[var(--color-text-muted)] font-medium">Full repository of your active and archived openings.</p>
-       </div>
-     </div>
-     <div className="grid md:grid-cols-2 gap-10">
-      {jobs.map((job) => (
-       <div key={job._id} className="card-premium group hover:shadow-2xl transition-all duration-700 flex flex-col justify-between p-10">
-        <div className="space-y-8">
-         <div className="flex justify-between items-start">
-          <div className="w-16 h-16 bg-white/5 rounded-[1.5rem] border border-white/10 flex items-center justify-center group-hover:border-lime-400/30 transition-all duration-500 shadow-sm shrink-0">
-           <span className="text-2xl font-bold text-[#c4eec6] opacity-20">{job.title?.[0] || 'J'}</span>
-          </div>
-          <div className={`px-4 py-2 rounded-2xl text-[10px] font-bold border uppercase tracking-[0.2em] ${job.isActive ? 'bg-green-400/10 text-green-400 border-green-400/10' : 'bg-red-400/10 text-red-400 border-red-400/10'}`}>
-           {job.isActive ? 'Active' : 'Closed'}
-          </div>
-         </div>
-         <div>
-          <h3 className="text-3xl font-display font-bold text-white group-hover:text-[#c4eec6] transition-colors tracking-tighter leading-tight mb-2">{job.title}</h3>
-          <p className="text-lg font-bold text-[#c4eec6] tracking-tight opacity-70">{job.location}</p>
-         </div>
-         <p className="text-sm font-medium text-[var(--color-text-muted)] line-clamp-3 leading-relaxed">{job.description}</p>
-         <div className="flex flex-wrap gap-4">
-          <span className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{candidates.filter(c => c.jobId?._id === job._id).length} Applicants</span>
-          <span className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{job.type}</span>
-          {job.salaryRange && <span className="px-4 py-2 bg-lime-400/10 rounded-xl border border-lime-400/10 text-[10px] font-bold text-[#c4eec6] uppercase tracking-widest">{job.salaryRange}</span>}
-         </div>
-        </div>
-        <div className="pt-10 mt-10 border-t border-white/5">
-         <button onClick={() => handleEditClick(job)} className="w-full btn-secondary py-4 text-[10px] font-bold uppercase tracking-widest">Modify Posting</button>
-        </div>
-       </div>
-      ))}
-     </div>
+     <PostJobSection userRole="employer" />
     </div>
    )}
 
@@ -423,7 +319,11 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
          </div>
          <div className="flex justify-between items-center">
           <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Neural Status</span>
-          <span className={`text-[10px] font-bold uppercase tracking-widest ${candidate.status === 'Accepted' ? 'text-green-400' : candidate.status === 'Rejected' ? 'text-red-400' : 'text-blue-400'}`}>
+          <span className={`text-[10px] font-bold uppercase tracking-widest ${
+            candidate.status === 'Accepted' || candidate.status === 'Round 1 Selected' ? 'text-[#c4eec6]' : 
+            candidate.status === 'Rejected' ? 'text-red-400' : 
+            'text-blue-400'
+          }`}>
            {candidate.status}
           </span>
          </div>
@@ -454,100 +354,7 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
     </div>
    )}
 
-   {/* POST JOB MODAL */}
-   {showPostJobModal && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl">
-     <div className="relative w-full max-w-2xl bg-[#09090b] rounded-[3rem] border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar p-12 overflow-x-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-#c4eec6 to-transparent opacity-30"></div>
-      <button 
-       onClick={() => {
-        setShowPostJobModal(false);
-        setIsEditing(false);
-        setEditingJobId(null);
-        setFormData({
-         title: '',
-         company: user?.firstName ? `${user.firstName}'s Company` : '',
-         companyWebsite: '',
-         location: '',
-         type: 'Full-time',
-         experienceLevel: 'Mid Level',
-         description: '',
-         requirements: '',
-         salaryRange: '',
-         isActive: true
-        });
-       }} 
-       className="absolute top-10 right-10 w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all"
-      >
-       <X className="w-5 h-5" />
-      </button>
-      
-      <h2 className="text-4xl font-display font-bold text-white tracking-tighter mb-10">
-       {isEditing ? 'Modify Listing' : 'Initiate New Stream'}
-      </h2>
-      
-      <form onSubmit={handlePostJob} className="space-y-8">
-       <div className="grid grid-cols-2 gap-8">
-        <div className="col-span-2 md:col-span-1 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Job Title</label>
-         <input required name="title" value={formData.title} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all" placeholder="e.g. Lead Neural Architect" />
-        </div>
-        <div className="col-span-2 md:col-span-1 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Experience Matrix</label>
-         <select name="experienceLevel" value={formData.experienceLevel} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all appearance-none">
-          <option>Entry Level</option>
-          <option>Mid Level</option>
-          <option>Senior</option>
-          <option>Executive</option>
-         </select>
-        </div>
-        <div className="col-span-2 md:col-span-1 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Location Node</label>
-         <input required name="location" value={formData.location} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all" placeholder="e.g. Remote / Global" />
-        </div>
-        <div className="col-span-2 md:col-span-1 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Stream Type</label>
-         <select name="type" value={formData.type} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all appearance-none">
-          <option>Full-time</option>
-          <option>Part-time</option>
-          <option>Contract</option>
-          <option>Internship</option>
-         </select>
-        </div>
-        <div className="col-span-2 md:col-span-1 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Compensation Matrix</label>
-         <input name="salaryRange" value={formData.salaryRange} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all" placeholder="e.g. $140k - $180k" />
-        </div>
-        
-        {isEditing && (
-         <div className="col-span-2 md:col-span-1 space-y-2">
-          <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Stream Status</label>
-          <select name="isActive" value={formData.isActive} onChange={(e) => setFormData({...formData, isActive: e.target.value === 'true'})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all appearance-none">
-           <option value="true">Active (Synchronizing)</option>
-           <option value="false">Closed (Archived)</option>
-          </select>
-         </div>
-        )}
-        <div className="col-span-2 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Neural Description</label>
-         <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all resize-none" placeholder="Describe the neural synchronization role..."></textarea>
-        </div>
-        <div className="col-span-2 space-y-2">
-         <label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Key Requirements (One per line)</label>
-         <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows="4" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-semibold text-white focus:border-#c4eec6/40 focus:outline-none transition-all resize-none" placeholder="Architectural expertise in React&#10;Neural pattern matching..."></textarea>
-        </div>
-       </div>
-       
-       <div className="pt-6 flex gap-6">
-        <button type="button" onClick={() => setShowPostJobModal(false)} className="btn-secondary py-5 px-10 text-[10px] font-bold uppercase tracking-widest w-1/3">Cancel</button>
-        <button type="submit" className="btn-primary py-5 px-10 text-[10px] font-bold uppercase tracking-widest w-2/3 shadow-2xl">
-         {isEditing ? 'Commit Changes' : 'Initialize Stream'}
-        </button>
-       </div>
-      </form>
-     </div>
-    </div>
-   )}
+
   </div>
  );
 }

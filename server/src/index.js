@@ -25,6 +25,7 @@ const userRoutes = require('./routes/userRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
+const interviewRoutes = require('./routes/interviewRoutes');
 
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -38,6 +39,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/resumes', resumeRoutes);
+app.use('/api/interviews', interviewRoutes);
 
 // Clerk Webhooks require raw body for verification
 app.post('/api/webhooks/clerk', express.raw({ type: 'application/json' }), clerkWebhook);

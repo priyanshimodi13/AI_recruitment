@@ -6,11 +6,14 @@ const sendEmail = require('../utils/sendEmail');
 const buildAcceptanceEmail = require('../utils/emailTemplates');
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
 const AIService = require('../services/aiService');
 const Job = require('../models/Job');
+const User = require('../models/User');
+const { requireAuth } = require('../middlewares/auth');
 
 // POST /api/resumes — Upload resume & save metadata
-router.post('/', upload.single('resume'), async (req, res) => {
+router.post('/', requireAuth, upload.single('resume'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ status: 'error', message: 'No file uploaded' });
@@ -22,25 +25,44 @@ router.post('/', upload.single('resume'), async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'All fields are required' });
     }
 
-    let extractedSkills = [];
+    let resumeText = '';
     let debugInfo = {};
+    let extractedSkills = [];
     try {
-      if (req.file.originalname.toLowerCase().endsWith('.pdf') || req.file.mimetype.includes('pdf')) {
+      const isPDF = req.file.originalname.toLowerCase().endsWith('.pdf') || req.file.mimetype.includes('pdf');
+      const isDocx = req.file.originalname.toLowerCase().endsWith('.docx') || req.file.mimetype.includes('officedocument');
+
+      if (isPDF) {
         const pdfData = await pdfParse(fs.readFileSync(req.file.path));
-        const resumeText = pdfData.text;
-        debugInfo.pdfTextLength = resumeText ? resumeText.length : 0;
-        debugInfo.resumeTextPreview = resumeText ? resumeText.substring(0, 50) : '';
-        extractedSkills = await AIService.extractSkills(resumeText);
-        debugInfo.extractedSkills = extractedSkills;
+        resumeText = pdfData.text;
+        debugInfo.fileType = 'PDF';
+      } else if (isDocx) {
+        const result = await mammoth.extractRawText({ path: req.file.path });
+        resumeText = result.value;
+        debugInfo.fileType = 'DOCX';
       } else {
-        debugInfo.error = 'Not a PDF file';
+        debugInfo.error = 'Unsupported file format for text extraction';
+      }
+
+      if (resumeText) {
+        debugInfo.textLength = resumeText.length;
+        debugInfo.textPreview = resumeText.substring(0, 100);
+        extractedSkills = await AIService.extractSkills(resumeText);
+        debugInfo.skillsFound = extractedSkills.length;
       }
     } catch (parseError) {
-      console.error('Error parsing PDF or extracting skills:', parseError);
+      console.error('Extraction Error:', parseError);
       debugInfo.error = parseError.message;
     }
 
+    // Link to our DB user
+    let dbUser = null;
+    if (req.auth && req.auth.userId) {
+      dbUser = await User.findOne({ clerkId: req.auth.userId });
+    }
+
     const resume = await Resume.create({
+      userId: dbUser ? dbUser._id : null,
       name,
       email,
       phone,
@@ -323,6 +345,25 @@ router.get('/:id/ics', async (req, res) => {
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="interview.ics"');
     res.send(icsContent);
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// GET /api/resumes/my-latest — Get the current user's most recent resume
+router.get('/my-latest', requireAuth, async (req, res) => {
+  try {
+    const dbUser = await User.findOne({ clerkId: req.auth.userId });
+    if (!dbUser) {
+      return res.status(404).json({ status: 'error', message: 'User not found in DB' });
+    }
+
+    const latestResume = await Resume.findOne({ userId: dbUser._id }).sort({ uploadedAt: -1 });
+    
+    res.status(200).json({
+      status: 'success',
+      data: latestResume
+    });
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message });
   }

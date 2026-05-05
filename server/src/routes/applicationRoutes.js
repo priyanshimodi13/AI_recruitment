@@ -4,6 +4,8 @@ const Application = require('../models/Application');
 const User = require('../models/User');
 const Job = require('../models/Job');
 const AIService = require('../services/aiService');
+const { matchSkills } = require('../utils/skillMatcher');
+const { sendSelectionEmail, sendRejectionEmail } = require('../services/emailService');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 
@@ -154,61 +156,137 @@ router.post('/:id/analyze', requireAdmin, async (req, res) => {
 // @desc    Submit a job application (authenticated users)
 router.post('/', requireAuth, async (req, res) => {
     try {
-        const { jobId, resumeUrl, coverLetter, aiScore, aiFeedback, extractedSkills, matchPercentage, missingSkills } = req.body;
+        const { jobId, resumeUrl, coverLetter, extractedSkills } = req.body;
 
         const user = await User.findOne({ clerkId: req.auth.userId });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         // Check if already applied
         let application = await Application.findOne({ jobId, userId: user._id });
-        
-        if (application) {
-            console.log("--- Updating existing application with new intelligence markers ---");
-            application.resumeUrl = resumeUrl;
-            application.coverLetter = coverLetter || application.coverLetter;
-            application.aiScore = aiScore || application.aiScore;
-            application.aiFeedback = aiFeedback || application.aiFeedback;
-            application.extractedSkills = extractedSkills || application.extractedSkills;
-            application.matchPercentage = matchPercentage || application.matchPercentage;
-            application.missingSkills = missingSkills || application.missingSkills;
-        } else {
+
+        if (!application) {
             application = new Application({
                 jobId,
                 userId: user._id,
                 resumeUrl,
                 coverLetter,
-                aiScore: aiScore || 0,
-                aiFeedback: aiFeedback || 'Analysis pending...',
+                aiFeedback: 'Analysis pending...',
                 extractedSkills: extractedSkills || [],
-                matchPercentage: matchPercentage || 0,
-                missingSkills: missingSkills || []
             });
+        } else {
+            application.resumeUrl = resumeUrl;
+            application.coverLetter = coverLetter || application.coverLetter;
+            application.extractedSkills = extractedSkills || application.extractedSkills;
         }
 
-        // AUTOMATED AI ANALYSIS UPON SUBMISSION (Trigger for all jobs)
+        // ── AUTOMATED AI ANALYSIS ────────────────────────────────────────────────
         const job = await Job.findById(jobId).populate('postedBy');
-        if (job) {
-            console.log(`--- Triggering Automated AI Skill Analysis for job: ${job.title} ---`);
-            const jobDescription = `${job.title} at ${job.company}. Requirements: ${job.requirements.join(', ')}`;
-            const analysisText = coverLetter || "Applied via platform. Resume at: " + resumeUrl;
+        if (job && job.requirements && job.requirements.length > 0) {
+            console.log(`--- Automated AI Skill Analysis: ${job.title} ---`);
 
-            try {
-                const { score, feedback } = await AIService.analyzeResumeMatch(analysisText, jobDescription);
-                const { extractedSkills: aiExtracted, matchPercentage: aiMatch, missingSkills: aiMissing } = await AIService.analyzeSkillsMatch(analysisText, job.requirements);
+            // 1. Use candidate's already-extracted skills, or ask AI to extract them
+            let candidateSkills = extractedSkills && extractedSkills.length > 0
+                ? extractedSkills
+                : [];
 
-                application.aiScore = score;
-                application.aiFeedback = feedback;
-                application.extractedSkills = aiExtracted;
-                application.matchPercentage = aiMatch;
-                application.missingSkills = aiMissing;
-                application.status = 'Reviewed';
-            } catch (aiErr) {
-                console.error('Automated AI Analysis failed (Silent):', aiErr);
+            // 2. If no skills provided in body, try to fetch from candidate's latest resume record
+            if (candidateSkills.length === 0) {
+                try {
+                    const Resume = require('../models/Resume');
+                    const latestResume = await Resume.findOne({ userId: user._id }).sort({ uploadedAt: -1 });
+                    if (latestResume && latestResume.skills && latestResume.skills.length > 0) {
+                        console.log('--- Using skills from candidate profile/latest resume ---');
+                        candidateSkills = latestResume.skills;
+                    }
+                } catch (resumeErr) {
+                    console.warn('Failed to fetch latest resume skills:', resumeErr.message);
+                }
             }
+
+            // 3. Last ditch effort: AI extraction pass (if still no skills)
+            if (candidateSkills.length === 0) {
+                try {
+                    const analysisText = coverLetter || 'Resume uploaded.';
+                    const { extractedSkills: aiExtracted } = await AIService.analyzeSkillsMatch(analysisText, job.requirements);
+                    candidateSkills = aiExtracted || [];
+                } catch (aiErr) {
+                    console.warn('AI extraction fallback failed:', aiErr.message);
+                }
+            }
+
+            // 3. Synonym-aware skill matching via skillMatcher utility
+            console.log('--- Matching Logic Input ---');
+            console.log('Candidate Skills:', candidateSkills);
+            console.log('Job Requirements:', job.requirements);
+            
+            const { matchedSkills, unmatchedSkills, advantageSkills, matchScore, status } =
+                matchSkills(candidateSkills, job.requirements);
+            
+            console.log('Match Score:', matchScore, '%');
+            console.log('Matched:', matchedSkills);
+            console.log('Missing:', unmatchedSkills);
+            console.log('---------------------------');
+
+            // 4. Get AI text feedback
+            let aiFeedbackText = '';
+            try {
+                const analysisText = candidateSkills.length > 0
+                    ? `Candidate Skills: ${candidateSkills.join(', ')}`
+                    : coverLetter || 'Resume uploaded.';
+                const jobDescription = `${job.title} at ${job.company}. Requirements: ${job.requirements.join(', ')}`;
+                const { score, feedback } = await AIService.analyzeResumeMatch(analysisText, jobDescription);
+                application.aiScore = score;
+                aiFeedbackText = feedback;
+            } catch (aiErr) {
+                console.warn('AI feedback failed (silent):', aiErr.message);
+            }
+
+            // 5. Persist results
+            application.extractedSkills = candidateSkills;
+            application.matchedSkills   = matchedSkills;
+            application.missingSkills   = unmatchedSkills;
+            application.advantageSkills = advantageSkills;
+            application.matchPercentage = matchScore;
+
+            if (status === 'SELECTED') {
+                application.status     = 'Round 1 Selected';
+                application.aiFeedback = `✨ CONGRATULATIONS! Your skills match ${matchScore}% of our requirements. You have been automatically selected for Round 1!\n\n${aiFeedbackText}`;
+            } else {
+                application.status     = 'Reviewed';
+                application.aiFeedback = aiFeedbackText || `Your skills match ${matchScore}% of the requirements. Keep building your skills!`;
+            }
+
+            await application.save();
+
+            // 6. Send email non-blocking
+            const candidateEmail = user.email;
+            const candidateName  = user.name || user.firstName || 'Candidate';
+            const jobData = { title: job.title, company: job.company };
+
+            if (status === 'SELECTED') {
+                sendSelectionEmail(candidateEmail, candidateName, jobData, matchScore, matchedSkills, unmatchedSkills, application._id.toString())
+                    .then(() => { application.emailSentAt = new Date(); application.save(); })
+                    .catch(err => console.error('[EMAIL] Selection email failed:', err.message));
+            } else {
+                sendRejectionEmail(candidateEmail, candidateName, jobData, matchScore, unmatchedSkills)
+                    .catch(err => console.error('[EMAIL] Rejection email failed:', err.message));
+            }
+
+        } else {
+            // No job or no requirements – just save
+            await application.save();
         }
 
-        await application.save();
-        res.status(201).json(application);
+        // Return the full result object so the frontend can show selection screen
+        res.status(201).json({
+            ...application.toObject(),
+            status:          application.status,
+            matchPercentage: application.matchPercentage,
+            matchedSkills:   application.matchedSkills,
+            missingSkills:   application.missingSkills,
+            advantageSkills: application.advantageSkills,
+            aiFeedback:      application.aiFeedback,
+        });
 
     } catch (error) {
         console.error('Error submitting application:', error);
@@ -276,7 +354,7 @@ router.get('/:jobId', requireAdmin, async (req, res) => {
 router.put('/:id/status', requireAdmin, async (req, res) => {
     try {
         const { status } = req.body;
-        if (!['Accepted', 'Rejected', 'Reviewed', 'Pending'].includes(status)) {
+        if (!['Accepted', 'Rejected', 'Reviewed', 'Pending', 'Round 1 Selected'].includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
 

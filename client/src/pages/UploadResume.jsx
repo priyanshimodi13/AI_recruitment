@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import axios from 'axios';
+import { CheckCircle2 } from 'lucide-react';
+import SelectionResultScreen from '../components/SelectionResultScreen';
+import InterviewScheduler from '../components/InterviewScheduler';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 
 export default function UploadResume() {
  const navigate = useNavigate();
  const { getToken } = useAuth();
+ const { user } = useUser();
  const [form, setForm] = useState({
   name: '',
   email: '',
@@ -26,6 +30,9 @@ export default function UploadResume() {
  const [appliedJobIds, setAppliedJobIds] = useState([]);
  const [applyingTo, setApplyingTo] = useState(null);
  const [debugInfo, setDebugInfo] = useState(null);
+ const [selectionResult, setSelectionResult]       = useState(null);  // holds full API result
+ const [selectionJobMeta, setSelectionJobMeta]     = useState(null);  // { jobId, jobTitle, companyName }
+ const [showScheduler, setShowScheduler]           = useState(false);
 
  const handleChange = (e) => {
   setForm({ ...form, [e.target.name]: e.target.value });
@@ -97,16 +104,18 @@ export default function UploadResume() {
   }
  };
 
- const handleQuickApply = async (jobId, jobTitle) => {
+ const handleQuickApply = async (jobId, jobTitle, companyName = '') => {
   if (!uploadedResumeId) return;
   setApplyingTo(jobId);
+  setError('');
   try {
+   // Mark the resume as applied in the resume collection
    await axios.patch(`${API_URL}/api/resumes/${uploadedResumeId}/apply`, {
     positionTitle: jobTitle
    });
 
    const token = await getToken();
-   await fetch(`${API_URL}/api/applications`, {
+   const resApp = await fetch(`${API_URL}/api/applications`, {
     method: 'POST',
     headers: {
      'Content-Type': 'application/json',
@@ -121,7 +130,15 @@ export default function UploadResume() {
    });
 
    setAppliedJobIds(prev => [...prev, jobId]);
-   setSuccess(`✅ Automatically applied! You are now visible to the employer for the ${jobTitle} position.`);
+
+   if (resApp.ok) {
+     const appData = await resApp.json();
+     // Store the full result + job context, show SelectionResultScreen
+     setSelectionResult(appData);
+     setSelectionJobMeta({ jobId, jobTitle, companyName, submissionId: appData._id });
+   } else {
+     setSuccess(`✅ Automatically applied! You are now visible to the employer for the ${jobTitle} position.`);
+   }
   } catch (err) {
    setError(err.response?.data?.message || '❌ Failed to apply. Please try again.');
   } finally {
@@ -332,6 +349,39 @@ export default function UploadResume() {
      </button>
     </form>
    </div>
+
+   {/* ── SELECTION RESULT SCREEN ─────────────────────────────────────── */}
+   {selectionResult && selectionJobMeta && !showScheduler && (
+    <SelectionResultScreen
+     result={{
+      ...selectionResult,
+      jobTitle:    selectionJobMeta.jobTitle,
+      companyName: selectionJobMeta.companyName,
+     }}
+     candidateEmail={user?.primaryEmailAddress?.emailAddress || form.email}
+     onScheduleClick={() => setShowScheduler(true)}
+     onViewJobsClick={() => { setSelectionResult(null); setSelectionJobMeta(null); navigate('/dashboard'); }}
+     onDismiss={() => { setSelectionResult(null); setSelectionJobMeta(null); }}
+    />
+   )}
+
+   {/* ── INTERVIEW SCHEDULER ─────────────────────────────────────────── */}
+   {showScheduler && selectionJobMeta && (
+    <InterviewScheduler
+     submissionId={selectionJobMeta.submissionId}
+     jobId={selectionJobMeta.jobId}
+     jobTitle={selectionJobMeta.jobTitle}
+     companyName={selectionJobMeta.companyName}
+     onSuccess={() => {
+      setShowScheduler(false);
+      setSelectionResult(null);
+      setSelectionJobMeta(null);
+     }}
+     onClose={() => setShowScheduler(false)}
+    />
+   )}
+
   </div>
  );
 }
+

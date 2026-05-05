@@ -152,14 +152,16 @@ class AIService {
             const result = await AIService._generateJsonWithLLM(prompt);
 
             return {
-                extractedSkills: result.extracted || [],
-                matchPercentage: result.percentage || 0,
-                missingSkills: result.missing || []
+                extractedSkills: result.extracted || result.extractedSkills || result.skills || [],
+                matchPercentage: result.percentage || result.matchPercentage || result.score || 0,
+                missingSkills: result.missing || result.missingSkills || []
             };
         } catch (error) {
             console.error('Skill Analysis Error:', error);
+            // Fallback to deterministic matching if the full analysis fails
+            const deterministicSkills = await AIService.extractSkillsDeterministic(resumeText);
             return {
-                extractedSkills: [],
+                extractedSkills: deterministicSkills,
                 matchPercentage: 0,
                 missingSkills: jobRequirements
             };
@@ -300,17 +302,12 @@ class AIService {
                     continue;
                 }
 
-                // Use word-boundary-aware matching to avoid partial matches
-                // e.g. "C" shouldn't match inside "Communication"
                 const escaped = skillLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-                // For very short skills (1-2 chars like "C", "R", "Go"), require stricter context
+                // Stricter word boundary matching
                 let regex;
                 if (skill.length <= 2) {
-                    // Match "C " or "C," or "C++" context, or as a standalone listed item
-                    regex = new RegExp(
-                        `(?:^|[,;|/\\s])${escaped}(?=[,;|/\\s.+]|$)`, 'i'
-                    );
+                    regex = new RegExp(`(?:^|[,;|/\\s])${escaped}(?=[,;|/\\s.+]|$)`, 'i');
                 } else {
                     regex = new RegExp(`(?:^|[^a-zA-Z])${escaped}(?=[^a-zA-Z]|$)`, 'i');
                 }
@@ -320,13 +317,15 @@ class AIService {
                 }
             }
 
-            // De-duplicate variations (e.g. if both "React" and "React.js" matched, keep "React.js")
+            // Also check for common multi-word skills that might be missed by simple splitting
+            const multiWordSkills = ['Full Stack', 'Full-Stack', 'Machine Learning', 'Deep Learning', 'Cloud Computing', 'Data Science', 'MERN Stack', 'MEAN Stack'];
+            for (const mw of multiWordSkills) {
+                if (textLower.includes(mw.toLowerCase())) {
+                    foundSkills.add(mw);
+                }
+            }
+
             const deduped = AIService._deduplicateSkills([...foundSkills]);
-
-            console.log(`--- Deterministic Skill Extraction ---`);
-            console.log(`Found ${deduped.length} skills:`, deduped);
-            console.log(`--------------------------------------`);
-
             return deduped;
         } catch (error) {
             console.error('Deterministic Skill Extraction Error:', error);
@@ -341,66 +340,65 @@ class AIService {
      */
     static async extractSkills(resumeText) {
         try {
-            if (!resumeText || typeof resumeText !== 'string') {
-                console.warn('extractSkills: No resume text provided.');
-                return [];
+            if (!resumeText || typeof resumeText !== 'string' || resumeText.length < 50) {
+                console.warn('extractSkills: Resume text too short or missing. Falling back to deterministic.');
+                return await AIService.extractSkillsDeterministic(resumeText);
             }
 
             const prompt = `
-                You are an expert technical recruiter. Your task is to exhaustively extract EVERY SINGLE technical skill from the following resume text.
-                Do NOT leave any technical skills out. Read the entire document carefully.
+                ### INSTRUCTION
+                You are a world-class technical recruiter. Analyze the following RESUME TEXT and extract EVERY technical skill mentioned.
+                Technical skills include: Programming Languages, Frameworks, Libraries, Databases, Cloud Platforms, Tools, and Methodologies (like Agile).
 
-                CRITICAL RULE: DO NOT INVENT, GUESS, OR HALLUCINATE SKILLS.
-                CRITICAL RULE: ONLY EXTRACT SKILLS THAT ARE EXPLICITLY WRITTEN IN THE RESUME TEXT.
-
-                Categorize all the extracted skills into three specific categories:
-                1. Programming Languages
-                2. Web Development (Frontend & Backend Frameworks/Libraries)
-                3. Tools, Platforms, Cloud, and Databases
-
-                Ignore soft skills, spoken languages, and general office software.
-                
-                IMPORTANT: Ensure the skills strictly fit into these three buckets. You MUST extract all of them, but ONLY if they are explicitly mentioned in the text.
+                ### RULES
+                1. DO NOT extract soft skills (e.g., "Leadership", "Communication").
+                2. DO NOT extract spoken languages (e.g., "English", "Hindi").
+                3. DO NOT hallucinate. Only extract what is explicitly mentioned.
+                4. Group them into "programming", "web_development", and "tools_and_platforms".
 
                 ### OUTPUT FORMAT (STRICT JSON ONLY)
                 {
-                   "programming": ["extracted_skill_1", "extracted_skill_2"],
-                   "web_development": ["extracted_skill_3", "extracted_skill_4"],
-                   "tools_and_platforms": ["extracted_skill_5", "extracted_skill_6"]
+                   "programming": ["Skill 1", "Skill 2"],
+                   "web_development": ["Skill 3", "Skill 4"],
+                   "tools_and_platforms": ["Skill 5", "Skill 6"]
                 }
 
-                ### RESUME CONTENT
-                ${resumeText}
+                ### RESUME TEXT
+                ${resumeText.substring(0, 8000)}
             `;
 
             try {
                 const result = await AIService._generateJsonWithLLM(prompt);
-                console.log("--- AI Raw Response (Extract Skills Categorized) ---");
-                console.log(JSON.stringify(result));
-                console.log("----------------------------------------");
                 
                 if (result) {
-                    // Concatenate the categorized arrays in the requested sequence
-                    const combinedSkills = [
-                        ...(Array.isArray(result.programming) ? result.programming : []),
-                        ...(Array.isArray(result.web_development) ? result.web_development : []),
-                        ...(Array.isArray(result.tools_and_platforms) ? result.tools_and_platforms : [])
-                    ];
+                    let combined = [];
+                    
+                    // Robust extraction: Check specific keys first
+                    const keys = ['programming', 'web_development', 'tools_and_platforms', 'languages', 'frameworks', 'databases', 'tools', 'skills'];
+                    keys.forEach(k => {
+                        if (Array.isArray(result[k])) combined = [...combined, ...result[k]];
+                    });
 
-                    if (combinedSkills.length > 0) {
-                        return AIService._deduplicateSkills(combinedSkills);
+                    // Deep scan: If still empty, grab any array found in the object
+                    if (combined.length === 0) {
+                        Object.values(result).forEach(val => {
+                            if (Array.isArray(val)) combined = [...combined, ...val];
+                        });
+                    }
+
+                    if (combined.length > 0) {
+                        console.log(`AI extracted ${combined.length} skills.`);
+                        return AIService._deduplicateSkills(combined);
                     }
                 }
             } catch (e) {
-                console.error("AI Skill Extraction failed:", e.message);
+                console.error("AI Skill Extraction Error:", e.message);
             }
 
-            // Fallback to deterministic method if AI fails or returns empty
-            console.log("Falling back to deterministic skill extraction.");
+            // Fallback
             return await AIService.extractSkillsDeterministic(resumeText);
-            
         } catch (error) {
-            console.error('Skill Extraction Overall Error:', error);
+            console.error('Final fallback error in extractSkills:', error);
             return await AIService.extractSkillsDeterministic(resumeText);
         }
     }

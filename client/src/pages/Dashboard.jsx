@@ -18,11 +18,28 @@ import {
 } from 'lucide-react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import Sidenavbar from '@/components/UI/sidenavbar';
+import Toast from '@/components/UI/Toast';
+import SelectionResultScreen from '@/components/SelectionResultScreen';
+import InterviewScheduler from '@/components/InterviewScheduler';
+
+// Toast State Hook Helper
+const useToasts = () => {
+  const [toasts, setToasts] = useState([]);
+  const addToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+  return { toasts, addToast, removeToast };
+};
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 
 export default function Dashboard() {
  const { user } = useUser();
+ const { toasts, addToast, removeToast } = useToasts();
  const { getToken } = useAuth();
  const navigate = useNavigate();
  const [jobs, setJobs] = useState([]);
@@ -42,6 +59,59 @@ export default function Dashboard() {
  const [applyForm, setApplyForm] = useState({ name: '', email: '', phone: '' });
  const [applyFile, setApplyFile] = useState(null);
  const [isApplying, setIsApplying] = useState(false);
+ const [triggerPostJob, setTriggerPostJob] = useState(0);
+ const [userApplications, setUserApplications] = useState([]);
+ const [loadingApps, setLoadingApps] = useState(false);
+ const [userResume, setUserResume] = useState(null);
+ const [loadingResume, setLoadingResume] = useState(false);
+ const [selectionResult, setSelectionResult] = useState(null);
+ const [selectionJobMeta, setSelectionJobMeta] = useState(null);
+ const [showScheduler, setShowScheduler] = useState(false);
+
+ const fetchUserApplications = async () => {
+   try {
+     setLoadingApps(true);
+     const token = await getToken();
+     const res = await fetch(`${API_URL}/api/applications`, {
+       headers: { Authorization: `Bearer ${token}` }
+     });
+      if (res.ok) {
+        const data = await res.json();
+        setUserApplications(data);
+        setAppliedJobs(data.map(app => app.jobId?._id).filter(Boolean));
+      }
+   } catch (err) {
+     console.error('Error fetching user apps:', err);
+   } finally {
+     setLoadingApps(false);
+   }
+ };
+
+ const fetchUserResume = async () => {
+   try {
+     setLoadingResume(true);
+     const token = await getToken();
+     const res = await fetch(`${API_URL}/api/resumes/my-latest`, {
+       headers: { Authorization: `Bearer ${token}` }
+     });
+     if (res.ok) {
+       const result = await res.json();
+       setUserResume(result.data);
+     }
+   } catch (err) {
+     console.error('Error fetching user resume:', err);
+   } finally {
+     setLoadingResume(false);
+   }
+ };
+
+ const handlePostJobClick = () => {
+  if (userRole === 'employer') {
+   setTriggerPostJob(prev => prev + 1);
+  } else {
+   setActiveView('Jobs');
+  }
+ };
 
  const handleApplyClick = (job) => {
   setJobToApply(job);
@@ -94,15 +164,25 @@ export default function Dashboard() {
    });
 
    if (resApp.ok) {
-    setAppliedJobs([...appliedJobs, jobToApply._id]);
-    setShowApplyModal(false);
-    setJobToApply(null);
-    setApplyForm({ name: '', email: '', phone: '' });
-    setApplyFile(null);
-    alert("Application submitted successfully!");
-   } else {
-    alert("Failed to submit application.");
-   }
+     const appData = await resApp.json();
+     setAppliedJobs([...appliedJobs, jobToApply._id]);
+     setShowApplyModal(false);
+     
+     // Store the full result + job context, show SelectionResultScreen
+     setSelectionResult(appData);
+     setSelectionJobMeta({ 
+       jobId: jobToApply._id, 
+       jobTitle: jobToApply.title, 
+       companyName: jobToApply.company,
+       submissionId: appData._id 
+     });
+
+     setJobToApply(null);
+     setApplyForm({ name: '', email: '', phone: '' });
+     setApplyFile(null);
+    } else {
+     addToast("Failed to submit application. Please verify your neural link.", 'error');
+    }
   } catch (error) {
    console.error(error);
    alert("Error applying for the job.");
@@ -125,6 +205,15 @@ export default function Dashboard() {
     setLoadingJobs(false);
    });
  }, []);
+
+ useEffect(() => {
+  if (activeView === 'Applications') {
+   fetchUserApplications();
+  }
+  if (activeView === 'Overview') {
+   fetchUserResume();
+  }
+ }, [activeView, getToken]);
 
  useEffect(() => {
   const checkAndInitRole = async () => {
@@ -214,9 +303,10 @@ export default function Dashboard() {
    userRole={userRole} 
    activeView={activeView} 
    setActiveView={setActiveView}
+   onPostJob={handlePostJobClick}
   >
    {userRole === 'employer' ? (
-    <EmployerDashboard activeView={activeView} setActiveView={setActiveView} />
+    <EmployerDashboard activeView={activeView} setActiveView={setActiveView} triggerPostJob={triggerPostJob} />
    ) : (
     <div className="space-y-12 animate-fade-in">
      {activeView === 'Overview' && (
@@ -232,54 +322,54 @@ export default function Dashboard() {
          </div>
          
          <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none">Job Opportunities</h3>
-
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {[
-           { company: 'NVIDIA', role: 'Senior ML Engineer', score: '98%', trend: 'Elite Match', salary: '$180k - $240k', color: 'text-purple-400', chart: 'M0 30 Q 15 10, 30 25 T 60 15 T 90 20 T 120 5' },
-           { company: 'OpenAI', role: 'Data Scientist', score: '94%', trend: 'High Fit', salary: '$160k - $210k', color: 'text-[#c4eec6]', chart: 'M0 30 Q 20 20, 40 25 T 80 15 T 120 20' },
-           { company: 'DeepMind', role: 'Research Engineer', score: '89%', trend: 'Strong Fit', salary: '$150k - $190k', color: 'text-red-400', chart: 'M0 10 Q 30 15, 60 25 T 90 35 T 120 30' },
-          ].map((asset, i) => (
-           <div key={i} className="card-premium !rounded-[1.5rem] !p-5 space-y-4 group hover:border-white/20 transition-all duration-500 relative overflow-hidden">
-            <div className="flex justify-between items-start">
-             <div className="flex gap-3 items-center">
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all">
-               <span className="text-lg font-bold opacity-30 font-sf-display">{asset.company[0]}</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+           {jobs.length > 0 ? jobs.map((job, i) => (
+            <div key={job._id} className="card-premium !rounded-[1.5rem] !p-5 space-y-4 group hover:border-white/20 transition-all duration-500 relative overflow-hidden">
+             <div className="flex justify-between items-start">
+              <div className="flex gap-3 items-center">
+               <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all">
+                <span className="text-lg font-bold opacity-30 font-sf-display">{job.company?.[0] || 'J'}</span>
+               </div>
+               <div>
+                <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-sf-text">{job.company}</p>
+                <div className="flex items-center gap-2">
+                 <p className="text-xs font-bold text-white tracking-tight font-sf-text">{job.title}</p>
+                 {appliedJobs.includes(job._id) && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-lime-400/20 text-[#c4eec6] text-[7px] font-bold uppercase tracking-widest">Applied</span>
+                 )}
+                </div>
+               </div>
               </div>
-              <div>
-               <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-sf-text">{asset.company}</p>
-               <p className="text-xs font-bold text-white tracking-tight font-sf-text">{asset.role}</p>
+              <button onClick={() => setSelectedJob(job)} className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6] group-hover:text-black transition-all">
+               <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+             </div>
+
+             <div className="space-y-1">
+              <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest font-sf-text">Compatibility Score</p>
+              <div className="flex items-baseline gap-2">
+               <span className="text-2xl font-sf-display font-bold text-white tracking-tighter">{Math.floor(Math.random() * 15 + 85)}%</span>
+              </div>
+              <div className="flex items-center gap-1">
+               <span className={`text-[9px] font-bold ${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} font-sf-text`}>{i === 0 ? 'Elite Match' : 'High Fit'}</span>
               </div>
              </div>
-             <button className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6] group-hover:text-black transition-all">
-              <ChevronRight className="w-3.5 h-3.5" />
-             </button>
-            </div>
 
-            <div className="space-y-1">
-             <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest font-sf-text">Compatibility Score</p>
-             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-sf-display font-bold text-white tracking-tighter">{asset.score}</span>
-             </div>
-             <div className="flex items-center gap-1">
-              
-              <span className={`text-[9px] font-bold ${asset.color} font-sf-text`}>{asset.trend}</span>
-             </div>
-            </div>
-
-            {/* MINI CHART */}
-            <div className="h-14 w-full relative pt-2">
-             <svg className="w-full h-full overflow-visible" viewBox="0 0 120 40">
-              <path d={asset.chart} fill="none" stroke="currentColor" strokeWidth="2" className={`${asset.color} opacity-50`} />
-              <path d={`${asset.chart} L 120 40 L 0 40 Z`} fill="currentColor" className={`${asset.color} opacity-10`} />
-              <circle cx="120" cy="5" r="2.5" fill="currentColor" className={asset.color} />
-             </svg>
-             <div className="absolute right-0 bottom-0 text-[8px] font-bold text-white/30 font-sf-text">
-              {asset.salary}
+             <div className="h-14 w-full relative pt-2">
+              <svg className="w-full h-full overflow-visible" viewBox="0 0 120 40">
+               <path d="M0 30 Q 15 10, 30 25 T 60 15 T 90 20 T 120 5" fill="none" stroke="currentColor" strokeWidth="2" className={`${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} opacity-50`} />
+               <path d="M0 30 Q 15 10, 30 25 T 60 15 T 90 20 T 120 5 L 120 40 L 0 40 Z" fill="currentColor" className={`${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} opacity-10`} />
+               <circle cx="120" cy="5" r="2.5" fill="currentColor" className={i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} />
+              </svg>
+              <div className="absolute right-0 bottom-0 text-[8px] font-bold text-white/30 font-sf-text">
+               {job.salaryRange || '$140k - $180k'}
+              </div>
              </div>
             </div>
-           </div>
-          ))}
-         </div>
+           )) : (
+            <div className="col-span-3 py-10 text-center text-white/20 font-bold uppercase tracking-widest text-[10px]">No active job nodes detected.</div>
+           )}
+          </div>
         </div>
 
         {/* RIGHT COLUMN: JOB LISTINGS */}
@@ -302,16 +392,16 @@ export default function Dashboard() {
 
            <h2 className="text-xl font-display font-bold text-white tracking-tight leading-none mb-3">Recent Listings</h2>
            <p className="text-xs font-medium text-white/50 leading-relaxed mb-8 max-w-[240px]">
-            Explore the latest high-tier engineering roles available now.
+            {allJobs.length > 0 ? `Explore ${allJobs[0].title} and ${allJobs.length - 1} other roles.` : "Explore the latest high-tier engineering roles available now."}
            </p>
           </div>
 
           <div className="relative z-10 space-y-3">
-           <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-400/80 to-indigo-400/80 text-black text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+           <button onClick={() => setActiveView('Jobs')} className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-400/80 to-indigo-400/80 text-black text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
             Connect Neural Link <LayoutDashboard className="w-3.5 h-3.5" />
            </button>
-           <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-            Enter Node Address <Settings className="w-3.5 h-3.5" />
+           <button onClick={() => setActiveView('Jobs')} className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+            Browse All Nodes <Search className="w-3.5 h-3.5" />
            </button>
           </div>
          </div>
@@ -350,10 +440,28 @@ export default function Dashboard() {
              <p className="text-lg font-bold text-[#c4eec6]">Top 2% <span className="text-[9px] text-white/40">Highly Skilled</span></p>
             </div>
            </div>
-           <button className="btn-primary !py-3 !px-8 text-[10px] font-bold uppercase tracking-widest shadow-2xl shadow-[#c4eec6]/20">
-            Update Profile
-           </button>
+            <button 
+              onClick={() => navigate('/upload-resume')}
+              className="btn-primary !py-3 !px-8 text-[10px] font-bold uppercase tracking-widest shadow-2xl shadow-[#c4eec6]/20"
+            >
+             {userResume ? 'Update Resume' : 'Upload Resume'}
+            </button>
           </div>
+          
+          {userResume && userResume.skills && userResume.skills.length > 0 && (
+            <div className="mt-8 flex flex-wrap gap-2">
+              {userResume.skills.slice(0, 8).map((skill, idx) => (
+                <span key={idx} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-bold text-lime-400 uppercase tracking-widest backdrop-blur-md hover:border-lime-400/30 transition-all">
+                  {skill}
+                </span>
+              ))}
+              {userResume.skills.length > 8 && (
+                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                  +{userResume.skills.length - 8} More
+                </span>
+              )}
+            </div>
+          )}
          </div>
 
          
@@ -364,13 +472,17 @@ export default function Dashboard() {
 
         <div className="col-span-12 xl:col-span-4 flex flex-col gap-4">
           <div className="card-premium !rounded-[1.5rem] !p-6 flex-1 flex flex-col justify-between">
-           <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-2">Profile Match</p>
+           <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-2">Neural Alignment</p>
            <div className="flex items-baseline gap-2 mb-3">
-             <span className="text-2xl font-display font-bold text-white tracking-tight">98.2%</span>
-             <span className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-widest">Strong</span>
+             <span className="text-2xl font-display font-bold text-white tracking-tight">
+               {userResume ? '94.2%' : 'Pending'}
+             </span>
+             <span className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-widest">
+               {userResume ? 'High' : 'Scan Required'}
+             </span>
            </div>
            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-             <div className="h-full bg-[#c4eec6] w-[98%]"></div>
+             <div className="h-full bg-[#c4eec6]" style={{ width: userResume ? '94.2%' : '0%' }}></div>
            </div>
           </div>
           <div className="card-premium !rounded-[1.5rem] !p-6 flex-1 flex flex-col justify-between bg-gradient-to-br from-purple-500/10 to-transparent">
@@ -487,59 +599,59 @@ export default function Dashboard() {
 
      {activeView === 'Jobs' && (
       <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-       <div className="card-premium p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
-        <div className="flex-grow relative w-full">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] opacity-50" />
-         <input 
-          type="text" 
-          placeholder="Search specialized roles or companies..." 
-          className="w-full bg-white/5 border border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-sm font-semibold text-white focus:outline-none focus:border-#c4eec6/40 transition-all placeholder:"
-         />
-        </div>
-        <div className="flex gap-4 w-full md:w-auto">
-         <button className="btn-secondary py-5 px-10 text-[10px] font-bold uppercase tracking-widest">Priority Ranking</button>
-         <button className="btn-primary py-5 px-12 text-[10px] font-bold uppercase tracking-widest shadow-2xl">Find Now</button>
-        </div>
+        <div className="card-premium p-6 flex flex-col md:flex-row gap-5 items-center relative overflow-hidden">
+         <div className="flex-grow relative w-full">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] opacity-50" />
+          <input 
+           type="text" 
+           placeholder="Search roles or companies..." 
+           className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-14 pr-8 text-xs font-semibold text-white focus:outline-none focus:border-[#c4eec6]/40 transition-all"
+          />
+         </div>
+         <div className="flex gap-3 w-full md:w-auto">
+          <button className="btn-secondary py-3.5 px-6 text-[9px] font-bold uppercase tracking-widest">Filter</button>
+          <button className="btn-primary py-3.5 px-8 text-[9px] font-bold uppercase tracking-widest shadow-2xl">Search</button>
+         </div>
        </div>
 
-       <div className="grid md:grid-cols-2 gap-10">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allJobs.length === 0 ? (
          <p className="text-[var(--color-text-muted)] text-center py-20 col-span-2">Initializing career discovery matrix...</p>
         ) : (
          allJobs.map((job) => (
-          <div key={job._id} className="card-premium group hover:shadow-2xl transition-all duration-700 flex flex-col justify-between p-10">
-           <div className="space-y-8">
-            <div className="flex justify-between items-start">
-             <div className="w-16 h-16 bg-white/5 rounded-[1.5rem] border border-white/10 flex items-center justify-center group-hover:border-#c4eec6/30 transition-all duration-500 shadow-sm shrink-0">
-              <span className="text-2xl font-bold text-#c4eec6 opacity-20">{job.company?.[0] || 'C'}</span>
+           <div key={job._id} className="card-premium group hover:shadow-2xl transition-all duration-700 flex flex-col justify-between p-7">
+            <div className="space-y-6">
+             <div className="flex justify-between items-start">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center group-hover:border-[#c4eec6]/30 transition-all duration-500 shadow-sm shrink-0">
+               <span className="text-xl font-bold text-[#c4eec6] opacity-20">{job.company?.[0] || 'C'}</span>
+              </div>
+              <div className="px-3 py-1.5 rounded-xl bg-[#c4eec6]/10 text-[#c4eec6] text-[8px] font-bold border border-[#c4eec6]/10 uppercase tracking-widest">
+               {Math.floor(Math.random() * 20 + 80)}% Fit
+              </div>
              </div>
-             <div className="px-4 py-2 rounded-2xl bg-#c4eec6/10 text-#c4eec6 text-[10px] font-bold border border-#c4eec6/10 uppercase tracking-[0.2em]">
-              {Math.floor(Math.random() * 20 + 80)}% Fit
+             <div>
+              <h3 className="text-xl font-display font-bold text-white group-hover:text-[#c4eec6] transition-colors tracking-tight leading-tight mb-1">{job.title}</h3>
+              <p className="text-sm font-bold text-[#c4eec6] tracking-tight opacity-70">{job.company}</p>
+             </div>
+             <p className="text-xs font-medium text-[var(--color-text-muted)] line-clamp-3 leading-relaxed opacity-60">{job.description}</p>
+             <div className="flex flex-wrap gap-2">
+              {job.location && <span className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-[8px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{job.location}</span>}
+              {job.type && <span className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-[8px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{job.type}</span>}
+              {job.salaryRange && <span className="px-3 py-1 bg-[#c4eec6]/10 rounded-lg border border-[#c4eec6]/10 text-[8px] font-bold text-[#c4eec6] uppercase tracking-widest">{job.salaryRange}</span>}
              </div>
             </div>
-            <div>
-             <h3 className="text-3xl font-display font-bold text-white group-hover:text-#c4eec6 transition-colors tracking-tighter leading-tight mb-2">{job.title}</h3>
-             <p className="text-lg font-bold text-#c4eec6 tracking-tight opacity-70">{job.company}</p>
+            <div className="pt-6 mt-6 border-t border-white/5 flex gap-3">
+             <button onClick={() => setSelectedJob(job)} className="btn-secondary py-3 flex-1 text-[9px] font-bold uppercase tracking-widest">Details</button>
+             <button 
+              onClick={() => handleApplyClick(job)} 
+              disabled={appliedJobs.includes(job._id)}
+              className={`py-3 flex-1 text-[9px] font-bold uppercase tracking-widest transition-all ${
+               appliedJobs.includes(job._id) ? 'bg-green-600/20 text-green-400 border border-green-500/30 cursor-default rounded-xl' : 'btn-primary'
+              }`}
+             >
+              {appliedJobs.includes(job._id) ? 'Applied ✓' : 'Apply'}
+             </button>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-muted)] line-clamp-3 leading-relaxed">{job.description}</p>
-            <div className="flex flex-wrap gap-4">
-             {job.location && <span className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{job.location}</span>}
-             {job.type && <span className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{job.type}</span>}
-             {job.salaryRange && <span className="px-4 py-2 bg-#c4eec6/10 rounded-xl border border-#c4eec6/10 text-[10px] font-bold text-#c4eec6 uppercase tracking-widest">{job.salaryRange}</span>}
-            </div>
-           </div>
-           <div className="pt-10 mt-10 border-t border-white/5 flex gap-4">
-            <button onClick={() => setSelectedJob(job)} className="btn-secondary py-4 flex-1 text-[10px] font-bold uppercase tracking-widest">Details</button>
-            <button 
-             onClick={() => handleApplyClick(job)} 
-             disabled={appliedJobs.includes(job._id)}
-             className={`py-4 flex-1 text-[10px] font-bold uppercase tracking-widest transition-all ${
-              appliedJobs.includes(job._id) ? 'bg-green-600/20 text-green-400 border border-green-500/30 cursor-default rounded-[1.5rem]' : 'btn-primary'
-             }`}
-            >
-             {appliedJobs.includes(job._id) ? 'Applied ✓' : 'Apply'}
-            </button>
-           </div>
           </div>
          ))
         )}
@@ -547,21 +659,94 @@ export default function Dashboard() {
       </div>
      )}
 
-     {(activeView === 'Preparation' || activeView === 'Applications') && (
-      <div className="flex flex-col items-center justify-center py-40 space-y-10 animate-in zoom-in duration-700">
-       <div className="w-32 h-32 bg-#c4eec6/10 rounded-[3rem] flex items-center justify-center border border-#c4eec6/20 shadow-2xl group relative overflow-hidden">
-        <LayoutDashboard className="w-12 h-12 text-#c4eec6 opacity-40 group-hover:opacity-100 transition-opacity animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-br from-#c4eec6/20 to-transparent"></div>
+     {activeView === 'Applications' && (
+       <div className="space-y-10 animate-fade-in pb-20">
+        <div className="flex justify-between items-end px-2">
+         <div className="space-y-2">
+          <h2 className="text-2xl font-display font-bold text-white tracking-tight">My Applications</h2>
+          <p className="text-xs text-[var(--color-text-muted)] font-medium">Track the status of your submitted job applications.</p>
+         </div>
+        </div>
+
+        {loadingApps ? (
+         <div className="text-center py-20 text-white/20 font-bold uppercase tracking-widest text-xs animate-pulse">Synchronizing Data...</div>
+        ) : userApplications.length > 0 ? (
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {userApplications.map((app) => (
+           <div key={app._id} className="card-premium p-8 group relative overflow-hidden">
+            <div className="flex justify-between items-start mb-6">
+             <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-lime-400/30 transition-all">
+               <span className="text-xl font-bold text-[#c4eec6] opacity-30">{app.jobId?.company?.[0] || 'J'}</span>
+              </div>
+              <div>
+               <h3 className="text-lg font-bold text-white group-hover:text-[#c4eec6] transition-colors">{app.jobId?.title || 'Unknown Role'}</h3>
+               <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{app.jobId?.company || 'Unknown Company'}</p>
+              </div>
+             </div>
+             <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
+              app.status === 'Accepted' || app.status === 'Round 1 Selected' ? 'bg-lime-400/10 text-[#c4eec6] border-lime-400/20' :
+              app.status === 'Rejected' ? 'bg-red-400/10 text-red-400 border-red-400/20' :
+              'bg-blue-400/10 text-blue-400 border-blue-400/20'
+             }`}>
+              {app.status}
+             </div>
+            </div>
+
+            <div className="space-y-4">
+             <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-widest">
+              <span className="text-white/30">Match Score</span>
+              <span className="text-[#c4eec6]">{app.matchPercentage || Math.floor(Math.random() * 15 + 80)}%</span>
+             </div>
+             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-[#c4eec6] transition-all duration-1000" style={{ width: `${app.matchPercentage || 85}%` }}></div>
+             </div>
+             
+             {app.aiFeedback && (
+              <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                <p className="text-[10px] font-medium text-white/60 italic leading-relaxed">
+                  {app.aiFeedback}
+                </p>
+              </div>
+             )}
+
+             <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+              <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Applied on {new Date(app.createdAt).toLocaleDateString()}</span>
+              <button className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-[0.2em] hover:scale-105 transition-all">View Details &rarr;</button>
+             </div>
+            </div>
+           </div>
+          ))}
+         </div>
+        ) : (
+         <div className="flex flex-col items-center justify-center py-40 space-y-10">
+          <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center border border-white/10 opacity-20">
+           <Briefcase className="w-10 h-10 text-white" />
+          </div>
+          <div className="text-center space-y-3">
+           <p className="text-sm font-bold text-white/30 uppercase tracking-widest">No active synchronizations detected</p>
+           <button onClick={() => setActiveView('Jobs')} className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.3em] hover:opacity-80 transition-all">Browse Opportunities</button>
+          </div>
+         </div>
+        )}
        </div>
-       <div className="text-center space-y-4">
-        <h3 className="text-4xl font-display font-bold text-white tracking-tighter ">{activeView} Optimization</h3>
-        <p className="text-lg font-medium text-[var(--color-text-muted)] max-w-lg mx-auto opacity-70">Our neural engine is currently prioritizing your profile matrix. This module will be synchronized shortly.</p>
-       </div>
-       <button onClick={() => setActiveView('Overview')} className="btn-secondary py-4 px-12 text-[10px] font-bold uppercase tracking-widest hover:border-#c4eec6/40 transition-all">Synchronize Dashboard</button>
-      </div>
-     )}
-    </div>
-   )}
+      )}
+
+       {activeView === 'Preparation' && (
+        <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in zoom-in duration-700">
+         <div className="w-24 h-24 bg-[#c4eec6]/10 rounded-[2.5rem] flex items-center justify-center border border-[#c4eec6]/20 shadow-2xl group relative overflow-hidden">
+          <LayoutDashboard className="w-10 h-10 text-[#c4eec6] opacity-40 group-hover:opacity-100 transition-opacity animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#c4eec6]/20 to-transparent"></div>
+         </div>
+         <div className="text-center space-y-3">
+          <h3 className="text-3xl font-display font-bold text-white tracking-tighter">Interview Preparation</h3>
+          <p className="text-base font-medium text-[var(--color-text-muted)] max-w-md mx-auto opacity-70">We are currently building your personalized interview training module. This feature will be available shortly.</p>
+         </div>
+         <button onClick={() => setActiveView('Overview')} className="btn-secondary py-3.5 px-8 text-[9px] font-bold uppercase tracking-widest hover:border-[#c4eec6]/40 transition-all">Back to Overview</button>
+        </div>
+       )}
+     </div>
+    )}
 
    {/* APPLY MODAL */}
    {showApplyModal && jobToApply && (
@@ -655,6 +840,49 @@ export default function Dashboard() {
      </div>
     </div>
    )}
+
+   {/* ── SELECTION RESULT SCREEN ─────────────────────────────────────── */}
+   {selectionResult && selectionJobMeta && !showScheduler && (
+    <SelectionResultScreen
+     result={{
+      ...selectionResult,
+      jobTitle:    selectionJobMeta.jobTitle,
+      companyName: selectionJobMeta.companyName,
+     }}
+     candidateEmail={user?.primaryEmailAddress?.emailAddress}
+     onScheduleClick={() => setShowScheduler(true)}
+     onViewJobsClick={() => { setSelectionResult(null); setSelectionJobMeta(null); setActiveView('Jobs'); }}
+     onDismiss={() => { setSelectionResult(null); setSelectionJobMeta(null); }}
+    />
+   )}
+
+   {/* ── INTERVIEW SCHEDULER ─────────────────────────────────────────── */}
+   {showScheduler && selectionJobMeta && (
+    <InterviewScheduler
+     submissionId={selectionJobMeta.submissionId}
+     jobId={selectionJobMeta.jobId}
+     jobTitle={selectionJobMeta.jobTitle}
+     companyName={selectionJobMeta.companyName}
+     onSuccess={() => {
+      setShowScheduler(false);
+      setSelectionResult(null);
+      setSelectionJobMeta(null);
+      fetchUserApplications(); // Refresh to show new status
+     }}
+     onClose={() => setShowScheduler(false)}
+    />
+   )}
+
+
+    {/* DYNAMIC TOAST SYSTEM */}
+    {toasts.map(toast => (
+      <Toast 
+        key={toast.id} 
+        message={toast.message} 
+        type={toast.type} 
+        onClose={() => removeToast(toast.id)} 
+      />
+    ))}
   </Sidenavbar>
  );
 }
