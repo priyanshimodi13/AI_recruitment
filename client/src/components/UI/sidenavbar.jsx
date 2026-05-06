@@ -4,7 +4,7 @@ import {
  CollapsibleContent,
  CollapsibleTrigger,
 } from "@/components/UI/collapsible";
-import { ScrollArea } from "@/components/UI/scroll-area";
+
 import {
  ChevronRight,
  Home,
@@ -20,7 +20,8 @@ import {
  Search,
  Plus,
  Bell,
- LogOut
+ LogOut,
+ HelpCircle
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -32,16 +33,16 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
  const location = useLocation();
 
  const navItems = userRole === 'admin' ? [
-  { icon: LayoutDashboard, label: "Overview" },
+  { icon: LayoutDashboard, label: "Dashboard" },
   { icon: CheckCircle2, label: "Resumes" },
   { icon: Briefcase, label: "Jobs" },
  ] : userRole === 'employer' ? [
-  { icon: LayoutDashboard, label: "Overview" },
+  { icon: LayoutDashboard, label: "Dashboard" },
   { icon: Briefcase, label: "Jobs" },
   { icon: Calendar, label: "Interviews" },
   { icon: CheckCircle2, label: "Candidates" },
  ] : [
-  { icon: LayoutDashboard, label: "Overview" },
+  { icon: LayoutDashboard, label: "Dashboard" },
   { icon: Briefcase, label: "Jobs" },
   { icon: Calendar, label: "Preparation" },
   { icon: CheckCircle2, label: "Applications" },
@@ -54,20 +55,17 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
      isOpen ? "w-72" : "w-20"
     } flex flex-col border-r border-[var(--color-border)] transition-all duration-500 ease-in-out bg-[#09090b] z-30`}
    >
-    <div className="flex h-20 items-center justify-between px-6 border-b border-[var(--color-border)]">
-      <div className={`${isOpen ? "flex" : "hidden"} items-center gap-2 overflow-hidden group cursor-pointer`}>
-       <div className="p-1.5 bg-[#c4eec6]/10 rounded-lg border border-[#c4eec6]/20">
-        <Briefcase className="w-4 h-4 text-[#c4eec6]" />
-       </div>
-       <span className="text-base font-display font-bold tracking-tight text-[#c4eec6]">
-        Hire.Vision
-       </span>
-      </div>
-     {!isOpen && (
-      <div className="w-10 h-10 bg-[#c4eec6]/10 rounded-xl flex items-center justify-center mx-auto border border-[#c4eec6]/20">
-        <Briefcase className="w-5 h-5 text-[#c4eec6]" />
-      </div>
-     )}
+    <div className={`flex h-20 items-center ${isOpen ? 'justify-between' : 'justify-center'} px-6 border-b border-[var(--color-border)]`}>
+      {isOpen && (
+        <div className="flex items-center gap-2 overflow-hidden group cursor-pointer">
+         <div className="p-1.5 bg-[#c4eec6]/10 rounded-lg border border-[#c4eec6]/20">
+          <Briefcase className="w-4 h-4 text-[#c4eec6]" />
+         </div>
+         <span className="text-base font-display font-bold tracking-tight text-[#c4eec6]">
+          Hire.Vision
+         </span>
+        </div>
+      )}
      <Button
       variant="ghost"
       size="icon"
@@ -78,11 +76,13 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
      </Button>
     </div>
     
-    <ScrollArea className="flex-1 px-3 py-6">
+    <div className="flex-1 px-3 py-6">
      <nav className="space-y-3">
-      <p className={`${isOpen ? "px-4 text-left" : "text-center"} text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40`}>
-       {isOpen ? "Primary Menu" : "Menu"}
-      </p>
+      {isOpen && (
+       <p className="px-4 text-left text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40">
+        Primary Menu
+       </p>
+      )}
       {navItems.map((item, i) => (
        <Button
         key={i}
@@ -99,21 +99,26 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
       ))}
 
       <div className="pt-10 mt-10 border-t border-white/5">
-        <p className={`${isOpen ? "px-4 text-left" : "text-center"} text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40`}>
-        {isOpen ? "Platform Overview" : "Overview"}
-       </p>
+        {isOpen && (
+         <p className="px-4 text-left text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40">
+          Platform Overview
+         </p>
+        )}
        {[
-        { icon: User, label: "Profile", path: "/profile" },
-        { icon: Settings, label: "Settings", path: "/settings" },
+        { label: "Dashboard", icon: User },
+        { icon: Bell, label: "Notifications" },
+        { icon: HelpCircle, label: "Help & Support" },
        ].map((item, i) => (
-        <Button
-         key={i}
-         variant="ghost"
-         className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-[var(--color-text-muted)] hover:bg-white/5 hover:text-white transition-all duration-500 group`}
-        >
-         <item.icon className="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100" />
-         {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">{item.label}</span>}
-        </Button>
+         <Button
+          key={i}
+          variant="ghost"
+          onClick={() => setActiveView && setActiveView(item.label)}
+          className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-[var(--color-text-muted)] hover:bg-white/5 hover:text-white transition-all duration-500 group
+           ${activeView === item.label ? 'bg-white/5 text-white' : ''}`}
+         >
+          <item.icon className={`w-6 h-6 shrink-0 ${activeView === item.label ? 'text-[#c4eec6]' : 'opacity-70 group-hover:opacity-100'}`} />
+          {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">{item.label}</span>}
+         </Button>
        ))}
 
        <div className="pt-4 mt-4 border-t border-white/5">
@@ -129,19 +134,8 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
        </div>
       </div>
      </nav>
-    </ScrollArea>
+    </div>
 
-    {isOpen && (
-     <div className="p-8">
-      <div className="bg-gradient-to-br from-lime-400/20 to-transparent rounded-[2rem] p-6 border border-lime-400/10 relative overflow-hidden group shadow-inner">
-       <p className="text-[10px] font-bold text-lime-400 mb-2 uppercase tracking-widest ">Core Status</p>
-       <p className="text-[10px] text-[var(--color-text-muted)] font-bold mb-4 leading-relaxed opacity-70">AI career intelligence is fully synchronized.</p>
-       <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-         <div className="h-full bg-lime-400 w-4/5 shadow-[0_0_15px_rgba(200,241,53,0.5)]"></div>
-       </div>
-      </div>
-     </div>
-    )}
    </aside>
 
    <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#09090b]">
@@ -161,9 +155,7 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
            <p className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-wider">{userRole} Account</p>
          </div>
         </div>
-        <button onClick={onPostJob} className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#c4eec6] text-black text-xs font-bold hover:opacity-90 transition-all">
-         {userRole === 'employer' ? 'Post Job' : 'Quick Match'} <Plus className="w-3.5 h-3.5" />
-        </button>
+
       </div>
 
       <div className="flex items-center gap-6">

@@ -801,9 +801,8 @@ export default function ModernLandingPage() {
  if (isLoaded && isSignedIn) {
   return <Navigate to="/dashboard" replace />;
  }
-
- return (
-  <main className="min-h-screen bg-white text-zinc-950">
+return (
+   <main className="min-h-screen bg-white text-zinc-950">
    <section
     ref={heroRef}
     className="relative flex min-h-screen w-full items-center overflow-hidden px-6 sm:px-10"
@@ -870,7 +869,7 @@ export default function ModernLandingPage() {
 
    <section
     ref={aboutRef}
-    className="grid min-h-screen items-center gap-10 bg-white px-6 py-24 sm:px-10 lg:grid-cols-2"
+     className="grid min-h-screen items-center gap-10 bg-white px-6 py-24 sm:px-10 lg:grid-cols-2"
    >
     <div className="mx-auto w-full max-w-xl">
      <p className="about-reveal mb-5 text-sm font-semibold uppercase tracking-[0.24em] text-zinc-500">

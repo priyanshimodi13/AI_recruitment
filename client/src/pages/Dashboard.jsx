@@ -46,7 +46,7 @@ export default function Dashboard() {
  const [jobs, setJobs] = useState([]);
  const [allJobs, setAllJobs] = useState([]);
  const [loadingJobs, setLoadingJobs] = useState(true);
- const [activeView, setActiveView] = useState('Overview'); // Overview, Job Matches, Preparation, Applications
+ const [activeView, setActiveView] = useState('Dashboard'); // Dashboard, Job Matches, Preparation, Applications
  const [selectedJob, setSelectedJob] = useState(null);
  const [activeSessions, setActiveSessions] = useState([]);
  const [loadingSessions, setLoadingSessions] = useState(true);
@@ -211,7 +211,7 @@ export default function Dashboard() {
   if (activeView === 'Applications') {
    fetchUserApplications();
   }
-  if (activeView === 'Overview') {
+  if (activeView === 'Dashboard') {
    fetchUserResume();
   }
  }, [activeView, getToken]);
@@ -246,15 +246,20 @@ export default function Dashboard() {
      
      // 2. Handle Intended Role Sync
      if (localIntendedRole && localIntendedRole !== dbRole) {
-      fetch(`${API_URL}/api/users/role`, {
-       method: 'PUT',
-       headers: { 
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}` 
-       },
-       body: JSON.stringify({ role: localIntendedRole })
-      });
-      finalRole = localIntendedRole;
+      try {
+       await fetch(`${API_URL}/api/users/role`, {
+        method: 'PUT',
+        headers: { 
+         'Content-Type': 'application/json',
+         Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ role: localIntendedRole })
+       });
+       finalRole = localIntendedRole;
+      } catch(err) {
+       console.error("Failed to save role", err);
+       finalRole = localIntendedRole; // Keep it locally even if backend fails
+      }
      } else {
       finalRole = dbRole;
      }
@@ -278,7 +283,7 @@ export default function Dashboard() {
    } catch (err) {
     console.error('Error initializing role:', err);
     // If backend fails but we have a local role, keep using it
-    if (!userRole) setUserRole('candidate');
+    setUserRole(prev => prev || 'candidate');
    }
   };
   checkAndInitRole();
@@ -321,7 +326,7 @@ export default function Dashboard() {
      <EmployerDashboard activeView={activeView} setActiveView={setActiveView} triggerPostJob={triggerPostJob} />
     ) : (
     <div className="space-y-12 animate-fade-in">
-     {activeView === 'Overview' && (
+     {activeView === 'Dashboard' && (
       <div className="space-y-6 animate-fade-in pb-12">
        {/* MAIN CONTENT GRID */}
        <div className="grid grid-cols-12 gap-5">
@@ -357,15 +362,7 @@ export default function Dashboard() {
               </button>
              </div>
 
-             <div className="space-y-1">
-              <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest font-sf-text">Compatibility Score</p>
-              <div className="flex items-baseline gap-2">
-               <span className="text-2xl font-sf-display font-bold text-white tracking-tighter">{Math.floor(Math.random() * 15 + 85)}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-               <span className={`text-[9px] font-bold ${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} font-sf-text`}>{i === 0 ? 'Elite Match' : 'High Fit'}</span>
-              </div>
-             </div>
+
 
              <div className="h-14 w-full relative pt-2">
               <svg className="w-full h-full overflow-visible" viewBox="0 0 120 40">
@@ -637,9 +634,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center group-hover:border-[#c4eec6]/30 transition-all duration-500 shadow-sm shrink-0">
                <span className="text-xl font-bold text-[#c4eec6] opacity-20">{job.company?.[0] || 'C'}</span>
               </div>
-              <div className="px-3 py-1.5 rounded-xl bg-[#c4eec6]/10 text-[#c4eec6] text-[8px] font-bold border border-[#c4eec6]/10 uppercase tracking-widest">
-               {Math.floor(Math.random() * 20 + 80)}% Fit
-              </div>
+
              </div>
              <div>
               <h3 className="text-xl font-display font-bold text-white group-hover:text-[#c4eec6] transition-colors tracking-tight leading-tight mb-1">{job.title}</h3>
@@ -754,7 +749,7 @@ export default function Dashboard() {
           <h3 className="text-3xl font-display font-bold text-white tracking-tighter">Interview Preparation</h3>
           <p className="text-base font-medium text-[var(--color-text-muted)] max-w-md mx-auto opacity-70">We are currently building your personalized interview training module. This feature will be available shortly.</p>
          </div>
-         <button onClick={() => setActiveView('Overview')} className="btn-secondary py-3.5 px-8 text-[9px] font-bold uppercase tracking-widest hover:border-[#c4eec6]/40 transition-all">Back to Overview</button>
+         <button onClick={() => setActiveView('Dashboard')} className="btn-secondary py-3.5 px-8 text-[9px] font-bold uppercase tracking-widest hover:border-[#c4eec6]/40 transition-all">Back to Dashboard</button>
         </div>
        )}
      </div>

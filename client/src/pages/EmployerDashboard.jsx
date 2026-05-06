@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Briefcase, Plus, TrendingUp, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { Briefcase, Plus, TrendingUp, CheckCircle2, ChevronRight, X, MoreHorizontal, Bookmark, Eye, Pencil } from 'lucide-react';
 import PostJobSection from '@/components/UI/PostJobSection';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
@@ -11,6 +11,8 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
  const [jobs, setJobs] = useState([]);
  const [candidates, setCandidates] = useState([]);
  const [loading, setLoading] = useState(true);
+ const [timeFilter, setTimeFilter] = useState('Day');
+ const [selectedJobId, setSelectedJobId] = useState('');
 
  useEffect(() => {
   if (triggerPostJob > 0) {
@@ -82,194 +84,156 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
     <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
      <div className="space-y-1">
       <h1 className="text-2xl font-sf-display font-bold text-white tracking-tight leading-none">
-       {activeView === 'Overview' ? 'Company Dashboard' : activeView === 'Jobs' ? 'Job Listings' : activeView}
+       {activeView === 'Dashboard' ? 'Company Dashboard' : activeView === 'Jobs' ? 'Job Listings' : activeView}
       </h1>
       <p className="text-sm text-[var(--color-text-muted)] font-medium opacity-70 font-sf-text">
-       {activeView === 'Overview' ? 'Manage your recruitment pipeline.' : `Refine your ${activeView === 'Jobs' ? 'job listings' : activeView.toLowerCase()} details.`}
+       {activeView === 'Dashboard' ? 'Manage your recruitment pipeline.' : `Refine your ${activeView === 'Jobs' ? 'job listings' : activeView.toLowerCase()} details.`}
       </p>
      </div>
-     <div className="flex flex-wrap gap-3 w-full xl:w-auto">
-      <button onClick={() => setActiveView('Jobs')} className="btn-primary py-3 px-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
-       <Plus className="w-3.5 h-3.5" /> Post Job
-      </button>
-     </div>
+
     </header>
 
    {/* OVERVIEW CONTENT */}
-   {activeView === 'Overview' && (
+   {activeView === 'Dashboard' && (
     <div className="space-y-6 animate-fade-in pb-12">
      
-     {/* METRIC GRID (Asset Style) */}
-     <div className="grid grid-cols-12 gap-5">
+     {/* TOP METRIC CARDS */}
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
        {[
-        { label: "Active Postings", value: jobs.length, trend: "+12%", color: "text-[#c4eec6]", chart: "M0 25 L10 20 L20 28 L30 15 L40 22 L50 10 L60 18 L70 5 L80 12 L90 2 L100 8" },
-        { label: "Total Impressions", value: (jobs.length * 142).toLocaleString(), trend: "+4.5%", color: "text-blue-400", chart: "M0 20 L10 25 L20 15 L30 22 L40 10 L50 18 L60 5 L70 12 L80 8 L90 15 L100 5" },
-        { label: "Candidate Pool", value: candidates.length, trend: "+28%", color: "text-purple-400", chart: "M0 28 L10 22 L20 25 L30 18 L40 20 L50 12 L60 15 L70 8 L80 10 L90 5 L100 2" },
+        { label: "Posted Job", value: jobs.length < 10 ? `0${jobs.length}` : jobs.length, icon: Briefcase },
+        { label: "Shortlisted", value: candidates.filter(c => c?.status === 'Accepted' || c?.status === 'Round 1 Selected' || c?.status === 'Shortlisted').length < 10 ? `0${candidates.filter(c => c?.status === 'Accepted' || c?.status === 'Round 1 Selected' || c?.status === 'Shortlisted').length}` : candidates.filter(c => c?.status === 'Accepted' || c?.status === 'Round 1 Selected' || c?.status === 'Shortlisted').length, icon: Bookmark },
+        { label: "Application", value: candidates.length >= 1000 ? `${(candidates.length/1000).toFixed(1)}k` : candidates.length, icon: Eye },
+        { label: "Save Candidate", value: "04", icon: Pencil },
        ].map((m, i) => (
-        <div key={i} className="col-span-12 md:col-span-4 card-premium !p-5 group relative overflow-hidden flex flex-col justify-between h-36 hover:border-white/20 transition-all duration-700">
-         <div className="flex justify-between items-start relative z-10">
-           <div className="space-y-1">
-            <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest font-sf-text">{m.label}</p>
-            <h3 className={`text-xl font-sf-display font-bold tracking-tight ${m.color}`}>{m.value}</h3>
-           </div>
-           <div className={`px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[7px] font-bold ${m.color} uppercase tracking-widest font-sf-text`}>
-            {m.trend}
-           </div>
-         </div>
-        
-        {/* Mini Chart */}
-        <div className="absolute bottom-0 left-0 w-full h-20 opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none">
-         <svg className="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
-          <defs>
-           <linearGradient id={`grad-emp-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" className={m.color} />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0" className={m.color} />
-           </linearGradient>
-          </defs>
-          <path d={`${m.chart} L100 30 L0 30 Z`} fill={`url(#grad-emp-${i})`} className={m.color} />
-          <path d={m.chart} fill="none" stroke="currentColor" strokeWidth="1" className={m.color} />
-         </svg>
-        </div>
-        
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/10 transition-all duration-700"></div>
-       </div>
-      ))}
-
-      {/* RECRUITMENT STRATEGY HUB (Big Card) */}
-      <div className="col-span-12 xl:col-span-8 card-premium !p-0 overflow-hidden group relative h-[18rem]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#c4eec6]/10 via-[#09090b] to-[#c4eec6]/5 opacity-50 group-hover:opacity-80 transition-opacity duration-1000"></div>
-        <div className="absolute inset-0 flex flex-col justify-between p-6 relative z-10">
-         <div className="space-y-4">
-           <div className="w-12 h-12 bg-white/10 rounded-xl border border-white/20 flex items-center justify-center shadow-2xl backdrop-blur-3xl group-hover:scale-105 transition-all duration-700">
-            <TrendingUp className="w-6 h-6 text-[#c4eec6]" />
-           </div>
-           <div className="space-y-1">
-             <h2 className="text-xl font-sf-display font-bold text-white tracking-tight leading-none">Hiring Overview</h2>
-             <p className="text-[10px] text-white/60 font-medium max-w-xl font-sf-text">Centralize your recruitment process and find top global talent.</p>
-           </div>
-         </div>
-         
-         <div className="flex flex-wrap gap-4 items-end justify-between">
-           <div className="flex gap-6">
-            <div className="space-y-1">
-              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest font-sf-text">Active Listings</p>
-              <p className="text-base font-bold text-white font-sf-display">{jobs.length}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest font-sf-text">System Status</p>
-              <p className="text-base font-bold text-[#c4eec6] font-sf-display">Active</p>
-            </div>
-           </div>
-           <button onClick={() => setActiveView('Jobs')} className="btn-primary !py-3 !px-8 text-[9px] font-bold uppercase tracking-wider shadow-xl font-sf-text">
-            Create Posting <Plus className="ml-1.5 w-3 h-3" />
-           </button>
-         </div>
-        </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-1/2 right-10 -translate-y-1/2 w-48 h-48 border border-white/5 rounded-full opacity-20 group-hover:scale-125 transition-transform duration-1000"></div>
-        <div className="absolute top-1/2 right-10 -translate-y-1/2 w-32 h-32 border border-white/10 rounded-full opacity-20 group-hover:scale-110 transition-transform duration-1000"></div>
-      </div>
-
-      {/* SYSTEM HEALTH */}
-      <div className="col-span-12 xl:col-span-4 card-premium !p-5 space-y-5 relative overflow-hidden group h-[18rem]">
-        <div className="space-y-1">
-         <h3 className="text-sm font-sf-display font-bold text-white tracking-tight uppercase">System Health</h3>
-         <p className="text-[9px] text-white/40 font-medium font-sf-text">Monitoring platform stability.</p>
-        </div>
-        
-        <div className="space-y-5">
-         {[
-          { label: "Candidate Matching", status: "Active", val: "98.2%", color: "bg-[#c4eec6]" },
-          { label: "System Speed", status: "Nominal", val: "12ms", color: "bg-blue-400" },
-          { label: "Data Quality", status: "Verified", val: "100%", color: "bg-purple-400" },
-          { label: "Urgency Level", status: "High", val: "Elite", color: "bg-orange-400" },
-         ].map((s, i) => (
-          <div key={i} className="space-y-1.5 group/item">
-            <div className="flex justify-between items-end">
-             <p className="text-[8px] font-bold text-white uppercase tracking-widest group-hover/item:text-[#c4eec6] transition-colors font-sf-text">{s.label}</p>
-             <span className="text-[8px] font-bold text-white/40 uppercase tracking-tighter font-sf-text">{s.val}</span>
-            </div>
-            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-             <div className={`h-full ${s.color} w-4/5 transition-all duration-1000`}></div>
-            </div>
+        <div key={i} className="card-premium !p-6 flex items-center justify-between group hover:border-white/20 transition-all duration-700">
+          <div className="space-y-1">
+            <h3 className="text-3xl font-display font-bold text-white tracking-tight">{m.value}</h3>
+            <p className="text-xs font-bold text-white/40 uppercase tracking-widest">{m.label}</p>
           </div>
-         ))}
+          <div className="w-12 h-12 rounded-full bg-[#c4eec6] flex items-center justify-center text-black shadow-[0_0_15px_rgba(196,238,198,0.3)] group-hover:scale-110 transition-transform">
+            <m.icon className="w-5 h-5" />
+          </div>
         </div>
+       ))}
+     </div>
+
+     {/* BOTTOM SECTION */}
+     <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
         
-        <div className="pt-2">
-         <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 group-hover:bg-white/10 transition-all">
-           <div className="w-8 h-8 rounded-lg bg-[#c4eec6]/20 flex items-center justify-center">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#c4eec6]" />
-           </div>
-           <div>
-            <p className="text-[8px] font-bold text-white uppercase tracking-widest font-sf-text">System Ready</p>
-            <p className="text-[7px] font-medium text-white/40 font-sf-text">All systems performing optimally.</p>
-           </div>
-         </div>
-        </div>
-      </div>
-
-      {/* ACTIVE JOB POSTINGS */}
-      <div className="col-span-12 space-y-5">
-        <div className="flex justify-between items-end px-2">
-         <div className="space-y-1">
-           <div className="flex items-center gap-2">
-            <div className="w-0.5 h-4 bg-[#c4eec6] rounded-full"></div>
-            <h2 className="text-xl font-sf-display font-bold text-white tracking-tight uppercase">Active Job Postings</h2>
-           </div>
-           <p className="text-[9px] text-white/40 font-medium font-sf-text">Real-time monitoring of your active hiring pipelines.</p>
-         </div>
-         <button onClick={() => setActiveView('Jobs')} className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-wider hover:tracking-widest transition-all px-3 py-1.5 border border-lime-400/20 rounded-lg bg-lime-400/5 font-sf-text">View All Jobs</button>
-        </div>
-
-        {loading ? (
-         <div className="py-20 flex justify-center items-center">
-           <div className="w-12 h-12 rounded-full border-4 border-lime-400/20 border-t-lime-400 animate-spin"></div>
-         </div>
-        ) : (
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {jobs.slice(0, 4).map((job) => (
-           <div key={job._id} className="card-premium !p-12 group relative overflow-hidden hover:border-white/20 transition-all duration-700">
-            <div className="flex justify-between items-start mb-10">
-              <div className="flex gap-8">
-               <div className="w-20 h-20 bg-white/5 rounded-[2rem] border border-white/10 flex items-center justify-center shrink-0 group-hover:rotate-6 transition-all duration-700">
-                 <span className="text-4xl font-bold text-[#c4eec6] opacity-20">{job.title?.[0] || 'J'}</span>
-               </div>
-               <div className="space-y-2">
-                 <h3 className="text-3xl font-display font-bold text-white group-hover:text-[#c4eec6] transition-colors tracking-tighter leading-none">{job.title}</h3>
-                 <p className="text-sm font-bold text-white/40 uppercase tracking-widest ">{job.location} &bull; {job.type}</p>
-               </div>
-              </div>
-              <div className={`px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest border ${job.isActive ? 'bg-green-400/10 text-green-400 border-green-400/10' : 'bg-red-400/10 text-red-400 border-red-400/10'}`}>
-               {job.isActive ? 'Active' : 'Closed'}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6 mb-10">
-              {[
-               { label: "Sync Potential", val: "98%", color: "text-[#c4eec6]" },
-               { label: "Applicants", val: candidates.filter(c => c.jobId?._id === job._id).length, color: "text-white" },
-               { label: "Match Score", val: "Elite", color: "text-purple-400" },
-              ].map((stat, idx) => (
-               <div key={idx} className="space-y-1">
-                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{stat.label}</p>
-                 <p className={`text-xl font-bold ${stat.color}`}>{stat.val}</p>
-               </div>
-              ))}
-            </div>
-
-            <div className="pt-8 border-t border-white/5 flex gap-4">
-              <button onClick={() => setActiveView('Jobs')} className="flex-1 btn-secondary !py-4 text-[10px] font-bold uppercase tracking-widest ">Modify Node</button>
-              <button onClick={() => setActiveView('Candidates')} className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all">Review Talent</button>
+        {/* LEFT: JOB VIEWS GRAPH */}
+        <div className="xl:col-span-8 card-premium !p-8 space-y-8 flex flex-col justify-between">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-display font-bold text-white tracking-tight">Job Views</h2>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <span className="text-xs font-bold text-white/60">Jobs:</span>
+              <select 
+                value={selectedJobId} 
+                onChange={(e) => setSelectedJobId(e.target.value)}
+                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#c4eec6]/40 appearance-none w-full sm:w-64 font-bold"
+              >
+                {jobs.length > 0 ? jobs.map(j => (
+                  <option key={j?._id || Math.random()} value={j?._id} className="bg-[#09090b] text-white">
+                    {j?.title && j.title.length > 30 ? j.title.substring(0,30)+'...' : (j?.title || 'Untitled Job')}
+                  </option>
+                )) : <option className="bg-[#09090b] text-white">No jobs posted</option>}
+              </select>
             </div>
             
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-lime-400/10 to-transparent blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-1000"></div>
-           </div>
-          ))}
-         </div>
-        )}
-      </div>
+            <div className="flex items-center gap-4">
+              {['1h', 'Day', 'Week', 'Month', 'Year'].map(t => (
+                <button 
+                  key={t} 
+                  onClick={() => setTimeFilter(t)}
+                  className={`text-xs font-bold transition-all ${timeFilter === t ? 'px-4 py-1.5 rounded-full bg-[#3d4f40] text-white' : 'text-white/40 hover:text-white'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* SVG GRAPH AREA */}
+          <div className="h-64 mt-4 relative w-full border-b border-white/10">
+            {/* Y Axis labels */}
+            <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-[10px] font-bold text-white/20">
+              <span>300</span>
+              <span>200</span>
+              <span>100</span>
+              <span>50</span>
+            </div>
+            
+            {/* Graph Content */}
+            <div className="absolute left-10 right-0 top-0 bottom-8 relative">
+              {/* Horizontal grid lines */}
+              <div className="absolute inset-0 flex flex-col justify-between">
+                <div className="border-b border-white/5 border-dashed w-full h-0"></div>
+                <div className="border-b border-white/5 border-dashed w-full h-0"></div>
+                <div className="border-b border-white/5 border-dashed w-full h-0"></div>
+                <div className="border-b border-white/5 border-dashed w-full h-0"></div>
+              </div>
+              
+              <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="viewGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#c4eec6" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#c4eec6" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+                {/* Dynamically shift path based on selected job or timeFilter so it feels real-time/interactive */}
+                <path d={`M 0 80 Q 15 20, 25 70 T 45 ${timeFilter === 'Day' ? 10 : timeFilter === 'Week' ? 30 : 50} T 65 30 T 100 70 L 100 100 L 0 100 Z`} fill="url(#viewGrad)" className="transition-all duration-700" />
+                <path d={`M 0 80 Q 15 20, 25 70 T 45 ${timeFilter === 'Day' ? 10 : timeFilter === 'Week' ? 30 : 50} T 65 30 T 100 70`} fill="none" stroke="#c4eec6" strokeWidth="2.5" className="transition-all duration-700" />
+                <circle cx="45" cy={timeFilter === 'Day' ? 10 : timeFilter === 'Week' ? 30 : 50} r="4" fill="#c4eec6" stroke="#09090b" strokeWidth="2" className="animate-pulse transition-all duration-700" />
+              </svg>
+            </div>
+            
+            {/* X Axis labels */}
+            <div className="absolute bottom-0 left-10 right-0 flex justify-between text-[10px] font-bold text-white/20 uppercase tracking-widest">
+              <span>Sun</span>
+              <span>Sat</span>
+              <span>Mon</span>
+              <span className="text-[#c4eec6]">Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: POSTED JOBS LIST */}
+        <div className="xl:col-span-4 card-premium !p-6 flex flex-col h-[28rem]">
+          <h2 className="text-lg font-display font-bold text-white tracking-tight mb-6">Posted Job</h2>
+          
+          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
+            {jobs.length === 0 ? (
+              <div className="text-center text-white/40 text-sm font-medium py-10">No jobs posted yet.</div>
+            ) : (
+              jobs.map(job => (
+                <div key={job?._id || Math.random()} className="flex items-center justify-between p-3 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center shrink-0">
+                      {job?.companyLogo ? (
+                        <img src={job.companyLogo} alt="" className="w-6 h-6 object-contain" />
+                      ) : (
+                        <span className="text-lg font-bold text-[#c4eec6]">{job?.title?.[0] || 'J'}</span>
+                      )}
+                    </div>
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-bold text-white group-hover:text-[#c4eec6] transition-colors">{job?.title || 'Untitled Job'}</h4>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{job?.type || 'Full-time'} &bull; {job?.location || 'Remote'}</p>
+                    </div>
+                  </div>
+                  <button className="text-white/20 hover:text-white transition-colors">
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
      </div>
     </div>
    )}
