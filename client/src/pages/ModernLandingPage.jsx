@@ -806,7 +806,6 @@ return (
    <section
     ref={heroRef}
     className="relative flex min-h-screen w-full items-center overflow-hidden px-6 sm:px-10"
-    style={{ marginTop: 0, paddingTop: 0 }}
    >
     <video
      ref={heroVideoRef}
@@ -867,9 +866,10 @@ return (
     </div>
    </section>
 
+   <div className="snap-y snap-mandatory">
    <section
     ref={aboutRef}
-     className="grid min-h-screen items-center gap-10 bg-white px-6 py-24 sm:px-10 lg:grid-cols-2"
+     className="snap-start grid min-h-screen items-center gap-10 bg-white px-6 py-24 sm:px-10 lg:grid-cols-2"
    >
     <div className="mx-auto w-full max-w-xl">
      <p className="about-reveal mb-5 text-sm font-semibold uppercase tracking-[0.24em] text-zinc-500">
@@ -983,7 +983,7 @@ return (
 
    <section
     ref={industriesRef}
-    className="relative overflow-hidden bg-zinc-950 px-6 py-24 text-white sm:px-10"
+    className="snap-start relative overflow-hidden bg-zinc-950 px-6 py-24 text-white sm:px-10"
    >
     <canvas
      ref={industriesCanvasRef}
@@ -1045,7 +1045,7 @@ return (
 
    <section
     ref={testimonialsRef}
-    className="relative overflow-hidden bg-[#f4f1e8] px-6 py-24 text-zinc-950 sm:px-10"
+    className="snap-start relative overflow-hidden bg-[#f4f1e8] px-6 py-24 text-zinc-950 sm:px-10"
    >
     <canvas
      ref={testimonialsCanvasRef}
@@ -1140,7 +1140,7 @@ return (
 
    <section
     ref={contactRef}
-    className="relative overflow-hidden bg-zinc-950 px-6 py-24 text-white sm:px-10"
+    className="snap-start relative overflow-hidden bg-zinc-950 px-6 py-24 text-white sm:px-10"
    >
     <canvas
      ref={contactCanvasRef}
@@ -1266,6 +1266,7 @@ return (
      </div>
     </div>
    </section>
+   </div>
 
    <CinematicFooter />
   </main>
