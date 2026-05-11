@@ -1,4 +1,4 @@
-// src/components/UI/spotlight-card.tsx
+// src/components/ui/spotlight-card.tsx
 import React, { useEffect, useRef, ReactNode } from 'react';
 
 interface GlowCardProps {

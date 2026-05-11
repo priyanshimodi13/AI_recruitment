@@ -22,8 +22,8 @@ import {
  UserCheck,
 } from 'lucide-react';
 import * as THREE from 'three';
-import RadialOrbitalTimeline from '../components/UI/radial-orbital-timeline';
-import { CinematicFooter } from '../components/UI/motion-footer';
+import RadialOrbitalTimeline from '../components/ui/radial-orbital-timeline';
+import { CinematicFooter } from '../components/ui/motion-footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -824,9 +824,9 @@ return (
      ref={heroContentRef}
      className="relative z-10 mx-auto w-full max-w-7xl text-center"
     >
-     <p className="mb-8 text-xl font-semibold text-white sm:text-2xl">
-      Hire Vision
-     </p>
+      <p className="mb-8 text-xl font-semibold text-white sm:text-2xl">
+       Hire Vision
+      </p>
 
      <h1
       className="mx-auto max-w-6xl text-6xl font-normal uppercase leading-[0.95] text-white sm:text-8xl lg:text-[8.5rem]"

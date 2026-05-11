@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
 
 @layer base {
   :root {
@@ -164,70 +166,70 @@
   display: none !important;
 }
 
-/* ===== CLERK FORM — FORCE WHITE TEXT ON DARK VIDEO PAGES ===== */
+/* ===== CLERK FORM — STYLING OVERRIDES ===== */
 .cl-socialButtonsBlockButton,
 .cl-socialButtonsBlockButton:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .cl-socialButtonsBlockButtonText {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.12em !important;
-  font-size: 11px !important;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 11px;
 }
 
 .cl-dividerText {
-  color: rgba(255, 255, 255, 0.55) !important;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .cl-dividerLine {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .cl-formFieldLabel {
-  color: rgba(255, 255, 255, 0.75) !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.12em !important;
-  font-size: 10px !important;
-  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  text-transform: uppercase;
 }
 
 .cl-formFieldInput {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
-  font-weight: 500 !important;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .cl-formFieldInput::placeholder {
-  color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .cl-formFieldHintText,
 .cl-formFieldSuccessText,
 .cl-formResendCodeLink {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .cl-footerActionText {
-  color: rgba(255, 255, 255, 0.45) !important;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .cl-footerActionLink {
-  color: #ffffff !important;
-  font-weight: 800 !important;
+  color: #ffffff;
+  font-weight: 800;
 }
 
 .cl-footerActionLink:hover {
-  color: #c8f135 !important;
+  color: #c8f135;
 }
 
 .cl-footer {
-  background: rgba(0, 0, 0, 0.4) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .cl-otpCodeFieldInput {

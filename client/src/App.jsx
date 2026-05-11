@@ -11,9 +11,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import RoleSelectionPage from './pages/RoleSelectionPage';
-import GridBackground from './components/UI/grid-background';
-import HeroSplashScreen from './components/UI/HeroSplashScreen';
-import { InfinityLoader } from './components/UI/loader-13';
+import GridBackground from './components/ui/grid-background';
+import HeroSplashScreen from './components/ui/HeroSplashScreen';
+import { InfinityLoader } from './components/ui/loader-13';
 
 function ProtectedRoute({ children }) {
  const { isSignedIn, isLoaded } = useAuth();

@@ -58,17 +58,16 @@ export default function Navbar() {
        className="flex items-center gap-3 transform transition-transform duration-300"
        style={{ transform: `scale(${logoScale})`, transformOrigin: 'left center' }}
       >
-       <span 
-        className="font-light tracking-wide text-white font-display uppercase hover:opacity-70 transition-opacity duration-300"
-        style={{ 
-         fontFamily: "'Jost', sans-serif",
-         fontSize: scrolled ? '18px' : '22px',
-         letterSpacing: scrolled ? '0.08em' : '0.12em',
-         transition: 'all 300ms ease-out'
-        }}
-       >
-        HIRE <span style={{ fontWeight: 700, color: '#c8f135' }}>VISION</span>
-       </span>
+        <img 
+          src="/logohirevision.png" 
+          alt="HireVision Logo" 
+          className="h-16 md:h-20 w-auto object-contain transition-all duration-300"
+          style={{ 
+            height: scrolled ? '54px' : '84px',
+            opacity: 1,
+            transition: 'all 300ms ease-out'
+          }}
+        />
       </Link>
       
       {/* Nav Links */}

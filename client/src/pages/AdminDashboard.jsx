@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
-import Sidenavbar from '@/components/UI/sidenavbar';
-import PostJobSection from '@/components/UI/PostJobSection';
+import Sidenavbar from '@/components/ui/sidenavbar';
+import PostJobSection from '@/components/ui/PostJobSection';
 import { TrendingUp, CheckCircle2 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';

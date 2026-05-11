@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Briefcase, Plus, TrendingUp, CheckCircle2, ChevronRight, X, MoreHorizontal, Bookmark, Eye, Pencil } from 'lucide-react';
-import PostJobSection from '@/components/UI/PostJobSection';
+import PostJobSection from '@/components/ui/PostJobSection';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 
