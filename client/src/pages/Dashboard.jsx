@@ -584,63 +584,52 @@ export default function Dashboard() {
           </div>
 
           {loadingInterviews ? (
-            <div className="text-center py-20 text-white/20 font-bold uppercase tracking-widest text-xs animate-pulse">Synchronizing Interview Stream...</div>
+            <div className="text-center py-40 card-premium !border-dashed !border-white/10">
+              <div className="w-10 h-10 border-2 border-[#c4eec6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Synchronizing Interview Stream...</p>
+            </div>
           ) : interviews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {interviews.map((interview) => (
-                <div key={interview._id} className="card-premium p-8 group relative overflow-hidden flex flex-col justify-between h-full">
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-[#c4eec6]/30 transition-all">
-                          <span className="text-xl font-bold text-[#c4eec6] opacity-30">{interview.jobId?.company?.[0] || 'J'}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white group-hover:text-[#c4eec6] transition-colors">{interview.jobId?.title}</h3>
-                          <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{interview.jobId?.company}</p>
-                        </div>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
-                        interview.status === 'Scheduled' ? 'bg-blue-400/10 text-blue-400 border-blue-400/20' :
-                        interview.status === 'Completed' ? 'bg-[#c4eec6]/10 text-[#c4eec6] border-[#c4eec6]/20' :
-                        'bg-red-400/10 text-red-400 border-red-400/20'
-                      }`}>
-                        {interview.status}
-                      </div>
+            <div className="grid grid-cols-1 gap-6 pb-20">
+              {interviews.map((interview, i) => (
+                <div key={interview._id} className="card-premium p-8 group hover:border-[#c4eec6]/40 transition-all duration-500 relative flex flex-col md:flex-row md:items-center justify-between gap-8 overflow-hidden animate-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6]/10 group-hover:border-[#c4eec6]/20 transition-all duration-500 shadow-xl shrink-0">
+                      <Calendar className="w-8 h-8 text-[#c4eec6] opacity-40" />
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Date</p>
-                        <p className="text-xs font-bold text-white">
-                          {new Date(interview.scheduledDateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <p className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.2em]">{interview.jobId?.company}</p>
+                        <span className={`px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[8px] font-bold uppercase tracking-widest border border-blue-500/20`}>
+                          {interview.status}
+                        </span>
                       </div>
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Time</p>
-                        <p className="text-xs font-bold text-white">
-                          {new Date(interview.scheduledDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                      <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-[#c4eec6] transition-colors">{interview.jobId?.title}</h3>
+                      <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-white/30 uppercase tracking-widest pt-2">
+                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(interview.scheduledDateTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                        <span className="flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> {new Date(interview.scheduledDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                        <span className="text-lime-400/60 uppercase">{interview.interviewMode} Session</span>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs font-medium text-white/50">
-                      <div className="w-2 h-2 rounded-full bg-[#c4eec6] animate-pulse"></div>
-                      Mode: {interview.interviewMode}
                     </div>
                   </div>
 
-                  <div className="pt-8 mt-4 border-t border-white/5 flex gap-4">
+                  <div className="flex items-center gap-3 w-full md:w-auto pt-6 md:pt-0 border-t border-white/5 md:border-none relative z-10">
                     {interview.interviewLink && (
                       <button 
                         onClick={() => window.open(interview.interviewLink, '_blank')}
-                        className="btn-primary py-3.5 flex-1 text-[9px] font-bold uppercase tracking-widest"
+                        className="flex-1 md:w-44 py-4 rounded-2xl bg-[#c4eec6] text-black text-[9px] font-bold uppercase tracking-widest hover:bg-[#c4eec6]/90 transition-all shadow-xl shadow-lime-400/20"
                       >
                         Join Meeting
                       </button>
                     )}
-                    <button className="btn-secondary py-3.5 flex-1 text-[9px] font-bold uppercase tracking-widest">Preparation Guide</button>
+                    <button className="flex-1 md:w-44 py-4 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+                      Prep Guide
+                    </button>
                   </div>
+                  
+                  {/* Background Decoration */}
+                  <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#c4eec6]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 </div>
               ))}
             </div>
