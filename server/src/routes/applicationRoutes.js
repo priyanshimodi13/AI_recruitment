@@ -171,39 +171,76 @@ router.post('/', requireAuth, async (req, res) => {
                 resumeUrl,
                 coverLetter,
                 aiFeedback: 'Analysis pending...',
-                extractedSkills: extractedSkills || [],
+                extractedSkills: (Array.isArray(extractedSkills) && extractedSkills.length > 0) ? extractedSkills : [],
             });
         } else {
             application.resumeUrl = resumeUrl;
             application.coverLetter = coverLetter || application.coverLetter;
-            application.extractedSkills = extractedSkills || application.extractedSkills;
+            // ONLY overwrite if we actually have NEW skills, otherwise KEEP the old ones
+            if (Array.isArray(extractedSkills) && extractedSkills.length > 0) {
+                application.extractedSkills = extractedSkills;
+            }
         }
 
         // ── AUTOMATED AI ANALYSIS ────────────────────────────────────────────────
         const job = await Job.findById(jobId).populate('postedBy');
         if (job && job.requirements && job.requirements.length > 0) {
-            console.log(`--- Automated AI Skill Analysis: ${job.title} ---`);
-
-            // 1. Use candidate's already-extracted skills, or ask AI to extract them
-            let candidateSkills = extractedSkills && extractedSkills.length > 0
-                ? extractedSkills
-                : [];
-
-            // 2. If no skills provided in body, try to fetch from candidate's latest resume record
-            if (candidateSkills.length === 0) {
+            // ── SKILL SOURCE RESOLUTION ──────────────────────────────────────────────
+            // We try to get skills from 3 sources in order of reliability:
+            // 1. Incoming extractedSkills from frontend
+            // 2. Already stored skills in this application (if re-applying)
+            // 3. Latest resume record for this user
+            let candidateSkills = [];
+            const Resume = require('../models/Resume');
+            
+            if (Array.isArray(extractedSkills) && extractedSkills.length > 0) {
+                candidateSkills = extractedSkills;
+            } else if (application.extractedSkills && application.extractedSkills.length > 0) {
+                candidateSkills = application.extractedSkills;
+            } else {
                 try {
-                    const Resume = require('../models/Resume');
                     const latestResume = await Resume.findOne({ userId: user._id }).sort({ uploadedAt: -1 });
-                    if (latestResume && latestResume.skills && latestResume.skills.length > 0) {
-                        console.log('--- Using skills from candidate profile/latest resume ---');
+                    if (latestResume && Array.isArray(latestResume.skills) && latestResume.skills.length > 0) {
                         candidateSkills = latestResume.skills;
+                        console.log('--- Using Skills from Latest Resume Record ---');
                     }
                 } catch (resumeErr) {
-                    console.warn('Failed to fetch latest resume skills:', resumeErr.message);
+                    console.warn('Error fetching latest resume skills:', resumeErr.message);
                 }
             }
 
-            // 3. Last ditch effort: AI extraction pass (if still no skills)
+            // 3. Deep Analysis Recovery: If skills are missing, find the LATEST resume file and parse it directly
+            if (candidateSkills.length === 0) {
+                try {
+                    const path = require('path');
+                    const fs = require('fs');
+                    const pdfParse = require('pdf-parse');
+                    
+                    // Find the latest resume record to get the REAL file path
+                    const latestResume = await Resume.findOne({ userId: user._id }).sort({ uploadedAt: -1 });
+                    
+                    if (latestResume && latestResume.filePath) {
+                        const fileName = latestResume.filePath.split('/').pop();
+                        const filePath = path.join(__dirname, '../../uploads', fileName);
+                        
+                        if (fs.existsSync(filePath)) {
+                            console.log('--- RECOVERY: Parsing File Directly:', fileName, '---');
+                            const dataBuffer = fs.readFileSync(filePath);
+                            const pdfData = await pdfParse(dataBuffer);
+                            const resumeText = pdfData.text;
+                            
+                            if (resumeText && resumeText.length > 50) {
+                                candidateSkills = await AIService.extractSkills(resumeText);
+                                console.log('--- RECOVERY SUCCESS: Extracted', candidateSkills.length, 'skills ---');
+                            }
+                        }
+                    }
+                } catch (recoveryErr) {
+                    console.warn('Aggressive recovery failed:', recoveryErr.message);
+                }
+            }
+
+            // 4. Final fallback: AI extraction from cover letter (if still no skills)
             if (candidateSkills.length === 0) {
                 try {
                     const analysisText = coverLetter || 'Resume uploaded.';
@@ -219,9 +256,32 @@ router.post('/', requireAuth, async (req, res) => {
             console.log('Candidate Skills:', candidateSkills);
             console.log('Job Requirements:', job.requirements);
             
-            const { matchedSkills, unmatchedSkills, advantageSkills, matchScore, status } =
+            let { matchedSkills, unmatchedSkills, advantageSkills, matchScore, status } =
                 matchSkills(candidateSkills, job.requirements);
             
+            // 5. CRITICAL RECOVERY: If match is 0, but requirements exist, try direct substring matching on resume text
+            if (matchScore === 0 && job.requirements.length > 0) {
+                console.log('--- RECOVERY: 0% match detected, attempting exact keyword scan ---');
+                const recoveredMatched = [];
+                // Re-run matching on candidateSkills with simpler logic if normalized matching failed
+                job.requirements.forEach(req => {
+                    const reqLower = req.toLowerCase().replace(/\s+language$/i, '').trim();
+                    const hasMatch = candidateSkills.some(skill => {
+                        const skillLower = skill.toLowerCase().replace(/\s+language$/i, '').trim();
+                        return skillLower === reqLower || skillLower.includes(reqLower) || reqLower.includes(skillLower);
+                    });
+                    if (hasMatch) recoveredMatched.push(req);
+                });
+
+                if (recoveredMatched.length > 0) {
+                    matchedSkills = [...new Set(recoveredMatched)];
+                    unmatchedSkills = job.requirements.filter(r => !matchedSkills.includes(r));
+                    matchScore = Math.round((matchedSkills.length / job.requirements.length) * 100);
+                    if (matchScore >= 50) status = 'SELECTED';
+                    console.log('--- RECOVERY SUCCESS: New Score:', matchScore, '% ---');
+                }
+            }
+
             console.log('Match Score:', matchScore, '%');
             console.log('Matched:', matchedSkills);
             console.log('Missing:', unmatchedSkills);

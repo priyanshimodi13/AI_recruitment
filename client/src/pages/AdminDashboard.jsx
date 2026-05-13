@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import Sidenavbar from '@/components/ui/sidenavbar';
 import PostJobSection from '@/components/ui/PostJobSection';
-import { TrendingUp, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, CheckCircle2, User } from 'lucide-react';
+import ProfileView from '@/components/ProfileView';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 
@@ -357,22 +358,23 @@ function AdminOverview() {
   </div>
  );
 }
-
 // ─── Main Admin Dashboard ──────────────────────────────────────────────────────
 export default function AdminDashboard() {
- const [activeTab, setActiveTab] = useState('Overview');
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const [activeTab, setActiveTab] = useState('Overview');
 
- const handlePostJobClick = () => {
-  setActiveTab('Jobs');
- };
+  const handlePostJobClick = () => {
+    setActiveTab('Jobs');
+  };
 
- return (
-  <Sidenavbar 
-   userRole="admin" 
-   activeView={activeTab}
-   setActiveView={setActiveTab}
-   onPostJob={handlePostJobClick}
-  >
+  return (
+    <Sidenavbar 
+      userRole="admin" 
+      activeView={activeTab}
+      setActiveView={setActiveTab}
+      onPostJob={handlePostJobClick}
+    >
    <div className="animate-fade-in pb-10">
     {/* Header */}
     <div className="mb-6">
@@ -387,6 +389,13 @@ export default function AdminDashboard() {
     {activeTab === 'Overview' && <AdminOverview />}
     {activeTab === 'Resumes' && <ResumesSection />}
     {activeTab === 'Jobs' && <PostJobSection userRole="admin" />}
+    {activeTab === 'Profile' && (
+      <ProfileView 
+        user={user} 
+        userRole="admin" 
+        getToken={getToken} 
+      />
+    )}
    </div>
   </Sidenavbar>
  );

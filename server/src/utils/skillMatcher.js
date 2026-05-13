@@ -39,12 +39,18 @@ const SKILL_SYNONYMS = {
   'gcp': ['google cloud', 'google cloud platform'],
   'git': ['github', 'gitlab', 'version control', 'git/github'],
   'ci/cd': ['cicd', 'continuous integration', 'continuous deployment', 'github actions', 'jenkins'],
-  'html': ['html5'],
-  'css': ['css3'],
+  'html': ['html5', 'hypertext markup language'],
+  'css': ['css3', 'cascading style sheets'],
   'sass': ['scss', 'sass/scss'],
   'tailwind': ['tailwindcss', 'tailwind css'],
   'bootstrap': ['bootstrap css'],
-  'machine learning': ['ml', 'machine learning algorithms'],
+  'php': ['php7', 'php8', 'laravel', 'codeigniter', 'symfony', 'programmingphp'],
+  'laravel': ['php laravel', 'laravel framework', 'programminglaravel'],
+  'c': ['c language', 'embedded c', 'ansi c', 'c programming', 'programmingc'],
+  'java': ['programmingjava', 'java8', 'java11', 'java17', 'j2ee', 'core java'],
+  'python': ['programmingpython', 'python3'],
+  'sql': ['structured query language', 'sql queries', 'database queries'],
+  'machine learning': ['ml', 'machine learning algorithms', 'ai/ml'],
   'deep learning': ['dl', 'neural networks'],
   'tensorflow': ['tf', 'tensor flow'],
   'pytorch': ['torch'],
@@ -53,7 +59,7 @@ const SKILL_SYNONYMS = {
   'numpy': ['numpy library'],
   'scikit-learn': ['sklearn'],
   'linux': ['unix', 'bash', 'shell scripting', 'linux/unix'],
-  'agile': ['scrum', 'kanban', 'agile scrum'],
+  'agile': ['scrum', 'kanban', 'agile scrum', 'software development lifecycle', 'sdlc'],
   'mern': ['mern stack'],
   'mean': ['mean stack'],
 };
@@ -173,9 +179,24 @@ function matchSkills(extractedSkills, requiredSkills, threshold = 0.75) {
     } 
     
     // 2. Substring matching (e.g. "React" matches "React.js" or "React Native")
+    // Also handle "Skill Language" vs "Skill" (e.g. "C Language" vs "C")
     if (!matched) {
       for (const ext of normExtracted) {
-        if (ext.includes(req) || req.includes(ext)) {
+        const extClean = ext.replace(/\s+language$/i, '').trim();
+        const reqClean = req.replace(/\s+language$/i, '').trim();
+        
+        if (extClean === reqClean) {
+          matched = true;
+          break;
+        }
+        
+        // Only allow substring matching for longer, unique terms (at least 4 chars)
+        // This prevents 'C' matching 'Graphic Design' or 'Java' matching 'Javascript'
+        const isReqLong = reqClean.length >= 4;
+        const isExtLong = extClean.length >= 4;
+        
+        if ((isReqLong && extClean.includes(reqClean)) || 
+            (isExtLong && reqClean.includes(extClean))) {
           matched = true;
           break;
         }

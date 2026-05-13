@@ -161,7 +161,7 @@ const EyeBall = ({
 
 
 
-function LoginPage({ onSubmit, isLoading, error }) {
+function LoginPage({ onSubmit, onGoogleSignIn, isLoading, error }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -595,6 +595,7 @@ function LoginPage({ onSubmit, isLoading, error }) {
               variant="outline" 
               className="w-full h-12 bg-transparent border-white/20 text-white hover:bg-white/10 hover:border-[#c8f135]/50 transition-all duration-300 font-bold uppercase tracking-widest text-xs"
               type="button"
+              onClick={onGoogleSignIn}
             >
               <Mail className="mr-2 size-5 text-[#c8f135]" />
               Log in with Google

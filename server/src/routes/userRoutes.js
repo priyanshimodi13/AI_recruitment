@@ -58,6 +58,25 @@ router.get('/sessions', requireAuth, async (req, res) => {
     }
 });
 
+router.put('/profile', requireAuth, async (req, res) => {
+    try {
+        const userId = req.auth.userId;
+        const { firstName, lastName, bio, phone } = req.body;
+        
+        const User = require('../models/User');
+        const updatedUser = await User.findOneAndUpdate(
+            { clerkId: userId },
+            { firstName, lastName, bio, phone },
+            { new: true, upsert: true } // Upsert in case user wasn't synced yet
+        );
+        
+        res.json({ message: 'Profile updated successfully', user: updatedUser });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 router.put('/role', requireAuth, async (req, res) => {
     try {
         const userId = req.auth.userId;

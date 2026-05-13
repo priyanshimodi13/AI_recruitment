@@ -197,4 +197,29 @@ router.get('/my-interviews', requireAuth, async (req, res) => {
   }
 });
 
+// ─── GET /api/interviews/employer ──────────────────────────────────────────
+/**
+ * Returns all scheduled interviews for jobs posted by the authenticated employer.
+ */
+router.get('/employer', requireAuth, async (req, res) => {
+  try {
+    const dbUser = await User.findOne({ clerkId: req.auth.userId });
+    if (!dbUser) return res.status(404).json({ error: 'User not found' });
+
+    // Find all jobs posted by this employer
+    const employerJobs = await Job.find({ postedBy: dbUser._id });
+    const jobIds = employerJobs.map(j => j._id);
+
+    const interviews = await InterviewSchedule.find({ jobId: { $in: jobIds } })
+      .populate('jobId', 'title company location')
+      .populate('candidateId', 'firstName lastName email')
+      .sort({ scheduledDateTime: 1 });
+
+    res.status(200).json({ success: true, interviews });
+  } catch (err) {
+    console.error('Error fetching employer interviews:', err);
+    res.status(500).json({ error: 'Failed to fetch interviews.' });
+  }
+});
+
 module.exports = router;

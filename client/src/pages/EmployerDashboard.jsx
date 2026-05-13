@@ -10,7 +10,9 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
  const { getToken } = useAuth();
  const [jobs, setJobs] = useState([]);
  const [candidates, setCandidates] = useState([]);
+ const [interviews, setInterviews] = useState([]);
  const [loading, setLoading] = useState(true);
+ const [loadingInterviews, setLoadingInterviews] = useState(false);
  const [timeFilter, setTimeFilter] = useState('Day');
  const [selectedJobId, setSelectedJobId] = useState('');
 
@@ -54,9 +56,30 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
   }
  };
 
+ const fetchInterviews = async () => {
+  try {
+    setLoadingInterviews(true);
+    const token = await getToken();
+    const res = await fetch(`${API_URL}/api/interviews/employer`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setInterviews(data.interviews || []);
+    }
+  } catch (err) {
+    console.error('Error fetching interviews:', err);
+  } finally {
+    setLoadingInterviews(false);
+  }
+ };
+
  useEffect(() => {
   fetchJobs();
   fetchCandidates();
+  if (activeView === 'Interviews') {
+    fetchInterviews();
+  }
  }, [getToken, activeView]);
 
 
@@ -305,16 +328,99 @@ export default function EmployerDashboard({ activeView = 'Overview', setActiveVi
 
    {/* PLACEHOLDER VIEWS */}
    {activeView === 'Interviews' && (
-    <div className="flex flex-col items-center justify-center py-40 space-y-10 animate-in zoom-in duration-700">
-      <div className="w-32 h-32 bg-lime-400/10 rounded-[3rem] flex items-center justify-center border border-lime-400/20 shadow-2xl group relative overflow-hidden">
-       <CheckCircle2 className="w-12 h-12 text-[#c4eec6] opacity-40 group-hover:opacity-100 transition-opacity animate-pulse" />
-       <div className="absolute inset-0 bg-gradient-to-br from-lime-400/20 to-transparent"></div>
+    <div className="space-y-10 animate-fade-in">
+      <div className="flex justify-between items-end px-2">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-display font-bold text-white tracking-tighter">Scheduled Interviews</h2>
+          <p className="text-xs text-[var(--color-text-muted)] font-medium">Manage and track upcoming candidate synchronizations.</p>
+        </div>
       </div>
-      <div className="text-center space-y-4">
-       <h3 className="text-4xl font-display font-bold text-white tracking-tighter ">{activeView} Optimization</h3>
-       <p className="text-lg font-medium text-[var(--color-text-muted)] max-w-lg mx-auto opacity-70">Our neural engine is currently prioritizing your hiring matrix. This module will be synchronized shortly.</p>
-      </div>
-      <button onClick={() => setActiveView('Overview')} className="btn-secondary py-4 px-12 text-[10px] font-bold uppercase tracking-widest hover:border-#c4eec6/40 transition-all">Synchronize Dashboard</button>
+
+      {loadingInterviews ? (
+        <div className="text-center py-20 text-white/20 font-bold uppercase tracking-widest text-xs animate-pulse">Synchronizing Interview Matrix...</div>
+      ) : interviews.length > 0 ? (
+        <div className="grid xl:grid-cols-2 gap-8 pb-20">
+          {interviews.map((interview) => (
+            <div key={interview._id} className="card-premium p-8 group relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 right-0 p-4">
+                 <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
+                  interview.status === 'Scheduled' ? 'bg-blue-400/10 text-blue-400 border-blue-400/20' :
+                  interview.status === 'Completed' ? 'bg-lime-400/10 text-[#c4eec6] border-lime-400/20' :
+                  'bg-red-400/10 text-red-400 border-red-400/20'
+                }`}>
+                  {interview.status}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-lime-400/30 transition-all">
+                    <span className="text-xl font-bold text-[#c4eec6] opacity-30">
+                      {interview.candidateId?.firstName?.[0] || 'C'}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white group-hover:text-[#c4eec6] transition-colors">
+                      {interview.candidateId?.firstName} {interview.candidateId?.lastName}
+                    </h3>
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                      {interview.candidateId?.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Position</p>
+                    <p className="text-xs font-bold text-white truncate">{interview.jobId?.title || 'Unknown Job'}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Mode</p>
+                    <p className="text-xs font-bold text-white">{interview.interviewMode}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-white/60">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-3.5 h-3.5 text-[#c4eec6]" />
+                    <span className="text-xs font-bold text-white">
+                      {new Date(interview.scheduledDateTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#c4eec6]" />
+                    <span className="text-xs font-bold text-white">
+                      {new Date(interview.scheduledDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
+                {interview.interviewLink && (
+                  <button 
+                    onClick={() => window.open(interview.interviewLink, '_blank')}
+                    className="btn-primary py-3 flex-1 text-[9px] font-bold uppercase tracking-widest shadow-lg"
+                  >
+                    Join Meeting
+                  </button>
+                )}
+                <button className="btn-secondary py-3 flex-1 text-[9px] font-bold uppercase tracking-widest">Reschedule</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-40 space-y-10">
+          <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center border border-white/10 opacity-20">
+            <CheckCircle2 className="w-10 h-10 text-white" />
+          </div>
+          <div className="text-center space-y-3">
+            <p className="text-sm font-bold text-white/30 uppercase tracking-widest">No scheduled synchronizations detected</p>
+            <button onClick={() => setActiveView('Overview')} className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.3em] hover:opacity-80 transition-all">Return to Dashboard</button>
+          </div>
+        </div>
+      )}
     </div>
    )}
 

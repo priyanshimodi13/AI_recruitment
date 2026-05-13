@@ -36,16 +36,19 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
   { icon: LayoutDashboard, label: "Dashboard" },
   { icon: CheckCircle2, label: "Resumes" },
   { icon: Briefcase, label: "Jobs" },
+  { icon: User, label: "Profile" },
  ] : userRole === 'employer' ? [
   { icon: LayoutDashboard, label: "Dashboard" },
   { icon: Briefcase, label: "Jobs" },
   { icon: Calendar, label: "Interviews" },
   { icon: CheckCircle2, label: "Candidates" },
+  { icon: User, label: "Profile" },
  ] : [
   { icon: LayoutDashboard, label: "Dashboard" },
   { icon: Briefcase, label: "Jobs" },
-  { icon: Calendar, label: "Preparation" },
+  { icon: Calendar, label: "Interviews" },
   { icon: CheckCircle2, label: "Applications" },
+  { icon: User, label: "Profile" },
  ];
 
  return (
@@ -105,7 +108,7 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
          </p>
         )}
        {[
-        { label: "Dashboard", icon: User },
+        { label: "Profile", icon: User },
         { icon: Bell, label: "Notifications" },
         { icon: HelpCircle, label: "Help & Support" },
        ].map((item, i) => (
@@ -142,16 +145,19 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
      {/* TOP BAR */}
      <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#09090b]/80 backdrop-blur-3xl z-20">
       <div className="flex items-center gap-8">
-        <div className="flex items-center gap-4 group cursor-pointer">
+        <div 
+          className="flex items-center gap-4 group cursor-pointer"
+          onClick={() => setActiveView && setActiveView('Profile')}
+        >
          <div className="w-8 h-8 rounded-full bg-[#c4eec6] flex items-center justify-center font-bold text-black text-[10px] group-hover:scale-105 transition-all overflow-hidden">
-           {user?.profileImageUrl ? (
-             <img src={user.profileImageUrl} alt="" className="w-full h-full object-cover" />
+           {user?.imageUrl ? (
+             <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
            ) : (
              user?.firstName?.[0] || 'U'
            )}
          </div>
          <div className="hidden sm:block">
-           <p className="text-[10px] font-bold uppercase tracking-wide text-white/50 leading-none mb-1">{user?.fullName || 'User Profile'}</p>
+           <p className="text-[10px] font-bold uppercase tracking-wide text-white/50 leading-none mb-1 group-hover:text-white transition-colors">{user?.fullName || 'User Profile'}</p>
            <p className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-wider">{userRole} Account</p>
          </div>
         </div>

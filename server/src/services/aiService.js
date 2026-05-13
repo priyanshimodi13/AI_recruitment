@@ -173,11 +173,11 @@ class AIService {
     static SKILLS_DATABASE = {
         // Programming Languages
         languages: [
-            'Java', 'Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'C',
+            'Java', 'Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'C', 'C Language',
             'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Dart', 'PHP', 'Scala',
             'Perl', 'R', 'MATLAB', 'Lua', 'Haskell', 'Elixir', 'Clojure',
             'Objective-C', 'Shell', 'Bash', 'PowerShell', 'Assembly',
-            'Groovy', 'Julia', 'F#', 'COBOL', 'Fortran', 'Solidity',
+            'Groovy', 'Julia', 'F#', 'COBOL', 'Fortran', 'Solidity', 'SQL',
         ],
         // Web Frontend
         webFrontend: [
@@ -238,8 +238,10 @@ class AIService {
         tools: [
             'Git', 'GitHub', 'GitLab', 'Bitbucket', 'VS Code',
             'Visual Studio', 'IntelliJ', 'Eclipse', 'PyCharm', 'Postman',
-            'Jira', 'Confluence', 'Slack', 'Figma', 'Adobe XD', 'Sketch',
-            'PowerBI', 'Power BI', 'Tableau', 'Grafana', 'Kibana',
+            'Jira', 'Confluence', 'Slack', 'Figma', 'Adobe XD', 'Adobe Illustrator',
+            'Adobe Photoshop', 'Photoshop', 'Illustrator', 'Adobe Premiere Pro',
+            'Premiere Pro', 'Adobe After Effects', 'After Effects', 'Canva',
+            'Sketch', 'PowerBI', 'Power BI', 'Tableau', 'Grafana', 'Kibana',
             'Swagger', 'npm', 'Yarn', 'pip', 'Maven', 'Gradle',
             'WordPress', 'Shopify', 'Magento', 'Salesforce',
         ],
@@ -304,15 +306,48 @@ class AIService {
 
                 const escaped = skillLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-                // Stricter word boundary matching
+                // Stricter word boundary matching, but allow for cases like "ProgrammingJava" 
+                // by checking if it's preceded by common tech prefixes or at start of word
                 let regex;
                 if (skill.length <= 2) {
-                    regex = new RegExp(`(?:^|[,;|/\\s])${escaped}(?=[,;|/\\s.+]|$)`, 'i');
+                    // For short skills like C, R, Go:
+                    // Use a regex with global flag to find all occurrences and validate them
+                    const searchRegex = new RegExp(`(?:^|[\\s,;|/])${escaped}(?=[\\s,;|/]|$)`, 'gi');
+                    let match;
+                    let foundValid = false;
+                    
+                    while ((match = searchRegex.exec(resumeText)) !== null) {
+                        const index = match.index + (match[0].toLowerCase().indexOf(skillLower));
+                        const contextBefore = resumeText.substring(Math.max(0, index - 4), index);
+                        const contextAfter = resumeText.substring(index + 1, index + 5);
+                        
+                        // Reject if part of a spaced-out word like "V I D E O" or "C O N T A C T"
+                        const isSpacedOut = /[a-zA-Z]\s+$/i.test(contextBefore) || /^\s+[a-zA-Z]/i.test(contextAfter);
+                        if (!isSpacedOut) {
+                            foundValid = true;
+                            break;
+                        }
+                    }
+
+                    if (foundValid) {
+                        foundSkills.add(skill);
+                        continue;
+                    } else {
+                        // Special check for "C Language" or "C Programming" as a backup
+                        const cVariantRegex = new RegExp(`${escaped}\\s+(?:language|programming|lang)`, 'i');
+                        if (cVariantRegex.test(textLower)) {
+                            foundSkills.add(skill);
+                            continue;
+                        }
+                        continue; 
+                    }
                 } else {
-                    regex = new RegExp(`(?:^|[^a-zA-Z])${escaped}(?=[^a-zA-Z]|$)`, 'i');
+                    // For longer skills: allow them to be preceded by non-alphanumeric OR specific tech prefixes
+                    regex = new RegExp(`(?:^|[^a-zA-Z0-9]|programming|skills|knowledge|expert)${escaped}(?=[^a-zA-Z0-9]|$)`, 'i');
                 }
 
-                if (regex.test(textLower)) {
+                if (regex.test(textLower) || 
+                    (skill.length > 2 && (textLower.includes("programming" + skillLower) || textLower.includes("skills" + skillLower)))) {
                     foundSkills.add(skill);
                 }
             }
@@ -340,63 +375,39 @@ class AIService {
      */
     static async extractSkills(resumeText) {
         try {
-            if (!resumeText || typeof resumeText !== 'string' || resumeText.length < 50) {
-                console.warn('extractSkills: Resume text too short or missing. Falling back to deterministic.');
-                return await AIService.extractSkillsDeterministic(resumeText);
+            if (!resumeText || typeof resumeText !== 'string' || resumeText.length < 10) {
+                return [];
             }
 
-            const prompt = `
-                ### INSTRUCTION
-                You are a world-class technical recruiter. Analyze the following RESUME TEXT and extract EVERY technical skill mentioned.
-                Technical skills include: Programming Languages, Frameworks, Libraries, Databases, Cloud Platforms, Tools, and Methodologies (like Agile).
-
-                ### RULES
-                1. DO NOT extract soft skills (e.g., "Leadership", "Communication").
-                2. DO NOT extract spoken languages (e.g., "English", "Hindi").
-                3. DO NOT hallucinate. Only extract what is explicitly mentioned.
-                4. Group them into "programming", "web_development", and "tools_and_platforms".
-
-                ### OUTPUT FORMAT (STRICT JSON ONLY)
-                {
-                   "programming": ["Skill 1", "Skill 2"],
-                   "web_development": ["Skill 3", "Skill 4"],
-                   "tools_and_platforms": ["Skill 5", "Skill 6"]
-                }
-
-                ### RESUME TEXT
-                ${resumeText.substring(0, 8000)}
-            `;
-
-            try {
-                const result = await AIService._generateJsonWithLLM(prompt);
-                
-                if (result) {
-                    let combined = [];
+            // 1. ALWAYS start with deterministic extraction for 100% accuracy on core keywords
+            const deterministicSkills = await AIService.extractSkillsDeterministic(resumeText);
+            
+            // 2. Try AI for more complex extraction if resume is long enough
+            if (resumeText.length > 50) {
+                try {
+                    const prompt = `
+                        ### INSTRUCTION
+                        Extract ONLY technical programming skills (Frameworks, Libraries, Tools) from the resume.
+                        Core languages (Java, Python, C++, etc.) are already handled, focus on others.
+                        
+                        ### OUTPUT FORMAT (JSON)
+                        {"skills": ["Skill 1", "Skill 2"]}
+                        
+                        ### RESUME TEXT
+                        ${resumeText.substring(0, 5000)}
+                    `;
+                    const result = await AIService._generateJsonWithLLM(prompt);
+                    const aiSkills = result.skills || result.extracted || [];
                     
-                    // Robust extraction: Check specific keys first
-                    const keys = ['programming', 'web_development', 'tools_and_platforms', 'languages', 'frameworks', 'databases', 'tools', 'skills'];
-                    keys.forEach(k => {
-                        if (Array.isArray(result[k])) combined = [...combined, ...result[k]];
-                    });
-
-                    // Deep scan: If still empty, grab any array found in the object
-                    if (combined.length === 0) {
-                        Object.values(result).forEach(val => {
-                            if (Array.isArray(val)) combined = [...combined, ...val];
-                        });
+                    if (Array.isArray(aiSkills)) {
+                        return AIService._deduplicateSkills([...deterministicSkills, ...aiSkills]);
                     }
-
-                    if (combined.length > 0) {
-                        console.log(`AI extracted ${combined.length} skills.`);
-                        return AIService._deduplicateSkills(combined);
-                    }
+                } catch (e) {
+                    console.error("AI Skill Extraction Error:", e.message);
                 }
-            } catch (e) {
-                console.error("AI Skill Extraction Error:", e.message);
             }
 
-            // Fallback
-            return await AIService.extractSkillsDeterministic(resumeText);
+            return deterministicSkills;
         } catch (error) {
             console.error('Final fallback error in extractSkills:', error);
             return await AIService.extractSkillsDeterministic(resumeText);

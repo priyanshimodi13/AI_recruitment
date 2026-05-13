@@ -42,8 +42,8 @@ export default function SelectionResultScreen({
         ${visible ? 'bg-black/90 backdrop-blur-3xl' : 'bg-transparent'}`}
       onClick={(e) => { if (e.target === e.currentTarget) onDismiss?.(); }}
     >
-      <div className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar
-        bg-[#0c0c0e] border rounded-[2.5rem] shadow-2xl p-10 transition-all duration-700
+      <div className={`relative w-full max-w-2xl
+        bg-[#0c0c0e] border rounded-[2.5rem] shadow-2xl p-8 transition-all duration-700
         ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'}
         ${isSelected ? 'border-lime-400/30 shadow-lime-400/10' : 'border-white/10'}`}
       >
@@ -64,12 +64,12 @@ export default function SelectionResultScreen({
 
         {/* ──── SELECTED STATE ──────────────────────────────────────────── */}
         {isSelected ? (
-          <div className="flex flex-col items-center text-center space-y-8">
-            {/* Pulsing icon */}
-            <div className="relative w-24 h-24">
+          <div className="flex flex-col items-center text-center space-y-6">
+            {/* Compact icon */}
+            <div className="relative w-20 h-20">
               <div className="absolute inset-0 bg-lime-400/20 rounded-[2rem] animate-ping opacity-30" />
-              <div className="relative w-24 h-24 bg-lime-400/20 border border-lime-400/40 rounded-[2rem] flex items-center justify-center">
-                <CheckCircle2 className="w-12 h-12 text-lime-400" />
+              <div className="relative w-20 h-20 bg-lime-400/20 border border-lime-400/40 rounded-[2rem] flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-lime-400" />
               </div>
             </div>
 
@@ -141,9 +141,9 @@ export default function SelectionResultScreen({
 
         ) : (
           /* ──── REJECTED STATE ──────────────────────────────────────────── */
-          <div className="flex flex-col items-center text-center space-y-8">
-            <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-[2rem] flex items-center justify-center">
-              <XCircle className="w-12 h-12 text-white/30" />
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-[2rem] flex items-center justify-center">
+              <XCircle className="w-10 h-10 text-white/30" />
             </div>
 
             <div className="space-y-3">
@@ -212,8 +212,8 @@ function ScoreRing({ score, isSelected }) {
   const offset = circ - (score / 100) * circ;
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="relative w-36 h-36">
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-32 h-32">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
           <circle

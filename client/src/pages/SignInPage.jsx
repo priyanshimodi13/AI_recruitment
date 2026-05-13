@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useSignIn, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
+import { useNavigate, Routes, Route } from 'react-router-dom';
 import LoginPage from '../components/ui/animated-characters-login-page';
 
 export default function SignInPage() {
@@ -37,13 +37,28 @@ export default function SignInPage() {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    if (!isLoaded) return;
+    signIn.authenticateWithRedirect({
+      strategy: "oauth_google",
+      redirectUrl: "/sign-in/sso-callback",
+      redirectUrlComplete: "/dashboard",
+    });
+  };
+
   return (
-    <div className="dark">
-      <LoginPage 
-        onSubmit={handleSignIn} 
-        isLoading={isLoading} 
-        error={error} 
-      />
-    </div>
+    <Routes>
+      <Route path="sso-callback" element={<AuthenticateWithRedirectCallback />} />
+      <Route path="*" element={
+        <div className="dark">
+          <LoginPage 
+            onSubmit={handleSignIn} 
+            onGoogleSignIn={handleGoogleSignIn}
+            isLoading={isLoading} 
+            error={error} 
+          />
+        </div>
+      } />
+    </Routes>
   );
 }

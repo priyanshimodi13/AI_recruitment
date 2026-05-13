@@ -22,6 +22,8 @@ import Toast from '@/components/ui/Toast';
 import SelectionResultScreen from '@/components/SelectionResultScreen';
 import InterviewScheduler from '@/components/InterviewScheduler';
 import { InfinityLoader } from '@/components/ui/loader-13';
+import { Mail, Phone, FileText, Save, Check } from 'lucide-react';
+import ProfileView from '@/components/ProfileView';
 
 // Toast State Hook Helper
 const useToasts = () => {
@@ -46,12 +48,14 @@ export default function Dashboard() {
  const [jobs, setJobs] = useState([]);
  const [allJobs, setAllJobs] = useState([]);
  const [loadingJobs, setLoadingJobs] = useState(true);
- const [activeView, setActiveView] = useState('Dashboard'); // Dashboard, Job Matches, Preparation, Applications
+ const [activeView, setActiveView] = useState('Dashboard'); // Dashboard, Job Matches, Interviews, Applications
  const [selectedJob, setSelectedJob] = useState(null);
  const [activeSessions, setActiveSessions] = useState([]);
  const [loadingSessions, setLoadingSessions] = useState(true);
  const [userRole, setUserRole] = useState(null);
  const [appliedJobs, setAppliedJobs] = useState([]);
+ const [interviews, setInterviews] = useState([]);
+ const [loadingInterviews, setLoadingInterviews] = useState(false);
  const [applyingJobId, setApplyingJobId] = useState(null);
 
  // Apply Modal State
@@ -145,7 +149,9 @@ export default function Dashboard() {
 
    if (resumeData.data) {
     if (resumeData.data.filePath) resumeUrl = resumeData.data.filePath;
-    if (resumeData.data.skills) extractedSkills = resumeData.data.skills;
+    if (resumeData.data.skills && resumeData.data.skills.length > 0) {
+      extractedSkills = resumeData.data.skills;
+    }
    }
 
    // 2. Submit formal application linked to job
@@ -208,13 +214,34 @@ export default function Dashboard() {
  }, []);
 
  useEffect(() => {
-  if (activeView === 'Applications') {
-   fetchUserApplications();
-  }
-  if (activeView === 'Dashboard') {
-   fetchUserResume();
-  }
- }, [activeView, getToken]);
+   if (activeView === 'Applications') {
+    fetchUserApplications();
+   }
+   if (activeView === 'Dashboard') {
+    fetchUserResume();
+   }
+   if (activeView === 'Interviews') {
+    fetchUserInterviews();
+   }
+  }, [activeView, getToken]);
+
+  const fetchUserInterviews = async () => {
+    try {
+      setLoadingInterviews(true);
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/interviews/my-interviews`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInterviews(data.interviews || []);
+      }
+    } catch (err) {
+      console.error('Error fetching interviews:', err);
+    } finally {
+      setLoadingInterviews(false);
+    }
+  };
 
  useEffect(() => {
   const checkAndInitRole = async () => {
@@ -292,11 +319,11 @@ export default function Dashboard() {
  useEffect(() => {
   const fetchSessions = async () => {
    try {
-    const token = await getToken();
-    if (!token) return;
-    const res = await fetch(`${API_URL}/api/users/profile/sessions`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+     const token = await getToken();
+     if (!token) return;
+     const res = await fetch(`${API_URL}/api/users/sessions`, {
+       headers: { Authorization: `Bearer ${token}` }
+     });
     if (res.ok) {
       const data = await res.json();
       setActiveSessions(data);
@@ -317,7 +344,14 @@ export default function Dashboard() {
     setActiveView={setActiveView}
     onPostJob={handlePostJobClick}
    >
-    {!userRole ? (
+    {activeView === 'Profile' ? (
+      <ProfileView 
+        user={user} 
+        userRole={userRole} 
+        getToken={getToken} 
+        addToast={addToast} 
+      />
+    ) : !userRole ? (
      <div className="flex flex-col items-center justify-center h-[60vh] space-y-6 animate-pulse">
       <InfinityLoader size={80} className="text-[#c4eec6]" />
       <p className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.4em]">Synchronizing Neural Profile...</p>
@@ -736,24 +770,94 @@ export default function Dashboard() {
           </div>
          </div>
         )}
-       </div>
+        </div>
       )}
 
-       {activeView === 'Preparation' && (
-        <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in zoom-in duration-700">
-         <div className="w-24 h-24 bg-[#c4eec6]/10 rounded-[2.5rem] flex items-center justify-center border border-[#c4eec6]/20 shadow-2xl group relative overflow-hidden">
-          <LayoutDashboard className="w-10 h-10 text-[#c4eec6] opacity-40 group-hover:opacity-100 transition-opacity animate-pulse" />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#c4eec6]/20 to-transparent"></div>
-         </div>
-         <div className="text-center space-y-3">
-          <h3 className="text-3xl font-display font-bold text-white tracking-tighter">Interview Preparation</h3>
-          <p className="text-base font-medium text-[var(--color-text-muted)] max-w-md mx-auto opacity-70">We are currently building your personalized interview training module. This feature will be available shortly.</p>
-         </div>
-         <button onClick={() => setActiveView('Dashboard')} className="btn-secondary py-3.5 px-8 text-[9px] font-bold uppercase tracking-widest hover:border-[#c4eec6]/40 transition-all">Back to Dashboard</button>
+      {activeView === 'Interviews' && (
+        <div className="space-y-12 animate-fade-in pb-20">
+          <div className="flex justify-between items-end px-2">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-display font-bold text-white tracking-tighter">My Interviews</h2>
+              <p className="text-xs text-[var(--color-text-muted)] font-medium">Track and prepare for your upcoming neural synchronizations.</p>
+            </div>
+          </div>
+
+          {loadingInterviews ? (
+            <div className="text-center py-20 text-white/20 font-bold uppercase tracking-widest text-xs animate-pulse">Synchronizing Interview Stream...</div>
+          ) : interviews.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {interviews.map((interview) => (
+                <div key={interview._id} className="card-premium p-8 group relative overflow-hidden flex flex-col justify-between h-full">
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-[#c4eec6]/30 transition-all">
+                          <span className="text-xl font-bold text-[#c4eec6] opacity-30">{interview.jobId?.company?.[0] || 'J'}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-white group-hover:text-[#c4eec6] transition-colors">{interview.jobId?.title}</h3>
+                          <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{interview.jobId?.company}</p>
+                        </div>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
+                        interview.status === 'Scheduled' ? 'bg-blue-400/10 text-blue-400 border-blue-400/20' :
+                        interview.status === 'Completed' ? 'bg-[#c4eec6]/10 text-[#c4eec6] border-[#c4eec6]/20' :
+                        'bg-red-400/10 text-red-400 border-red-400/20'
+                      }`}>
+                        {interview.status}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Date</p>
+                        <p className="text-xs font-bold text-white">
+                          {new Date(interview.scheduledDateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Time</p>
+                        <p className="text-xs font-bold text-white">
+                          {new Date(interview.scheduledDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs font-medium text-white/50">
+                      <div className="w-2 h-2 rounded-full bg-[#c4eec6] animate-pulse"></div>
+                      Mode: {interview.interviewMode}
+                    </div>
+                  </div>
+
+                  <div className="pt-8 mt-4 border-t border-white/5 flex gap-4">
+                    {interview.interviewLink && (
+                      <button 
+                        onClick={() => window.open(interview.interviewLink, '_blank')}
+                        className="btn-primary py-3.5 flex-1 text-[9px] font-bold uppercase tracking-widest"
+                      >
+                        Join Meeting
+                      </button>
+                    )}
+                    <button className="btn-secondary py-3.5 flex-1 text-[9px] font-bold uppercase tracking-widest">Preparation Guide</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-40 space-y-10">
+              <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center border border-white/10 opacity-20">
+                <Calendar className="w-10 h-10 text-white" />
+              </div>
+              <div className="text-center space-y-3">
+                <p className="text-sm font-bold text-white/30 uppercase tracking-widest">No scheduled interviews detected</p>
+                <button onClick={() => setActiveView('Dashboard')} className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.3em] hover:opacity-80 transition-all">Back to Dashboard</button>
+              </div>
+            </div>
+          )}
         </div>
-       )}
-     </div>
-    )}
+      )}
+      </div>
+     )}
 
    {/* APPLY MODAL */}
    {showApplyModal && jobToApply && (
