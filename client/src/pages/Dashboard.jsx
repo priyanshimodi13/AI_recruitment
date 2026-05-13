@@ -378,45 +378,44 @@ export default function Dashboard() {
            </div>
           </div>
           
-          <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none">Neural Job Feed</h3>
-          <div className="flex gap-6 overflow-x-auto pb-8 pt-2 no-scrollbar snap-x snap-mandatory">
+          <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none mb-6">Neural Job Feed</h3>
+          <div className="grid grid-cols-1 gap-6 pb-20">
             {jobs.length > 0 ? jobs.map((job, i) => (
-              <div key={job._id} className="min-w-[320px] snap-start card-premium !rounded-[2.5rem] !p-0 overflow-hidden group hover:border-[#c4eec6]/40 transition-all duration-700 relative">
+              <div key={job._id} className="w-full card-premium !rounded-[2.5rem] !p-0 overflow-hidden group hover:border-[#c4eec6]/40 transition-all duration-700 relative animate-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
                 {/* Connection Line Animation */}
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c4eec6] to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-full transition-all duration-[2000ms] ease-linear"></div>
                 
-                <div className="p-8 space-y-6 relative z-10">
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6]/10 group-hover:border-[#c4eec6]/20 transition-all duration-500 shadow-xl">
-                        <span className="text-2xl font-bold text-[#c4eec6] opacity-30 font-sf-display">{job.company?.[0] || 'J'}</span>
+                <div className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6]/10 group-hover:border-[#c4eec6]/20 transition-all duration-500 shadow-xl shrink-0">
+                      <span className="text-3xl font-bold text-[#c4eec6] opacity-30 font-sf-display">{job.company?.[0] || 'J'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{job.company}</p>
+                        {appliedJobs.includes(job._id) && (
+                          <div className="px-3 py-1 rounded-full bg-lime-400/20 border border-lime-400/30 text-[#c4eec6] text-[8px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                            <CheckCircle2 className="w-2.5 h-2.5" /> Applied
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-1">{job.company}</p>
-                        <h4 className="text-lg font-bold text-white tracking-tight leading-tight group-hover:text-[#c4eec6] transition-colors">{job.title}</h4>
+                      <h4 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-[#c4eec6] transition-colors">{job.title}</h4>
+                      <div className="flex items-center gap-4 text-[10px] font-bold text-white/30 uppercase tracking-widest pt-2">
+                        <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> {job.location || 'Remote'}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                        <span>{job.salaryRange || '$120k+'}</span>
                       </div>
                     </div>
-                    {appliedJobs.includes(job._id) && (
-                      <div className="px-3 py-1 rounded-full bg-lime-400/20 border border-lime-400/30 text-[#c4eec6] text-[8px] font-bold uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> Applied
-                      </div>
-                    )}
                   </div>
 
-                  <div className="flex items-center gap-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5"><TrendingUp className="w-3 h-3" /> {job.location || 'Remote'}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/10"></span>
-                    <span>{job.salaryRange || '$120k+'}</span>
-                  </div>
-
-                  <div className="pt-4 flex gap-3">
-                    <button onClick={() => setSelectedJob(job)} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+                  <div className="flex items-center gap-3 w-full md:w-auto pt-4 md:pt-0 border-t border-white/5 md:border-none">
+                    <button onClick={() => setSelectedJob(job)} className="flex-1 md:w-32 py-4 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
                       Analysis
                     </button>
                     <button 
                       onClick={() => handleApplyClick(job)}
                       disabled={appliedJobs.includes(job._id)}
-                      className={`flex-[2] py-3.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest shadow-2xl transition-all ${
+                      className={`flex-[2] md:w-48 py-4 rounded-2xl text-[9px] font-bold uppercase tracking-widest shadow-2xl transition-all ${
                         appliedJobs.includes(job._id) 
                         ? 'bg-white/5 border border-white/10 text-white/20 cursor-default' 
                         : 'btn-primary'
@@ -428,7 +427,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Background Glow Overlay */}
-                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#c4eec6]/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#c4eec6]/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
               </div>
             )) : (
               <div className="w-full py-20 text-center card-premium !border-dashed !border-white/10 text-white/20 font-bold uppercase tracking-[0.4em] text-[10px]">
