@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSignIn, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
-import LoginPage from '../components/ui/animated-characters-login-page';
+import LoginPage from '../components/UI/animated-characters-login-page';
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn();

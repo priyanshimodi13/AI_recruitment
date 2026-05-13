@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, Save } from 'lucide-react';
-import { InfinityLoader } from './ui/loader-13';
+import { InfinityLoader } from './UI/loader-13';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
 

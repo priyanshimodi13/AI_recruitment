@@ -17,11 +17,11 @@ import {
  Filter
 } from 'lucide-react';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import Sidenavbar from '@/components/ui/sidenavbar';
-import Toast from '@/components/ui/Toast';
+import Sidenavbar from '@/components/UI/sidenavbar';
+import Toast from '@/components/UI/Toast';
 import SelectionResultScreen from '@/components/SelectionResultScreen';
 import InterviewScheduler from '@/components/InterviewScheduler';
-import { InfinityLoader } from '@/components/ui/loader-13';
+import { InfinityLoader } from '@/components/UI/loader-13';
 import { Mail, Phone, FileText, Save, Check } from 'lucide-react';
 import ProfileView from '@/components/ProfileView';
 

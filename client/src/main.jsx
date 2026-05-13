@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/clerk-react'
 import { BrowserRouter } from 'react-router-dom'
-import { InfinityLoader } from './components/ui/loader-13'
+import { InfinityLoader } from './components/UI/loader-13'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 

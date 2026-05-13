@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { SignUp } from '@clerk/clerk-react';
-import LoginPage from '../components/ui/gaming-login';
+import LoginPage from '../components/UI/gaming-login';
 
 // Final styling integration with HireVision branding (Replaced NexusGate)
 export default function SignUpPage() {

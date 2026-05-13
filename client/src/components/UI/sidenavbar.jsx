@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/UI/button";
 import {
  Collapsible,
  CollapsibleContent,
  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/UI/collapsible";
 
 import {
  ChevronRight,
