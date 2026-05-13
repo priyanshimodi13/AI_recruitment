@@ -675,8 +675,8 @@ export default function Dashboard() {
 
    {/* APPLY MODAL */}
    {showApplyModal && jobToApply && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl">
-     <div className="relative w-full max-w-xl bg-[#09090b] rounded-[3rem] border border-white/10 shadow-2xl p-12 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl overflow-y-auto">
+     <div className="relative w-full max-w-xl bg-[#09090b] rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-2xl p-6 md:p-12 overflow-hidden my-auto">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-#c4eec6 to-transparent opacity-30"></div>
       <button onClick={() => setShowApplyModal(false)} className="absolute top-8 right-8 w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all">✕</button>
       
@@ -711,7 +711,7 @@ export default function Dashboard() {
    {/* JOB DETAILS MODAL */}
    {selectedJob && (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl">
-     <div className="relative w-full max-w-3xl bg-[#030712] rounded-[3rem] border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar p-12">
+     <div className="relative w-full max-w-3xl bg-[#030712] rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar p-6 md:p-12">
       <button onClick={() => setSelectedJob(null)} className="absolute top-10 right-10 w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all">✕</button>
       
       <div className="space-y-12">

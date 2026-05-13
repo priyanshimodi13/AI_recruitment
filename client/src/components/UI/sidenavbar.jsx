@@ -88,11 +88,11 @@ import { useEffect } from "react";
 
  return (
   <div className="flex h-screen overflow-hidden bg-[var(--color-bg)]">
-   <aside
-    className={`${
-     isOpen ? "w-72" : "w-20"
-    } flex flex-col border-r border-[var(--color-border)] transition-all duration-500 ease-in-out bg-[#09090b] z-30`}
-   >
+    <aside
+     className={`fixed md:relative ${
+      isOpen ? "translate-x-0 w-72" : "-translate-x-full md:translate-x-0 w-0 md:w-20"
+     } flex flex-col border-r border-[var(--color-border)] transition-all duration-500 ease-in-out bg-[#09090b] z-50 h-full`}
+    >
     <div className={`flex h-20 items-center ${isOpen ? 'justify-between' : 'justify-center'} px-6 border-b border-[var(--color-border)]`}>
       {isOpen && (
         <div className="flex items-center gap-2 overflow-hidden group cursor-pointer">
@@ -125,7 +125,10 @@ import { useEffect } from "react";
        <Button
         key={i}
         variant="ghost"
-        onClick={() => setActiveView && setActiveView(item.label)}
+        onClick={() => {
+          setActiveView && setActiveView(item.label);
+          if (window.innerWidth < 768) setIsOpen(false);
+        }}
         className={`w-full ${isOpen ? "justify-start px-5" : "justify-center px-0"} py-6 rounded-[1.25rem] transition-all duration-500 group
          ${activeView === item.label 
           ? 'bg-lime-400 text-black shadow-xl shadow-lime-400/20 font-bold' 
@@ -149,7 +152,10 @@ import { useEffect } from "react";
          <Button
           key={i}
           variant="ghost"
-          onClick={() => setActiveView && setActiveView(item.label)}
+          onClick={() => {
+            setActiveView && setActiveView(item.label);
+            if (window.innerWidth < 768) setIsOpen(false);
+          }}
           className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-[var(--color-text-muted)] hover:bg-white/5 hover:text-white transition-all duration-500 group
            ${activeView === item.label ? 'bg-white/5 text-white' : ''}`}
          >
@@ -174,10 +180,21 @@ import { useEffect } from "react";
 
    </aside>
 
+   {/* MOBILE OVERLAY */}
+    {isOpen && (
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
+        onClick={() => setIsOpen(false)}
+      ></div>
+    )}
+
    <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#09090b]">
      {/* TOP BAR */}
      <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#09090b]/80 backdrop-blur-3xl z-20">
       <div className="flex items-center gap-8">
+        <button className="md:hidden p-2 text-white" onClick={() => setIsOpen(!isOpen)}>
+          <Menu />
+        </button>
         <div 
           className="flex items-center gap-4 group cursor-pointer"
           onClick={() => setActiveView && setActiveView('Profile')}
@@ -229,9 +246,11 @@ import { useEffect } from "react";
       </div>
      </header>
 
-     <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+     <main className={`flex-1 flex flex-col overflow-y-auto overflow-x-hidden transition-all duration-500 ${isOpen ? 'md:pl-0' : 'md:pl-0'}`}>
+     <div className="p-4 md:p-10 max-w-7xl mx-auto w-full">
       {children}
      </div>
+    </main>
    </main>
 
    {/* LOGOUT CONFIRMATION MODAL */}
