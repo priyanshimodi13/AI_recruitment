@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, Save } from 'lucide-react';
+import { Mail, Phone, Save, Camera, Upload } from 'lucide-react';
 import { InfinityLoader } from './UI/loader-13';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5957';
@@ -11,8 +11,9 @@ const ProfileView = ({ user, userRole, getToken, addToast }) => {
     bio: '',
     phone: ''
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [dbLoading, setDbLoading] = useState(true);
+   const [isSaving, setIsSaving] = useState(false);
+   const [isUploading, setIsUploading] = useState(false);
+   const [dbLoading, setDbLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -78,6 +79,24 @@ const ProfileView = ({ user, userRole, getToken, addToast }) => {
     }
   };
 
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      if (user) {
+        await user.setProfileImage({ file });
+        if (addToast) addToast("Neural Avatar synchronized successfully.", 'success');
+      }
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      if (addToast) addToast("Failed to upload image.", 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   if (dbLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -98,18 +117,28 @@ const ProfileView = ({ user, userRole, getToken, addToast }) => {
         {/* Profile Card */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
           <div className="card-premium !p-8 flex flex-col items-center text-center space-y-4">
-            <div className="w-24 h-24 rounded-3xl bg-white/5 border border-white/10 p-1 flex items-center justify-center relative group">
-              <div className="w-full h-full rounded-2xl overflow-hidden bg-[#c4eec6]/10 flex items-center justify-center">
-                {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-bold text-[#c4eec6] opacity-30">{user?.firstName?.[0]}</span>
-                )}
-              </div>
-              <div className="absolute inset-1 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                <span className="text-[8px] font-bold text-white uppercase tracking-widest">Change</span>
-              </div>
-            </div>
+             <div className="w-24 h-24 rounded-3xl bg-white/5 border border-white/10 p-1 flex items-center justify-center relative group">
+               <div className="w-full h-full rounded-2xl overflow-hidden bg-[#c4eec6]/10 flex items-center justify-center">
+                 {isUploading ? (
+                   <InfinityLoader size={32} className="text-[#c4eec6]" />
+                 ) : user?.imageUrl ? (
+                   <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+                 ) : (
+                   <span className="text-3xl font-bold text-[#c4eec6] opacity-30">{user?.firstName?.[0]}</span>
+                 )}
+               </div>
+               <label className="absolute inset-1 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer">
+                 <Camera className="w-5 h-5 text-white mb-1" />
+                 <span className="text-[8px] font-bold text-white uppercase tracking-widest">Change</span>
+                 <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handlePhotoChange}
+                  disabled={isUploading}
+                 />
+               </label>
+             </div>
             
             <div>
               <h3 className="text-xl font-bold text-white">{user?.fullName}</h3>
