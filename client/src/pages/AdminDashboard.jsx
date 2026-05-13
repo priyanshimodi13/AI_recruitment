@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import Sidenavbar from '@/components/ui/sidenavbar';
-import PostJobSection from '@/components/ui/PostJobSection';
+import Sidenavbar from '@/components/UI/sidenavbar';
+import PostJobSection from '@/components/UI/PostJobSection';
 import { TrendingUp, CheckCircle2, User } from 'lucide-react';
 import ProfileView from '@/components/ProfileView';
 

@@ -12,7 +12,7 @@ import {
  Play, 
  LineChart 
 } from 'lucide-react';
-import { GlowCard } from '../components/ui/spotlight-card';
+import { GlowCard } from '../components/UI/spotlight-card';
 
 export default function PrepareInterview() {
  return (

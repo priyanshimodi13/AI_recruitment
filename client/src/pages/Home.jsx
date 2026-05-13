@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import DigitalSerenity from '../components/ui/digital-serenity-animated-landing-page';
-import PlatformPreviewMockup from '../components/ui/PlatformPreviewMockup';
+import DigitalSerenity from '../components/UI/digital-serenity-animated-landing-page';
+import PlatformPreviewMockup from '../components/UI/PlatformPreviewMockup';
 
 export default function Home() {
  const { isSignedIn, isLoaded } = useAuth();
