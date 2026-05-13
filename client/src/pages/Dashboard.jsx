@@ -373,46 +373,63 @@ export default function Dashboard() {
           <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[8px] font-bold text-white/40">3 New</div>
          </div>
          
-         <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none">Job Opportunities</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-           {jobs.length > 0 ? jobs.map((job, i) => (
-            <div key={job._id} className="card-premium !rounded-[1.5rem] !p-5 space-y-4 group hover:border-white/20 transition-all duration-500 relative overflow-hidden">
-             <div className="flex justify-between items-start">
-              <div className="flex gap-3 items-center">
-               <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all">
-                <span className="text-lg font-bold opacity-30 font-sf-display">{job.company?.[0] || 'J'}</span>
-               </div>
-               <div>
-                <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-sf-text">{job.company}</p>
-                <div className="flex items-center gap-2">
-                 <p className="text-xs font-bold text-white tracking-tight font-sf-text">{job.title}</p>
-                 {appliedJobs.includes(job._id) && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-lime-400/20 text-[#c4eec6] text-[7px] font-bold uppercase tracking-widest">Applied</span>
-                 )}
+          <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none">Neural Job Feed</h3>
+          <div className="flex gap-6 overflow-x-auto pb-8 pt-2 no-scrollbar snap-x snap-mandatory">
+            {jobs.length > 0 ? jobs.map((job, i) => (
+              <div key={job._id} className="min-w-[320px] snap-start card-premium !rounded-[2.5rem] !p-0 overflow-hidden group hover:border-[#c4eec6]/40 transition-all duration-700 relative">
+                {/* Connection Line Animation */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c4eec6] to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-full transition-all duration-[2000ms] ease-linear"></div>
+                
+                <div className="p-8 space-y-6 relative z-10">
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-4 items-center">
+                      <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6]/10 group-hover:border-[#c4eec6]/20 transition-all duration-500 shadow-xl">
+                        <span className="text-2xl font-bold text-[#c4eec6] opacity-30 font-sf-display">{job.company?.[0] || 'J'}</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-1">{job.company}</p>
+                        <h4 className="text-lg font-bold text-white tracking-tight leading-tight group-hover:text-[#c4eec6] transition-colors">{job.title}</h4>
+                      </div>
+                    </div>
+                    {appliedJobs.includes(job._id) && (
+                      <div className="px-3 py-1 rounded-full bg-lime-400/20 border border-lime-400/30 text-[#c4eec6] text-[8px] font-bold uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
+                        <CheckCircle2 className="w-2.5 h-2.5" /> Applied
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5"><TrendingUp className="w-3 h-3" /> {job.location || 'Remote'}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                    <span>{job.salaryRange || '$120k+'}</span>
+                  </div>
+
+                  <div className="pt-4 flex gap-3">
+                    <button onClick={() => setSelectedJob(job)} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+                      Analysis
+                    </button>
+                    <button 
+                      onClick={() => handleApplyClick(job)}
+                      disabled={appliedJobs.includes(job._id)}
+                      className={`flex-[2] py-3.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest shadow-2xl transition-all ${
+                        appliedJobs.includes(job._id) 
+                        ? 'bg-white/5 border border-white/10 text-white/20 cursor-default' 
+                        : 'btn-primary'
+                      }`}
+                    >
+                      {appliedJobs.includes(job._id) ? 'Linked' : 'Sync Role'}
+                    </button>
+                  </div>
                 </div>
-               </div>
+
+                {/* Background Glow Overlay */}
+                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#c4eec6]/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
               </div>
-              <button onClick={() => setSelectedJob(job)} className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6] group-hover:text-black transition-all">
-               <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-             </div>
-
-
-
-             <div className="h-14 w-full relative pt-2">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 120 40">
-               <path d="M0 30 Q 15 10, 30 25 T 60 15 T 90 20 T 120 5" fill="none" stroke="currentColor" strokeWidth="2" className={`${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} opacity-50`} />
-               <path d="M0 30 Q 15 10, 30 25 T 60 15 T 90 20 T 120 5 L 120 40 L 0 40 Z" fill="currentColor" className={`${i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} opacity-10`} />
-               <circle cx="120" cy="5" r="2.5" fill="currentColor" className={i === 0 ? 'text-purple-400' : 'text-[#c4eec6]'} />
-              </svg>
-              <div className="absolute right-0 bottom-0 text-[8px] font-bold text-white/30 font-sf-text">
-               {job.salaryRange || '$140k - $180k'}
+            )) : (
+              <div className="w-full py-20 text-center card-premium !border-dashed !border-white/10 text-white/20 font-bold uppercase tracking-[0.4em] text-[10px]">
+                Initializing Job Node Stream...
               </div>
-             </div>
-            </div>
-           )) : (
-            <div className="col-span-3 py-10 text-center text-white/20 font-bold uppercase tracking-widest text-[10px]">No active job nodes detected.</div>
-           )}
+            )}
           </div>
         </div>
 
