@@ -14,7 +14,8 @@ import {
  Clock, 
  MoreVertical,
  ChevronRight,
- Filter
+ Filter,
+ Users
 } from 'lucide-react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import Sidenavbar from '@/components/UI/sidenavbar';
@@ -25,6 +26,7 @@ import { InfinityLoader } from '@/components/UI/loader-13';
 import { Mail, Phone, FileText, Save, Check } from 'lucide-react';
 import HelpSupportView from '../components/HelpSupportView';
 import ProfileView from '@/components/ProfileView';
+import CommunityView from '../components/CommunityView';
 import NotificationView from '@/components/NotificationView';
 
 // Toast State Hook Helper
@@ -707,6 +709,10 @@ export default function Dashboard() {
 
       {activeView === 'Help & Support' && (
         <HelpSupportView addToast={addToast} />
+      )}
+
+      {activeView === 'Community' && (
+        <CommunityView />
       )}
       </div>
      )}

@@ -81,6 +81,7 @@ import { useEffect } from "react";
  ] : [
   { icon: LayoutDashboard, label: "Dashboard" },
   { icon: Briefcase, label: "Jobs" },
+  { icon: Users, label: "Community" },
   { icon: Calendar, label: "Interviews" },
   { icon: CheckCircle2, label: "Applications" },
   { icon: User, label: "Profile" },
