@@ -205,7 +205,7 @@ export default function Dashboard() {
    .then(res => res.json())
    .then(data => {
     setAllJobs(data);
-    setJobs(data.slice(0, 3)); // Only show top 3 for overview
+    setJobs(data.slice(0, 6)); // Show top 6 for a more populated dashboard
     setLoadingJobs(false);
    })
    .catch(err => {
@@ -434,10 +434,22 @@ export default function Dashboard() {
             <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[8px] font-bold uppercase tracking-widest text-white">New</span>
            </div>
 
-           <h2 className="text-xl font-display font-bold text-white tracking-tight leading-none mb-3">Recent Listings</h2>
-           <p className="text-xs font-medium text-white/50 leading-relaxed mb-8 max-w-[240px]">
-            {allJobs.length > 0 ? `Explore ${allJobs[0].title} and ${allJobs.length - 1} other roles.` : "Explore the latest high-tier engineering roles available now."}
-           </p>
+            <h2 className="text-xl font-display font-bold text-white tracking-tight leading-none mb-3">Live Opportunities</h2>
+            <div className="space-y-4 mb-8">
+              {allJobs.length > 0 ? allJobs.slice(0, 4).map((j, i) => (
+                <div key={i} className="flex items-center justify-between group/item cursor-pointer" onClick={() => setSelectedJob(j)}>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-bold text-white group-hover/item:text-[#c4eec6] transition-colors">{j.title}</p>
+                    <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{j.company}</p>
+                  </div>
+                  <ChevronRight className="w-3 h-3 text-white/20 group-hover/item:text-[#c4eec6] transition-all" />
+                </div>
+              )) : (
+                <p className="text-xs font-medium text-white/50 leading-relaxed max-w-[240px]">
+                  Explore the latest high-tier engineering roles available now.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="relative z-10 space-y-3">
