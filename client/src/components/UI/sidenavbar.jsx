@@ -114,7 +114,7 @@ import { useEffect } from "react";
      </Button>
     </div>
     
-    <div className="flex-1 px-3 py-6">
+    <div className="flex-1 px-3 py-6 overflow-y-auto custom-scrollbar">
      <nav className="space-y-3">
       {isOpen && (
        <p className="px-4 text-left text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40">
@@ -143,7 +143,6 @@ import { useEffect } from "react";
          </p>
         )}
        {[
-        { label: "Profile", icon: User },
         { icon: Bell, label: "Notifications" },
         { icon: HelpCircle, label: "Help & Support" },
        ].map((item, i) => (
