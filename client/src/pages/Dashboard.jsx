@@ -500,79 +500,90 @@ export default function Dashboard() {
        </div>
       </div>
      )}
-
-     {activeView === 'Applications' && (
-       <div className="space-y-10 animate-fade-in pb-20">
-        <div className="flex justify-between items-end px-2">
-         <div className="space-y-2">
-          <h2 className="text-2xl font-display font-bold text-white tracking-tight">My Applications</h2>
-          <p className="text-xs text-[var(--color-text-muted)] font-medium">Track the status of your submitted job applications.</p>
-         </div>
+      {activeView === 'Applications' && (
+       <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-20">
+        <div className="space-y-2">
+         <h2 className="text-3xl font-display font-bold text-white tracking-tighter">My Applications</h2>
+         <p className="text-sm text-white/40 font-medium">Track the status of your submitted job synchronizations.</p>
         </div>
 
         {loadingApps ? (
-         <div className="text-center py-20 text-white/20 font-bold uppercase tracking-widest text-xs animate-pulse">Synchronizing Data...</div>
+          <div className="py-40 text-center card-premium !border-dashed !border-white/10">
+            <div className="w-10 h-10 border-2 border-[#c4eec6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Fetching Application Stream...</p>
+          </div>
         ) : userApplications.length > 0 ? (
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {userApplications.map((app) => (
-           <div key={app._id} className="card-premium p-8 group relative overflow-hidden">
-            <div className="flex justify-between items-start mb-6">
-             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-lime-400/30 transition-all">
-               <span className="text-xl font-bold text-[#c4eec6] opacity-30">{app.jobId?.company?.[0] || 'J'}</span>
-              </div>
-              <div>
-               <h3 className="text-lg font-bold text-white group-hover:text-[#c4eec6] transition-colors">{app.jobId?.title || 'Unknown Role'}</h3>
-               <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{app.jobId?.company || 'Unknown Company'}</p>
-              </div>
-             </div>
-             <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${
-              app.status === 'Accepted' || app.status === 'Round 1 Selected' ? 'bg-lime-400/10 text-[#c4eec6] border-lime-400/20' :
-              app.status === 'Rejected' ? 'bg-red-400/10 text-red-400 border-red-400/20' :
-              'bg-blue-400/10 text-blue-400 border-blue-400/20'
-             }`}>
-              {app.status}
-             </div>
-            </div>
+          <div className="grid grid-cols-1 gap-6">
+            {userApplications.map((app, i) => (
+              <div key={app._id} className="card-premium p-8 group hover:border-[#c4eec6]/40 transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden animate-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
+                <div className="flex flex-col md:flex-row md:items-center gap-8 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-[#c4eec6]/10 group-hover:border-[#c4eec6]/20 transition-all duration-500 shadow-xl shrink-0">
+                    <Briefcase className="w-8 h-8 text-[#c4eec6] opacity-30" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <p className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.2em]">{app.jobId?.company || 'Organization'}</p>
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${
+                        app.status === 'Accepted' || app.status === 'SCHEDULED' || app.status === 'Round 1 Selected' ? 'bg-lime-400/10 text-lime-400 border-lime-400/20' :
+                        app.status === 'Rejected' ? 'bg-red-400/10 text-red-400 border-red-400/20' :
+                        'bg-blue-400/10 text-blue-400 border-blue-400/20'
+                      }`}>
+                        {app.status}
+                      </span>
+                    </div>
+                    <h4 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-[#c4eec6] transition-colors">{app.jobId?.title || 'Applied Position'}</h4>
+                    <div className="flex flex-wrap items-center gap-5 text-[10px] font-bold text-white/30 uppercase tracking-widest pt-1">
+                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(app.createdAt).toLocaleDateString()}</span>
+                      <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                      <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> ID: {app._id.slice(-6).toUpperCase()}</span>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="space-y-4">
-             <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-widest">
-              <span className="text-white/30">Match Score</span>
-              <span className="text-[#c4eec6]">{app.matchPercentage || Math.floor(Math.random() * 15 + 80)}%</span>
-             </div>
-             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-500 to-[#c4eec6] transition-all duration-1000" style={{ width: `${app.matchPercentage || 85}%` }}></div>
-             </div>
-             
-             {app.aiFeedback && (
-              <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                <p className="text-[10px] font-medium text-white/60 italic leading-relaxed">
-                  {app.aiFeedback}
-                </p>
-              </div>
-             )}
+                <div className="flex items-center gap-3 relative z-10 pt-6 md:pt-0 border-t border-white/5 md:border-none">
+                  <button 
+                    onClick={() => {
+                      setSelectionResult(app);
+                      setSelectionJobMeta({
+                        jobId: app.jobId?._id,
+                        jobTitle: app.jobId?.title,
+                        companyName: app.jobId?.company,
+                        submissionId: app._id
+                      });
+                    }}
+                    className="flex-1 md:w-44 py-4 rounded-2xl bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                  >
+                    Review Selection
+                  </button>
+                  {app.status === 'SCHEDULED' && (
+                    <button 
+                      onClick={() => setActiveView('Interviews')}
+                      className="flex-1 md:w-44 py-4 rounded-2xl bg-lime-400 text-black text-[9px] font-bold uppercase tracking-widest hover:bg-lime-500 transition-all shadow-xl shadow-lime-400/20"
+                    >
+                      View Interview
+                    </button>
+                  )}
+                </div>
 
-             <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-              <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Applied on {new Date(app.createdAt).toLocaleDateString()}</span>
-              <button className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-[0.2em] hover:scale-105 transition-all">View Details &rarr;</button>
-             </div>
-            </div>
-           </div>
-          ))}
-         </div>
+                {/* Decoration */}
+                <div className="absolute top-0 right-0 w-1/4 h-full bg-gradient-to-l from-[#c4eec6]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              </div>
+            ))}
+          </div>
         ) : (
-         <div className="flex flex-col items-center justify-center py-40 space-y-10">
-          <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center border border-white/10 opacity-20">
-           <Briefcase className="w-10 h-10 text-white" />
+          <div className="flex flex-col items-center justify-center py-40 space-y-10">
+            <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center border border-white/10 opacity-20">
+             <Briefcase className="w-10 h-10 text-white" />
+            </div>
+            <div className="text-center space-y-3">
+             <p className="text-sm font-bold text-white/30 uppercase tracking-widest">No active synchronizations detected</p>
+             <button onClick={() => setActiveView('Jobs')} className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.3em] hover:opacity-80 transition-all">Browse Opportunities</button>
+            </div>
           </div>
-          <div className="text-center space-y-3">
-           <p className="text-sm font-bold text-white/30 uppercase tracking-widest">No active synchronizations detected</p>
-           <button onClick={() => setActiveView('Jobs')} className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.3em] hover:opacity-80 transition-all">Browse Opportunities</button>
-          </div>
-         </div>
         )}
-        </div>
+       </div>
       )}
+
 
       {activeView === 'Interviews' && (
         <div className="space-y-12 animate-fade-in pb-20">
