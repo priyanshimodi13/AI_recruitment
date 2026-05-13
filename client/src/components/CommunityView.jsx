@@ -19,34 +19,7 @@ const CommunityView = () => {
 
   const tabs = ['All', 'Discussions', 'Questions', 'Polls'];
 
-  const mockPosts = [
-    {
-      id: 1,
-      author: "Udit Raj",
-      role: "Staff",
-      date: "Mar 11",
-      title: "Just launched my portfolio site — here is what I learned",
-      content: "After two weeks of tweaking, I finally published my photography portfolio. A few things I wish I knew earlier: Less is more — I cut my gallery from 50 images to 15 and the site feels so much better. Mobile matters — over 70% of my visitors come from Instagram links on...",
-      type: "Discussion",
-      likes: 12,
-      comments: 4,
-      views: 156,
-      isPinned: true
-    },
-    {
-      id: 2,
-      author: "Udit Raj",
-      role: "Staff",
-      date: "Mar 11",
-      title: "What matters most to you in a website?",
-      content: "If you had to pick just one thing, what would it be?",
-      type: "Poll",
-      likes: 8,
-      comments: 32,
-      views: 89,
-      isPinned: false
-    }
-  ];
+  const mockPosts = [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">
@@ -127,7 +100,7 @@ const CommunityView = () => {
 
       {/* POSTS LIST */}
       <div className="space-y-6">
-        {mockPosts.map(post => (
+        {mockPosts.length > 0 ? mockPosts.map(post => (
           <div key={post.id} className="card-premium p-8 group hover:border-white/20 transition-all duration-500 relative">
             <div className="space-y-6">
               {post.isPinned && (
@@ -191,7 +164,13 @@ const CommunityView = () => {
               </div>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="py-40 text-center card-premium !border-dashed !border-white/10">
+            <MessageSquare className="w-12 h-12 text-white/10 mx-auto mb-4" />
+            <p className="text-sm font-bold text-white/30 uppercase tracking-[0.4em]">No neural transmissions detected</p>
+            <p className="text-[10px] text-white/20 mt-2 font-medium">Be the first to synchronize with the community.</p>
+          </div>
+        )}
       </div>
     </div>
   );
