@@ -55,13 +55,11 @@ import { useEffect } from "react";
 
   useEffect(() => {
     fetchUnreadCount();
-    // Poll for notifications every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, [getToken]);
 
   useEffect(() => {
-    // If we just navigated to Notifications, we might want to refresh count soon
     if (activeView === 'Notifications') {
       setTimeout(fetchUnreadCount, 1000);
     }
@@ -89,11 +87,11 @@ import { useEffect } from "react";
  return (
   <div className="flex h-screen overflow-hidden bg-[var(--color-bg)]">
     <aside
-     className={`fixed md:relative ${
-      isOpen ? "translate-x-0 w-72" : "-translate-x-full md:translate-x-0 w-0 md:w-20"
-     } flex flex-col border-r border-[var(--color-border)] transition-all duration-500 ease-in-out bg-[#09090b] z-50 h-full`}
+     className={`fixed md:relative z-50 h-full border-r border-[var(--color-border)] transition-all duration-500 ease-in-out bg-[#09090b] flex flex-col 
+      ${isOpen ? "w-72 translate-x-0" : "w-0 md:w-20 -translate-x-full md:translate-x-0"}
+     `}
     >
-    <div className={`flex h-20 items-center ${isOpen ? 'justify-between' : 'justify-center'} px-6 border-b border-[var(--color-border)]`}>
+    <div className={`flex h-20 items-center ${isOpen ? 'justify-between' : 'justify-center'} px-6 border-b border-[var(--color-border)] min-w-[280px] md:min-w-0`}>
       {isOpen && (
         <div className="flex items-center gap-2 overflow-hidden group cursor-pointer">
          <div className="p-1.5 bg-[#c4eec6]/10 rounded-lg border border-[#c4eec6]/20">
@@ -108,13 +106,13 @@ import { useEffect } from "react";
       variant="ghost"
       size="icon"
       onClick={() => setIsOpen(!isOpen)}
-      className="text-[var(--color-text-muted)] hover:text-white"
+      className="hidden md:flex text-[var(--color-text-muted)] hover:text-white"
      >
       <Menu className="h-5 w-5" />
      </Button>
     </div>
     
-    <div className="flex-1 px-3 py-6">
+    <div className="flex-1 px-3 py-6 overflow-y-auto no-scrollbar">
      <nav className="space-y-3">
       {isOpen && (
        <p className="px-4 text-left text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-4 opacity-40">
@@ -177,7 +175,6 @@ import { useEffect } from "react";
       </div>
      </nav>
     </div>
-
    </aside>
 
    {/* MOBILE OVERLAY */}
@@ -190,10 +187,10 @@ import { useEffect } from "react";
 
    <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#09090b]">
      {/* TOP BAR */}
-     <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#09090b]/80 backdrop-blur-3xl z-20">
-      <div className="flex items-center gap-8">
-        <button className="md:hidden p-2 text-white" onClick={() => setIsOpen(!isOpen)}>
-          <Menu />
+     <header className="h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#09090b]/80 backdrop-blur-3xl z-20">
+      <div className="flex items-center gap-4 md:gap-8">
+        <button className="md:hidden p-2 text-white hover:bg-white/5 rounded-xl transition-all" onClick={() => setIsOpen(!isOpen)}>
+          <Menu className="w-6 h-6" />
         </button>
         <div 
           className="flex items-center gap-4 group cursor-pointer"
@@ -211,10 +208,9 @@ import { useEffect } from "react";
            <p className="text-[9px] font-bold text-[#c4eec6] uppercase tracking-wider">{userRole} Account</p>
          </div>
         </div>
-
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2 md:gap-6">
         <div className="relative w-64 hidden xl:block">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
          <input 
@@ -223,13 +219,13 @@ import { useEffect } from "react";
           className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-14 pr-6 text-[10px] font-bold uppercase tracking-widest text-white focus:outline-none focus:border-lime-400/40 transition-all placeholder:text-white/10"
          />
         </div>
-        <div className="flex items-center gap-3">
-         <button className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all">
+        <div className="flex items-center gap-2 md:gap-3">
+         <button className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all">
           <Settings className="w-5 h-5" />
          </button>
          <button 
            onClick={() => setActiveView && setActiveView('Notifications')}
-           className={`w-11 h-11 rounded-2xl border flex items-center justify-center transition-all relative ${
+           className={`w-10 h-10 md:w-11 md:h-11 rounded-2xl border flex items-center justify-center transition-all relative ${
              activeView === 'Notifications' 
              ? 'bg-lime-400 border-lime-400 text-black' 
              : 'bg-white/5 border-white/10 text-white/30 hover:text-white hover:bg-white/10'
@@ -246,11 +242,11 @@ import { useEffect } from "react";
       </div>
      </header>
 
-     <main className={`flex-1 flex flex-col overflow-y-auto overflow-x-hidden transition-all duration-500 ${isOpen ? 'md:pl-0' : 'md:pl-0'}`}>
-     <div className="p-4 md:p-10 max-w-7xl mx-auto w-full">
-      {children}
+     <div className="flex-1 overflow-y-auto no-scrollbar">
+       <div className="p-4 md:p-10 max-w-7xl mx-auto w-full">
+        {children}
+       </div>
      </div>
-    </main>
    </main>
 
    {/* LOGOUT CONFIRMATION MODAL */}
