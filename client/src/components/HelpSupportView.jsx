@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, MessageSquare, Users, Send, HelpCircle, ChevronRight } from 'lucide-react';
 
-const HelpSupportView = ({ addToast }) => {
+const HelpSupportView = ({ addToast, setActiveView }) => {
   const [formData, setFormData] = useState({
     subject: '',
     category: 'General Inquiry',
@@ -66,7 +66,10 @@ const HelpSupportView = ({ addToast }) => {
                 <p className="text-xs font-medium text-white/40 leading-relaxed">{card.description}</p>
               </div>
             </div>
-            <div className="pt-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#c4eec6] cursor-pointer hover:gap-3 transition-all">
+            <div 
+              onClick={() => card.title === "Community" && setActiveView ? setActiveView("Community") : null}
+              className="pt-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#c4eec6] cursor-pointer hover:gap-3 transition-all"
+            >
               View Resources <ChevronRight className="w-3.5 h-3.5" />
             </div>
           </div>

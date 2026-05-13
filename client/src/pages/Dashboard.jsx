@@ -708,7 +708,7 @@ export default function Dashboard() {
       )}
 
       {activeView === 'Help & Support' && (
-        <HelpSupportView addToast={addToast} />
+        <HelpSupportView addToast={addToast} setActiveView={setActiveView} />
       )}
 
       {activeView === 'Community' && (
