@@ -23,6 +23,7 @@ import SelectionResultScreen from '@/components/SelectionResultScreen';
 import InterviewScheduler from '@/components/InterviewScheduler';
 import { InfinityLoader } from '@/components/UI/loader-13';
 import { Mail, Phone, FileText, Save, Check } from 'lucide-react';
+import HelpSupportView from '../components/HelpSupportView';
 import ProfileView from '@/components/ProfileView';
 import NotificationView from '@/components/NotificationView';
 
@@ -702,6 +703,10 @@ export default function Dashboard() {
 
       {activeView === 'Notifications' && (
         <NotificationView getToken={getToken} />
+      )}
+
+      {activeView === 'Help & Support' && (
+        <HelpSupportView addToast={addToast} />
       )}
       </div>
      )}
