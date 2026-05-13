@@ -369,13 +369,15 @@ export default function Dashboard() {
        {/* MAIN CONTENT GRID */}
        <div className="grid grid-cols-12 gap-5">
         
-        {/* LEFT COLUMN: TOP RECOMMENDATIONS */}
-        <div className="col-span-12 xl:col-span-8 space-y-4">
-         <div className="flex items-center gap-2">
-          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Recommended for You</p>
-          <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[8px] font-bold text-white/40">3 New</div>
-         </div>
-         
+        {/* FULL WIDTH: NEURAL JOB FEED */}
+        <div className="col-span-12 space-y-4">
+          <div className="flex justify-between items-end px-2">
+           <div className="space-y-1">
+            <p className="text-[10px] font-bold text-[#c4eec6] uppercase tracking-[0.4em] mb-1">Recommended for You</p>
+            <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[8px] font-bold text-white/40 w-fit">3 New</div>
+           </div>
+          </div>
+          
           <h3 className="text-2xl font-display font-bold text-white tracking-tight uppercase leading-none">Neural Job Feed</h3>
           <div className="flex gap-6 overflow-x-auto pb-8 pt-2 no-scrollbar snap-x snap-mandatory">
             {jobs.length > 0 ? jobs.map((job, i) => (
@@ -436,52 +438,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: JOB LISTINGS */}
-        <div className="col-span-12 xl:col-span-4 flex flex-col">
-         <div className="flex-grow card-premium !rounded-[1.5rem] !p-6 relative overflow-hidden flex flex-col justify-between group h-full">
-          {/* Background Glow */}
-          <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-500/10 blur-[80px] rounded-full group-hover:bg-lime-400/5 transition-all duration-1000"></div>
-          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-indigo-500/10 blur-[80px] rounded-full group-hover:bg-purple-500/5 transition-all duration-1000"></div>
-          
-          <div className="relative z-10">
-           <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-3">
-             <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-black">
-               <TrendingUp className="w-4 h-4" />
-             </div>
-             <h4 className="text-lg font-display font-bold text-white uppercase tracking-tighter">Syncent®</h4>
-            </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[8px] font-bold uppercase tracking-widest text-white">New</span>
-           </div>
-
-            <h2 className="text-xl font-display font-bold text-white tracking-tight leading-none mb-3">Live Opportunities</h2>
-            <div className="space-y-4 mb-8">
-              {allJobs.length > 0 ? allJobs.slice(0, 4).map((j, i) => (
-                <div key={i} className="flex items-center justify-between group/item cursor-pointer" onClick={() => setSelectedJob(j)}>
-                  <div className="space-y-0.5">
-                    <p className="text-[10px] font-bold text-white group-hover/item:text-[#c4eec6] transition-colors">{j.title}</p>
-                    <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{j.company}</p>
-                  </div>
-                  <ChevronRight className="w-3 h-3 text-white/20 group-hover/item:text-[#c4eec6] transition-all" />
-                </div>
-              )) : (
-                <p className="text-xs font-medium text-white/50 leading-relaxed max-w-[240px]">
-                  Explore the latest high-tier engineering roles available now.
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="relative z-10 space-y-3">
-           <button onClick={() => setActiveView('Jobs')} className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-400/80 to-indigo-400/80 text-black text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-            Connect Neural Link <LayoutDashboard className="w-3.5 h-3.5" />
-           </button>
-           <button onClick={() => setActiveView('Jobs')} className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-            Browse All Nodes <Search className="w-3.5 h-3.5" />
-           </button>
-          </div>
-         </div>
-        </div>
         </div>
        </div>
       )}
