@@ -112,6 +112,24 @@ router.post('/match-jobs', requireAuth, upload.single('resume'), async (req, res
     }
 });
 
+// @route   GET /api/applications/my-applications
+// @desc    Get all applications for the logged-in candidate
+router.get('/my-applications', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findOne({ clerkId: req.auth.userId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const applications = await Application.find({ userId: user._id })
+            .populate('jobId', 'title company description requirements')
+            .sort({ createdAt: -1 });
+        
+        res.json(applications);
+    } catch (error) {
+        console.error('Error fetching my applications:', error);
+        res.status(500).json({ error: 'Server error while fetching applications' });
+    }
+});
+
 // @route   POST /api/applications/:id/analyze
 // @desc    Trigger AI analysis for a specific application (admin only)
 router.post('/:id/analyze', requireAdmin, async (req, res) => {

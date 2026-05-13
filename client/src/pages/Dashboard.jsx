@@ -82,7 +82,7 @@ export default function Dashboard() {
    try {
      setLoadingApps(true);
      const token = await getToken();
-     const res = await fetch(`${API_URL}/api/applications`, {
+     const res = await fetch(`${API_URL}/api/applications/my-applications`, {
        headers: { Authorization: `Bearer ${token}` }
      });
       if (res.ok) {
