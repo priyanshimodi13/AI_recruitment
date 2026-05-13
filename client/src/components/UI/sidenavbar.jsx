@@ -25,12 +25,45 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser, SignOutButton } from "@clerk/clerk-react";
+import { useUser, SignOutButton, useAuth } from "@clerk/clerk-react";
+import { useEffect } from "react";
 
-export default function Sidenavbar({ children, userRole = 'candidate', activeView, setActiveView, onPostJob }) {
- const [isOpen, setIsOpen] = useState(true);
- const { user } = useUser();
- const location = useLocation();
+ export default function Sidenavbar({ children, userRole = 'candidate', activeView, setActiveView, onPostJob }) {
+  const [isOpen, setIsOpen] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const location = useLocation();
+
+  const fetchUnreadCount = async () => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5957'}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const unread = data.notifications.filter(n => !n.isRead).length;
+        setUnreadCount(unread);
+      }
+    } catch (err) {
+      console.error('Error fetching unread count:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    // Poll for notifications every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [getToken]);
+
+  useEffect(() => {
+    // If we just navigated to Notifications, we might want to refresh count soon
+    if (activeView === 'Notifications') {
+      setTimeout(fetchUnreadCount, 1000);
+    }
+  }, [activeView]);
 
  const navItems = userRole === 'admin' ? [
   { icon: LayoutDashboard, label: "Dashboard" },
@@ -177,9 +210,20 @@ export default function Sidenavbar({ children, userRole = 'candidate', activeVie
          <button className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all">
           <Settings className="w-5 h-5" />
          </button>
-         <button className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all relative">
+         <button 
+           onClick={() => setActiveView && setActiveView('Notifications')}
+           className={`w-11 h-11 rounded-2xl border flex items-center justify-center transition-all relative ${
+             activeView === 'Notifications' 
+             ? 'bg-lime-400 border-lime-400 text-black' 
+             : 'bg-white/5 border-white/10 text-white/30 hover:text-white hover:bg-white/10'
+           }`}
+         >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-lime-400 rounded-full border-2 border-[#09090b] animate-pulse"></span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-[#09090b] text-[10px] font-bold text-white flex items-center justify-center animate-bounce">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
          </button>
         </div>
       </div>

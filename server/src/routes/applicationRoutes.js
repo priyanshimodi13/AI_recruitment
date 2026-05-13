@@ -8,6 +8,7 @@ const { matchSkills } = require('../utils/skillMatcher');
 const { sendSelectionEmail, sendRejectionEmail } = require('../services/emailService');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
+const { createNotification } = require('../utils/notificationHelper');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -332,6 +333,19 @@ router.post('/', requireAuth, async (req, res) => {
                     .catch(err => console.error('[EMAIL] Rejection email failed:', err.message));
             }
 
+            // 7. Notify Employer
+            if (job.postedBy) {
+                createNotification({
+                    recipient: job.postedBy._id,
+                    sender: user._id,
+                    type: 'application_received',
+                    title: 'New Application Received',
+                    message: `${user.firstName || 'A candidate'} has applied for your position: ${job.title}`,
+                    relatedId: application._id,
+                    relatedModel: 'Application'
+                });
+            }
+
         } else {
             // No job or no requirements – just save
             await application.save();
@@ -425,6 +439,17 @@ router.put('/:id/status', requireAdmin, async (req, res) => {
         );
 
         if (!application) return res.status(404).json({ error: 'Application not found' });
+
+        // Notify Candidate of status update
+        const job = await Job.findById(application.jobId);
+        createNotification({
+            recipient: application.userId,
+            type: 'application_status_update',
+            title: 'Application Status Updated',
+            message: `Your application for ${job?.title || 'a position'} has been updated to: ${status}`,
+            relatedId: application._id,
+            relatedModel: 'Application'
+        });
 
         res.json({
             message: `Application status updated to ${status}`,

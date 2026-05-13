@@ -24,6 +24,7 @@ import InterviewScheduler from '@/components/InterviewScheduler';
 import { InfinityLoader } from '@/components/UI/loader-13';
 import { Mail, Phone, FileText, Save, Check } from 'lucide-react';
 import ProfileView from '@/components/ProfileView';
+import NotificationView from '@/components/NotificationView';
 
 // Toast State Hook Helper
 const useToasts = () => {
@@ -855,6 +856,10 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+      )}
+
+      {activeView === 'Notifications' && (
+        <NotificationView getToken={getToken} />
       )}
       </div>
      )}

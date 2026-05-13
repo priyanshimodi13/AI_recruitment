@@ -11,6 +11,7 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const InterviewSchedule = require('../models/InterviewSchedule');
 const { sendInterviewConfirmation } = require('../services/emailService');
+const { createNotification } = require('../utils/notificationHelper');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -160,6 +161,19 @@ router.post('/schedule', requireAuth, async (req, res) => {
       dbUser.name || 'Candidate',
       interviewData
     ).catch(err => console.error('[EMAIL] Confirmation email failed:', err));
+
+    // Notify Employer that a slot was picked
+    if (job.postedBy) {
+        createNotification({
+            recipient: job.postedBy,
+            sender: dbUser._id,
+            type: 'interview_scheduled',
+            title: 'Interview Scheduled',
+            message: `${dbUser.firstName || 'A candidate'} has scheduled an interview for ${job.title}`,
+            relatedId: interview._id,
+            relatedModel: 'InterviewSchedule'
+        });
+    }
 
     res.status(201).json({
       success: true,
