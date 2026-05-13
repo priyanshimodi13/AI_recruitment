@@ -25,15 +25,17 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser, SignOutButton, useAuth } from "@clerk/clerk-react";
+import { useUser, SignOutButton, useAuth, useClerk } from "@clerk/clerk-react";
 import { useEffect } from "react";
 
  export default function Sidenavbar({ children, userRole = 'candidate', activeView, setActiveView, onPostJob }) {
-  const [isOpen, setIsOpen] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const { user } = useUser();
-  const { getToken } = useAuth();
-  const location = useLocation();
+   const [isOpen, setIsOpen] = useState(true);
+   const [unreadCount, setUnreadCount] = useState(0);
+   const [showLogoutModal, setShowLogoutModal] = useState(false);
+   const { user } = useUser();
+   const { getToken } = useAuth();
+   const { signOut } = useClerk();
+   const location = useLocation();
 
   const fetchUnreadCount = async () => {
     try {
@@ -157,17 +159,16 @@ import { useEffect } from "react";
          </Button>
        ))}
 
-       <div className="pt-4 mt-4 border-t border-white/5">
-        <SignOutButton>
-         <Button
-          variant="ghost"
-          className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-red-400/60 hover:bg-red-400/5 hover:text-red-400 transition-all duration-500 group`}
-         >
-          <LogOut className="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100" />
-          {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">Sign Out</span>}
-         </Button>
-        </SignOutButton>
-       </div>
+        <div className="pt-4 mt-4 border-t border-white/5">
+          <Button
+           variant="ghost"
+           onClick={() => setShowLogoutModal(true)}
+           className={`w-full ${isOpen ? "justify-start px-6" : "justify-center px-0"} py-8 rounded-[1.5rem] text-red-400/60 hover:bg-red-400/5 hover:text-red-400 transition-all duration-500 group`}
+          >
+           <LogOut className="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100" />
+           {isOpen && <span className="ml-5 text-sm uppercase tracking-widest">Sign Out</span>}
+          </Button>
+        </div>
       </div>
      </nav>
     </div>
@@ -233,6 +234,37 @@ import { useEffect } from "react";
       {children}
      </div>
    </main>
+
+   {/* LOGOUT CONFIRMATION MODAL */}
+   {showLogoutModal && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
+     <div className="relative w-full max-w-sm bg-[#09090b] rounded-[2.5rem] border border-white/10 shadow-2xl p-10 overflow-hidden text-center space-y-8 animate-in zoom-in-95 duration-300">
+      <div className="w-20 h-20 bg-red-400/10 rounded-full flex items-center justify-center mx-auto border border-red-400/20">
+       <LogOut className="w-8 h-8 text-red-400" />
+      </div>
+      
+      <div className="space-y-3">
+       <h2 className="text-2xl font-display font-bold text-white tracking-tight">Are you sure?</h2>
+       <p className="text-sm text-white/40 font-medium">You will be logged out of your neural session.</p>
+      </div>
+      
+      <div className="flex gap-4">
+       <button 
+        onClick={() => setShowLogoutModal(false)}
+        className="flex-1 py-4 px-6 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+       >
+        No, Cancel
+       </button>
+       <button 
+        onClick={() => signOut()}
+        className="flex-1 py-4 px-6 rounded-2xl bg-red-500 text-white text-xs font-bold uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all"
+       >
+        Yes, Logout
+       </button>
+      </div>
+     </div>
+    </div>
+   )}
   </div>
  );
 }

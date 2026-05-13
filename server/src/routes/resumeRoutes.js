@@ -11,6 +11,7 @@ const AIService = require('../services/aiService');
 const Job = require('../models/Job');
 const User = require('../models/User');
 const { requireAuth } = require('../middlewares/auth');
+const { createNotification } = require('../utils/notificationHelper');
 
 // POST /api/resumes — Upload resume & save metadata
 router.post('/', requireAuth, upload.single('resume'), async (req, res) => {
@@ -114,6 +115,24 @@ router.post('/', requireAuth, upload.single('resume'), async (req, res) => {
       } catch (jobErr) {
         console.error('Error finding matching jobs:', jobErr);
       }
+    }
+
+    // ── NOTIFY ADMINS ────────────────────────────────────────────────────────
+    try {
+      const admins = await User.find({ isAdmin: true });
+      for (const admin of admins) {
+        createNotification({
+          recipient: admin._id,
+          sender: dbUser ? dbUser._id : null,
+          type: 'application_received', // Using a generic type or we could add 'resume_uploaded'
+          title: 'New Resume Processed',
+          message: `${name} has submitted a new resume for the position: ${position}`,
+          relatedId: resume._id,
+          relatedModel: 'Resume'
+        });
+      }
+    } catch (notifErr) {
+      console.warn('Admin notification failed:', notifErr.message);
     }
 
     res.status(201).json({
